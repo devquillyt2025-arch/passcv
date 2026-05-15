@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(npm list *)",
+      "Bash(mkdir -p \"c:/Projects/ATS Resume/app/api/parse\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" --max-time 10 https://api.anthropic.com)",
+      "Bash(node -e \"fetch\\('https://api.anthropic.com'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('FAIL', e.message\\)\\)\")",
+      "Bash(node -e \"fetch\\('https://api.anthropic.com'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('FAIL', e.cause?.message || e.message\\)\\)\")",
+      "Bash(powershell -Command \"Get-ItemProperty -Path 'HKCU:\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Internet Settings' | Select-Object ProxyEnable,ProxyServer,AutoConfigURL\")",
+      "Bash(NODE_TLS_REJECT_UNAUTHORIZED=0 node -e \"fetch\\('https://api.anthropic.com'\\).then\\(r => console.log\\('Reachable, status:', r.status\\)\\).catch\\(e => console.log\\('Still failing:', e.message\\)\\)\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Projects\\ATS Resume\\app\\api"
+    ]
+  }
+}

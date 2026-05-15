@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/parse.py": {
+      "runtime": "vercel-python@3.0.7"
+    },
+    "api/generate_docx.py": {
+      "runtime": "vercel-python@3.0.7"
+    }
+  }
+}
