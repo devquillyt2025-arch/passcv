@@ -2,110 +2,43 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import UploadZone from '@/components/UploadZone';
-import ScoreReport from '@/components/ScoreReport';
-import DiffView from '@/components/DiffView';
 import { ParsedResume, ATSScore, ParsedJD, RewrittenResume } from '@/lib/types';
 import { ThemeToggle } from '@/components/ThemeToggle';
-
-type Stage = 'input' | 'scored' | 'rewritten';
+import { useRewriteStore } from '@/lib/store/useRewriteStore';
+import WizardProgress from '@/components/WizardProgress';
 
 export default function Home() {
-  const [resume, setResume] = useState<ParsedResume | null>(null);
-  const [jdText, setJdText] = useState('');
-  const [stage, setStage] = useState<Stage>('input');
-  const [score, setScore] = useState<ATSScore | null>(null);
-  const [jd, setJd] = useState<ParsedJD | null>(null);
-  const [rewritten, setRewritten] = useState<RewrittenResume | null>(null);
-  const [edited, setEdited] = useState<RewrittenResume | null>(null);
+  const router = useRouter();
+  const { original: resume, setOriginal: setResume, jdText, setJdText, setScoreData } = useRewriteStore();
   const [scoring, setScoring] = useState(false);
-  const [rewriting, setRewriting] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const [parseError, setParseError] = useState('');
   const [scoreError, setScoreError] = useState('');
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  const getDownloadFilename = (resume: RewrittenResume, jobTitle: string, ext: string) => {
-    const name = resume.contact?.name?.replace(/\s+/g, '_') || 'Resume';
-    const title = jobTitle?.replace(/\s+/g, '_').slice(0, 30) || 'Role';
-    return `${name}_${title}_TailorCV.${ext}`;
-  };
-
-  const handleDownloadDocx = async () => {
-    if (!edited || !jd) return;
-    setDownloading(true);
-    setScoreError('');
-    try {
-      console.log('DOCX download start', { jobTitle: jd.jobTitle, resumeName: edited.contact?.name });
-      const res = await fetch('/api/generate_docx', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume: edited, jobTitle: jd.jobTitle }),
-      });
-
-      console.log('DOCX response', { status: res.status, statusText: res.statusText });
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error('DOCX response error body', errorText);
-        throw new Error(errorText || 'Download failed');
-      }
-
-      const blob = await res.blob();
-      console.log('DOCX blob received', { size: blob.size, type: blob.type });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = getDownloadFilename(edited, jd.jobTitle, 'docx');
-      a.click();
-      URL.revokeObjectURL(url);
-      console.log('DOCX download finished');
-    } catch (e) {
-      console.error('DOCX download error', e);
-      setScoreError(e instanceof Error ? e.message : 'Download failed');
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  const handleDownloadPdf = async () => {
-    if (!edited || !jd) return;
-    setDownloading(true);
-    setScoreError('');
-    try {
-      const { generateResumePdfBlob } = await import('@/lib/resumePdf');
-      const blob = await generateResumePdfBlob(edited);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = getDownloadFilename(edited, jd.jobTitle, 'pdf');
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error('PDF generation error', e);
-      setScoreError(e instanceof Error ? e.message : 'PDF download failed');
-    } finally {
-      setDownloading(false);
-    }
-  };
+  // Download functions moved to /rewrite page
 
   const handleAnalyze = async () => {
-    if (!resume || !jdText.trim()) return;
+    if (!resume || !(jdText || '').trim()) return;
     setScoring(true);
     setScoreError('');
 
     try {
-      console.log('Starting score request', { resumeName: resume.contact?.name, jdLength: jdText.length });
+      console.log('Starting score request', { resumeName: resume.contact?.name, jdLength: (jdText || '').length });
       const res = await fetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resume, jdText }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Scoring failed');
-      setScore(data.score);
-      setJd(data.jd);
-      setStage('scored');
-      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      setScoreData({
+        original: resume,
+        jdText: jdText || '',
+        score: data.score,
+        jd: data.jd
+      });
+      router.push('/score');
     } catch (e) {
       setScoreError(e instanceof Error ? e.message : 'Analysis failed. Please try again.');
     } finally {
@@ -113,31 +46,9 @@ export default function Home() {
     }
   };
 
-  const handleRewriteClick = async () => {
-    if (!resume) return;
-    setRewriting(true);
-    setScoreError('');
-    try {
-      console.log('Starting rewrite request', { resumeName: resume.contact?.name, jdLength: jdText.length });
-      const res = await fetch('/api/rewrite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume, jdText }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Rewrite failed');
-      setRewritten(data.rewritten);
-      setEdited(data.rewritten);
-      setStage('rewritten');
-      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-    } catch (e) {
-      setScoreError(e instanceof Error ? e.message : 'Rewrite failed. Please try again.');
-    } finally {
-      setRewriting(false);
-    }
-  };
+  // handleRewriteClick moved to /score page
 
-  const canAnalyze = resume && jdText.trim().length > 100;
+  const canAnalyze = resume && (jdText || '').trim().length > 100;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0A0A0F] text-gray-900 dark:text-white relative transition-colors duration-200">
@@ -186,23 +97,11 @@ export default function Home() {
       {/* Main form */}
       <main className="mx-auto max-w-5xl px-4 sm:px-6 pt-[48px] pb-[48px] space-y-[48px]">
         {/* Step indicators */}
-        <div className="flex items-center w-full max-w-2xl text-[13px] font-medium">
-          {[
-            { n: 1, label: 'Upload resume', active: true },
-            { n: 2, label: 'Paste JD', active: !!resume },
-            { n: 3, label: 'Get score', active: !!resume && jdText.trim().length > 100 },
-          ].map((s, i, arr) => (
-            <div key={s.n} className={`flex items-center ${i < arr.length - 1 ? 'flex-1' : ''}`}>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className={`flex w-[28px] h-[28px] items-center justify-center rounded-full text-[13px] font-bold transition-all duration-200 ease-in-out ${s.active ? 'bg-[#6366f1] text-white' : 'border-[1.5px] border-gray-300 dark:border-[rgba(255,255,255,0.2)] text-gray-400 dark:text-[rgba(255,255,255,0.35)]'}`}>
-                  {s.n}
-                </span>
-                <span className={s.active ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-500 dark:text-[rgba(255,255,255,0.35)]'}>{s.label}</span>
-              </div>
-              {i < arr.length - 1 && <div className="h-[1px] flex-1 mx-[8px] bg-gray-200 dark:bg-[rgba(255,255,255,0.1)]"></div>}
-            </div>
-          ))}
-        </div>
+        <WizardProgress 
+          currentStep={1} 
+          canProceedToScore={!!resume && (jdText || '').trim().length > 100} 
+          canProceedToRewrite={!!useRewriteStore.getState().score} 
+        />
 
         {/* Upload + JD */}
         <div className="grid gap-[24px] md:grid-cols-2 items-stretch">
@@ -229,13 +128,13 @@ export default function Home() {
             </label>
             <div className="flex-1 h-[320px] min-h-[320px] max-h-[320px] w-full rounded-[16px] border-2 border-dashed border-gray-300 dark:border-[rgba(99,102,241,0.4)] bg-white dark:bg-[rgba(99,102,241,0.04)] focus-within:border-indigo-400 dark:focus-within:border-[rgba(99,102,241,0.8)] focus-within:bg-indigo-50/50 dark:focus-within:bg-[rgba(99,102,241,0.08)] transition-all duration-200 ease shadow-sm dark:shadow-none flex overflow-hidden">
               <textarea
-                value={jdText}
+                value={jdText || ''}
                 onChange={e => setJdText(e.target.value)}
                 placeholder="Paste the full job description from Naukri, LinkedIn or any portal…"
                 className="flex-1 h-full w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 p-[16px] text-gray-800 dark:text-white text-[14px] leading-[1.6] placeholder-gray-400 dark:placeholder-[rgba(255,255,255,0.3)] resize-none scrollbar-hide"
               />
             </div>
-            <p className="mt-2 text-[12px] text-gray-500 dark:text-[rgba(255,255,255,0.4)]">{jdText.length} characters</p>
+            <p className="mt-2 text-[12px] text-gray-500 dark:text-[rgba(255,255,255,0.4)]">{(jdText || '').length} characters</p>
           </div>
         </div>
 
@@ -246,7 +145,7 @@ export default function Home() {
           )}
           <button
             onClick={handleAnalyze}
-            disabled={!canAnalyze || scoring || rewriting}
+            disabled={!canAnalyze || scoring}
             className="w-full md:w-auto h-[56px] px-10 rounded-[14px] bg-[linear-gradient(135deg,#6366f1_0%,#8b5cf6_100%)] text-white text-[16px] font-bold border-none hover:-translate-y-[1px] hover:shadow-[0_0_32px_rgba(99,102,241,0.5)] disabled:opacity-[0.35] disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 transition-all duration-200 ease flex items-center justify-center"
           >
             {scoring ? (
@@ -257,50 +156,15 @@ export default function Home() {
             ) : 'Analyse my resume — free'}
           </button>
           {!resume && <p className="text-[13px] text-gray-500 dark:text-[rgba(255,255,255,0.4)]">Upload a resume to get started</p>}
-          {resume && !jdText.trim() && <p className="text-[13px] text-gray-500 dark:text-[rgba(255,255,255,0.4)]">Paste a job description to continue</p>}
+          {resume && !(jdText || '').trim() && <p className="text-[13px] text-gray-500 dark:text-[rgba(255,255,255,0.4)]">Paste a job description to continue</p>}
         </div>
 
-        {/* Results */}
         <div ref={resultsRef}>
-          {stage === 'scored' && score && (
-            <ScoreReport
-              score={score}
-              onRewrite={handleRewriteClick}
-              rewriting={rewriting}
-            />
-          )}
-
-          {rewriting && (
-            <div className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-[#13131A] shadow-sm dark:shadow-none p-[24px] text-center mt-[48px]">
-              <div className="flex flex-col items-center gap-[24px]">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#6366f1] border-t-transparent" />
-                <div>
-                  <p className="font-semibold text-gray-900 dark:text-gray-200">Claude is rewriting your resume…</p>
-                  <p className="text-[13px] text-gray-500 mt-1">This takes about 20–30 seconds</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {stage === 'rewritten' && rewritten && edited && jd && (
-            <div className="mt-[48px]">
-              <DiffView
-                original={resume!}
-                rewritten={rewritten}
-                edited={edited}
-                jobTitle={jd.jobTitle}
-                onDownloadDocx={handleDownloadDocx}
-                onDownloadPdf={handleDownloadPdf}
-                onEditChange={setEdited}
-                downloading={downloading}
-              />
-            </div>
-          )}
+          {/* Results moved to /score and /rewrite */}
         </div>
 
         {/* How it works */}
-        {stage === 'input' && (
-          <section className="pt-[64px] border-t border-gray-200 dark:border-[rgba(255,255,255,0.06)]">
+        <section className="pt-[64px] border-t border-gray-200 dark:border-[rgba(255,255,255,0.06)]">
             <h2 className="text-[13px] font-semibold tracking-[0.08em] uppercase text-gray-500 dark:text-[rgba(255,255,255,0.4)] mb-[32px]">How TailorCV works</h2>
             <div className="grid gap-[24px] sm:grid-cols-3">
               {[
@@ -331,8 +195,7 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          </section>
-        )}
+        </section>
       </main>
 
       {/* Footer */}
