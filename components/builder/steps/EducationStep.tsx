@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 export default function EducationStep() {
-  const education = useResumeStore((state) => state.data.education);
+  const education = useResumeStore((state) => state.data.education || []);
   const { addEducation, updateEducation, removeEducation, reorderEducation } = useResumeStore();
   const [expandedId, setExpandedId] = useState<string | null>(education[0]?.id || null);
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 export default function ProjectsStep() {
-  const projects = useResumeStore((state) => state.data.projects);
+  const projects = useResumeStore((state) => state.data.projects || []);
   const { addProject, updateProject, removeProject, reorderProjects } = useResumeStore();
   const [expandedId, setExpandedId] = useState<string | null>(projects[0]?.id || null);
 

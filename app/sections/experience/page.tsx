@@ -32,7 +32,7 @@ export default function ExperiencePage() {
             onChange={(e) => {
               const newExp = [...edited.experience];
               newExp[i].title = e.target.value;
-              setEdited && setEdited({ ...edited, experience: newExp });
+              if (setEdited) setEdited({ ...edited, experience: newExp });
             }}
             className="w-full mb-2 rounded border border-gray-300 px-3 py-2"
           />
@@ -43,7 +43,7 @@ export default function ExperiencePage() {
             onChange={(e) => {
               const newExp = [...edited.experience];
               newExp[i].company = e.target.value;
-              setEdited && setEdited({ ...edited, experience: newExp });
+              if (setEdited) setEdited({ ...edited, experience: newExp });
             }}
             className="w-full mb-2 rounded border border-gray-300 px-3 py-2"
           />
@@ -53,7 +53,7 @@ export default function ExperiencePage() {
             onChange={(e) => {
               const newExp = [...edited.experience];
               newExp[i].bullets = e.target.value.split('\n').filter(Boolean);
-              setEdited && setEdited({ ...edited, experience: newExp });
+              if (setEdited) setEdited({ ...edited, experience: newExp });
             }}
             className="w-full h-24 rounded border border-gray-300 p-3 text-sm"
           />

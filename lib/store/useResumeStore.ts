@@ -89,7 +89,7 @@ export const useResumeStore = create<ResumeState>()(
           data: {
             ...state.data,
             experience: [
-              ...state.data.experience,
+              ...(state.data.experience || []),
               {
                 id: uuidv4(),
                 company: '',
@@ -107,19 +107,19 @@ export const useResumeStore = create<ResumeState>()(
         set((state) => ({
           data: {
             ...state.data,
-            experience: state.data.experience.map((e) => (e.id === id ? { ...e, ...exp } : e)),
+            experience: (state.data.experience || []).map((e) => (e.id === id ? { ...e, ...exp } : e)),
           },
         })),
       removeExperience: (id) =>
         set((state) => ({
           data: {
             ...state.data,
-            experience: state.data.experience.filter((e) => e.id !== id),
+            experience: (state.data.experience || []).filter((e) => e.id !== id),
           },
         })),
       reorderExperience: (startIndex, endIndex) =>
         set((state) => {
-          const newExp = Array.from(state.data.experience);
+          const newExp = Array.from(state.data.experience || []);
           const [removed] = newExp.splice(startIndex, 1);
           newExp.splice(endIndex, 0, removed);
           return { data: { ...state.data, experience: newExp } };
@@ -131,7 +131,7 @@ export const useResumeStore = create<ResumeState>()(
           data: {
             ...state.data,
             education: [
-              ...state.data.education,
+              ...(state.data.education || []),
               {
                 id: uuidv4(),
                 institution: '',
@@ -150,19 +150,19 @@ export const useResumeStore = create<ResumeState>()(
         set((state) => ({
           data: {
             ...state.data,
-            education: state.data.education.map((e) => (e.id === id ? { ...e, ...edu } : e)),
+            education: (state.data.education || []).map((e) => (e.id === id ? { ...e, ...edu } : e)),
           },
         })),
       removeEducation: (id) =>
         set((state) => ({
           data: {
             ...state.data,
-            education: state.data.education.filter((e) => e.id !== id),
+            education: (state.data.education || []).filter((e) => e.id !== id),
           },
         })),
       reorderEducation: (startIndex, endIndex) =>
         set((state) => {
-          const newEdu = Array.from(state.data.education);
+          const newEdu = Array.from(state.data.education || []);
           const [removed] = newEdu.splice(startIndex, 1);
           newEdu.splice(endIndex, 0, removed);
           return { data: { ...state.data, education: newEdu } };
@@ -174,7 +174,7 @@ export const useResumeStore = create<ResumeState>()(
           data: {
             ...state.data,
             skills: [
-              ...state.data.skills,
+              ...(state.data.skills || []),
               {
                 id: uuidv4(),
                 name: '',
@@ -187,19 +187,19 @@ export const useResumeStore = create<ResumeState>()(
         set((state) => ({
           data: {
             ...state.data,
-            skills: state.data.skills.map((s) => (s.id === id ? { ...s, ...skill } : s)),
+            skills: (state.data.skills || []).map((s) => (s.id === id ? { ...s, ...skill } : s)),
           },
         })),
       removeSkill: (id) =>
         set((state) => ({
           data: {
             ...state.data,
-            skills: state.data.skills.filter((s) => s.id !== id),
+            skills: (state.data.skills || []).filter((s) => s.id !== id),
           },
         })),
       reorderSkills: (startIndex, endIndex) =>
         set((state) => {
-          const newSkills = Array.from(state.data.skills);
+          const newSkills = Array.from(state.data.skills || []);
           const [removed] = newSkills.splice(startIndex, 1);
           newSkills.splice(endIndex, 0, removed);
           return { data: { ...state.data, skills: newSkills } };
@@ -215,7 +215,7 @@ export const useResumeStore = create<ResumeState>()(
           data: {
             ...state.data,
             projects: [
-              ...state.data.projects,
+              ...(state.data.projects || []),
               {
                 id: uuidv4(),
                 name: '',
@@ -231,25 +231,35 @@ export const useResumeStore = create<ResumeState>()(
         set((state) => ({
           data: {
             ...state.data,
-            projects: state.data.projects.map((p) => (p.id === id ? { ...p, ...proj } : p)),
+            projects: (state.data.projects || []).map((p) => (p.id === id ? { ...p, ...proj } : p)),
           },
         })),
       removeProject: (id) =>
         set((state) => ({
           data: {
             ...state.data,
-            projects: state.data.projects.filter((p) => p.id !== id),
+            projects: (state.data.projects || []).filter((p) => p.id !== id),
           },
         })),
       reorderProjects: (startIndex, endIndex) =>
         set((state) => {
-          const newProj = Array.from(state.data.projects);
+          const newProj = Array.from(state.data.projects || []);
           const [removed] = newProj.splice(startIndex, 1);
           newProj.splice(endIndex, 0, removed);
           return { data: { ...state.data, projects: newProj } };
         }),
 
-      loadResumeData: (data) => set({ data }),
+      loadResumeData: (data) => set({ 
+        data: {
+          ...initialResumeData,
+          ...data,
+          experience: data.experience || [],
+          education: data.education || [],
+          skills: data.skills || [],
+          projects: data.projects || [],
+          contact: { ...initialResumeData.contact, ...(data.contact || {}) }
+        }
+      }),
       reset: () => set({ data: initialResumeData, resumeId: null }),
     }),
     {

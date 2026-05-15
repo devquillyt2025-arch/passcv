@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 export default function ExperienceStep() {
-  const experience = useResumeStore((state) => state.data.experience);
+  const experience = useResumeStore((state) => state.data.experience || []);
   const { addExperience, updateExperience, removeExperience, reorderExperience } = useResumeStore();
   const [expandedId, setExpandedId] = useState<string | null>(experience[0]?.id || null);
 

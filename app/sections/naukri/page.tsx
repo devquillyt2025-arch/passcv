@@ -23,7 +23,11 @@ export default function NaukriPage() {
 
       <textarea
         value={text}
-        onChange={(e) => setEdited && setEdited({ ...(edited || {}), naukriProfileText: e.target.value })}
+        onChange={(e) => {
+          if (edited && setEdited) {
+            setEdited({ ...edited, naukriProfileText: e.target.value });
+          }
+        }}
         className="w-full h-48 rounded-lg border border-gray-300 p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
       />
     </div>

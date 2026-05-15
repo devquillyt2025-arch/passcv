@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function SkillsStep() {
-  const { skills, contact } = useResumeStore((state) => state.data);
+  const skills = useResumeStore((state) => state.data.skills || []);
+  const contact = useResumeStore((state) => state.data.contact || {});
   const { addSkill, updateSkill, removeSkill, reorderSkills, setSkills } = useResumeStore();
   const [isGenerating, setIsGenerating] = useState(false);
 

@@ -23,7 +23,7 @@ export const EditedResumeProvider = ({ children }: { children: React.ReactNode }
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setEditedState(JSON.parse(raw));
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, []);
@@ -32,7 +32,7 @@ export const EditedResumeProvider = ({ children }: { children: React.ReactNode }
     try {
       if (edited) localStorage.setItem(STORAGE_KEY, JSON.stringify(edited));
       else localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, [edited]);

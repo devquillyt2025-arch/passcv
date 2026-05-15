@@ -2,12 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #f9fafb;
-  --foreground: #111827;
+@layer base {
+  :root {
+    --background: #f9fafb;
+    --foreground: #111827;
+  }
+  .dark {
+    --background: #0A0A0F;
+    --foreground: #ffffff;
+  }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
+}
+
+::selection {
+  background-color: rgba(99, 102, 241, 0.3);
+  color: inherit;
+}
+
+/* Hide scrollbar for textarea but keep functionality */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

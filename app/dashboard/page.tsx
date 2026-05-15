@@ -8,7 +8,7 @@ import { FileText, Plus, Trash2, Edit, Loader2, LogOut } from 'lucide-react';
 import { useResumeStore, initialResumeData } from '@/lib/store/useResumeStore';
 
 export default function DashboardPage() {
-  const [resumes, setResumes] = useState<any[]>([]);
+  const [resumes, setResumes] = useState<{ id: string; name: string; updated_at: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const router = useRouter();

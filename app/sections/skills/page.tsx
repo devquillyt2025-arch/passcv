@@ -23,7 +23,11 @@ export default function SkillsPage() {
 
       <textarea
         value={skills}
-        onChange={(e) => setEdited && setEdited({ ...(edited || {}), skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+        onChange={(e) => {
+          if (edited && setEdited) {
+            setEdited({ ...edited, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) });
+          }
+        }}
         className="w-full h-36 rounded-lg border border-gray-300 p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
       />
     </div>
