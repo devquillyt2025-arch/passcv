@@ -279,3 +279,37 @@ function buildResumeText(resume: ParsedResume): string {
     resume.rawText || '',
   ].join(' ').toLowerCase();
 }
+
+import { ResumeData } from './types';
+
+export function mapResumeDataToParsedResume(data: ResumeData): ParsedResume {
+  return {
+    contact: {
+      name: `${data.contact.firstName} ${data.contact.lastName}`.trim(),
+      email: data.contact.email,
+      phone: data.contact.phone,
+      location: [data.contact.city, data.contact.country].filter(Boolean).join(', '),
+      linkedin: data.contact.linkedin,
+    },
+    summary: data.summary,
+    experience: data.experience.map(e => ({
+      company: e.company,
+      title: e.position,
+      startDate: e.startDate,
+      endDate: e.currentlyWorking ? 'Present' : e.endDate,
+      bullets: e.description.split('\n').map(b => b.trim()).filter(Boolean).map(b => b.replace(/^[-•]\s*/, '')),
+    })),
+    education: data.education.map(e => ({
+      institution: e.institution,
+      degree: e.degree,
+      field: e.field,
+      year: e.endDate || e.startDate,
+      cgpa: e.score,
+    })),
+    skills: data.skills.map(s => s.name),
+    certifications: [],
+    hasMultiColumn: false,
+    hasTables: false,
+    hasImages: false,
+  };
+}

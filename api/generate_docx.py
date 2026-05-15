@@ -172,6 +172,11 @@ class handler(BaseHTTPRequestHandler):
             resume   = data['resume']
             job_title = data.get('jobTitle', 'Resume')
             name     = resume.get('contact', {}).get('name', 'Resume')
+            print('DOCX generator request', {
+                'jobTitle': job_title,
+                'name': name,
+                'resume_fields': list(resume.keys()) if isinstance(resume, dict) else None,
+            })
 
             docx_bytes = build_docx(resume, job_title)
 

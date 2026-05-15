@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Link from 'next/link';
 import UploadZone from '@/components/UploadZone';
 import ScoreReport from '@/components/ScoreReport';
 import DiffView from '@/components/DiffView';
@@ -15,6 +16,7 @@ export default function Home() {
   const [score, setScore] = useState<ATSScore | null>(null);
   const [jd, setJd] = useState<ParsedJD | null>(null);
   const [rewritten, setRewritten] = useState<RewrittenResume | null>(null);
+  const [edited, setEdited] = useState<RewrittenResume | null>(null);
   const [scoring, setScoring] = useState(false);
   const [rewriting, setRewriting] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -22,12 +24,76 @@ export default function Home() {
   const [scoreError, setScoreError] = useState('');
   const resultsRef = useRef<HTMLDivElement>(null);
 
+  const getDownloadFilename = (resume: RewrittenResume, jobTitle: string, ext: string) => {
+    const name = resume.contact?.name?.replace(/\s+/g, '_') || 'Resume';
+    const title = jobTitle?.replace(/\s+/g, '_').slice(0, 30) || 'Role';
+    return `${name}_${title}_TailorCV.${ext}`;
+  };
+
+  const handleDownloadDocx = async () => {
+    if (!edited || !jd) return;
+    setDownloading(true);
+    setScoreError('');
+    try {
+      console.log('DOCX download start', { jobTitle: jd.jobTitle, resumeName: edited.contact?.name });
+      const res = await fetch('/api/generate_docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resume: edited, jobTitle: jd.jobTitle }),
+      });
+
+      console.log('DOCX response', { status: res.status, statusText: res.statusText });
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('DOCX response error body', errorText);
+        throw new Error(errorText || 'Download failed');
+      }
+
+      const blob = await res.blob();
+      console.log('DOCX blob received', { size: blob.size, type: blob.type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = getDownloadFilename(edited, jd.jobTitle, 'docx');
+      a.click();
+      URL.revokeObjectURL(url);
+      console.log('DOCX download finished');
+    } catch (e) {
+      console.error('DOCX download error', e);
+      setScoreError(e instanceof Error ? e.message : 'Download failed');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!edited || !jd) return;
+    setDownloading(true);
+    setScoreError('');
+    try {
+      const { generateResumePdfBlob } = await import('@/lib/resumePdf');
+      const blob = await generateResumePdfBlob(edited);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = getDownloadFilename(edited, jd.jobTitle, 'pdf');
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('PDF generation error', e);
+      setScoreError(e instanceof Error ? e.message : 'PDF download failed');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!resume || !jdText.trim()) return;
     setScoring(true);
     setScoreError('');
 
     try {
+      console.log('Starting score request', { resumeName: resume.contact?.name, jdLength: jdText.length });
       const res = await fetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -51,6 +117,7 @@ export default function Home() {
     setRewriting(true);
     setScoreError('');
     try {
+      console.log('Starting rewrite request', { resumeName: resume.contact?.name, jdLength: jdText.length });
       const res = await fetch('/api/rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,38 +126,13 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Rewrite failed');
       setRewritten(data.rewritten);
+      setEdited(data.rewritten);
       setStage('rewritten');
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } catch (e) {
       setScoreError(e instanceof Error ? e.message : 'Rewrite failed. Please try again.');
     } finally {
       setRewriting(false);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!rewritten || !jd) return;
-    setDownloading(true);
-    try {
-      const res = await fetch('/api/generate-docx', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume: rewritten, jobTitle: jd.jobTitle }),
-      });
-      if (!res.ok) throw new Error('Download failed');
-      const blob = await res.blob();
-      const name = rewritten.contact?.name?.replace(/\s+/g, '_') || 'Resume';
-      const title = jd.jobTitle?.replace(/\s+/g, '_').slice(0, 30) || 'Role';
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${name}_${title}_TailorCV.docx`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      setScoreError(e instanceof Error ? e.message : 'Download failed');
-    } finally {
-      setDownloading(false);
     }
   };
 
@@ -102,9 +144,17 @@ export default function Home() {
       <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-gray-200">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between">
           <span className="text-lg font-bold text-indigo-700 tracking-tight">TailorCV</span>
-          <span className="text-xs text-gray-500 bg-gray-100 rounded-full px-2.5 py-0.5">
-            Free ATS check · ₹49 rewrite
-          </span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/builder"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              Build Resume →
+            </Link>
+            <span className="text-xs text-gray-500 bg-gray-100 rounded-full px-2.5 py-0.5">
+              Free ATS check · ₹49 rewrite
+            </span>
+          </div>
         </div>
       </nav>
 
@@ -223,12 +273,15 @@ export default function Home() {
             </div>
           )}
 
-          {stage === 'rewritten' && rewritten && jd && (
+          {stage === 'rewritten' && rewritten && edited && jd && (
             <DiffView
               original={resume!}
               rewritten={rewritten}
+              edited={edited}
               jobTitle={jd.jobTitle}
-              onDownload={handleDownload}
+              onDownloadDocx={handleDownloadDocx}
+              onDownloadPdf={handleDownloadPdf}
+              onEditChange={setEdited}
               downloading={downloading}
             />
           )}

@@ -3,14 +3,18 @@
 import { useState } from 'react';
 import { ParsedResume, RewrittenResume } from '@/lib/types';
 import clsx from 'clsx';
+import ResumePreview from '@/components/ResumePreview';
 
-type Tab = 'summary' | 'experience' | 'skills' | 'naukri';
+type Tab = 'summary' | 'experience' | 'skills' | 'naukri' | 'edit' | 'preview';
 
 interface Props {
   original: ParsedResume;
   rewritten: RewrittenResume;
+  edited: RewrittenResume;
   jobTitle: string;
-  onDownload: () => void;
+  onDownloadDocx: () => void;
+  onDownloadPdf: () => void;
+  onEditChange: (edited: RewrittenResume) => void;
   downloading?: boolean;
 }
 
@@ -56,7 +60,7 @@ function BulletDiff({ original, rewritten }: { original: string[]; rewritten: st
   );
 }
 
-export default function DiffView({ original, rewritten, jobTitle, onDownload, downloading }: Props) {
+export default function DiffView({ original, rewritten, edited, jobTitle, onDownloadDocx, onDownloadPdf, onEditChange, downloading }: Props) {
   const [tab, setTab] = useState<Tab>('summary');
 
   const tabs: { id: Tab; label: string }[] = [
@@ -64,6 +68,8 @@ export default function DiffView({ original, rewritten, jobTitle, onDownload, do
     { id: 'experience', label: 'Experience' },
     { id: 'skills',     label: 'Skills' },
     { id: 'naukri',     label: 'Naukri text' },
+    { id: 'edit',       label: '✏️ Edit' },
+    { id: 'preview',    label: '📄 Preview' },
   ];
 
   return (
@@ -76,21 +82,38 @@ export default function DiffView({ original, rewritten, jobTitle, onDownload, do
             Optimised for: <span className="font-medium text-white">{jobTitle}</span>
           </p>
         </div>
-        <button
-          onClick={onDownload}
-          disabled={downloading}
-          className="flex items-center gap-2 rounded-xl bg-white px-5 py-2 text-sm font-semibold text-green-800 hover:bg-green-50 disabled:opacity-60 transition-colors shadow-sm"
-        >
-          {downloading ? (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-green-700 border-t-transparent" />
-          ) : (
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          )}
-          Download DOCX
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={onDownloadDocx}
+            disabled={downloading}
+            className="flex items-center gap-2 rounded-xl bg-white px-5 py-2 text-sm font-semibold text-green-800 hover:bg-green-50 disabled:opacity-60 transition-colors shadow-sm"
+          >
+            {downloading ? (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-green-700 border-t-transparent" />
+            ) : (
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            )}
+            Download DOCX
+          </button>
+          <button
+            onClick={onDownloadPdf}
+            disabled={downloading}
+            className="flex items-center gap-2 rounded-xl bg-white px-5 py-2 text-sm font-semibold text-indigo-800 hover:bg-indigo-50 disabled:opacity-60 transition-colors shadow-sm"
+          >
+            {downloading ? (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-700 border-t-transparent" />
+            ) : (
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 5v14m7-7H5" />
+              </svg>
+            )}
+            Download PDF
+          </button>
+        </div>
       </div>
 
       {/* Column labels */}
@@ -178,6 +201,92 @@ export default function DiffView({ original, rewritten, jobTitle, onDownload, do
             >
               Copy to clipboard
             </button>
+          </div>
+        )}
+
+        {tab === 'edit' && (
+          <div className="space-y-6">
+            {/* Edit Summary */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Summary</label>
+              <textarea
+                value={edited.summary}
+                onChange={(e) => onEditChange({ ...edited, summary: e.target.value })}
+                className="w-full h-24 rounded-lg border border-gray-300 p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-none"
+              />
+            </div>
+
+            {/* Edit Skills */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Skills (comma-separated)</label>
+              <textarea
+                value={edited.skills.join(', ')}
+                onChange={(e) => onEditChange({ ...edited, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                className="w-full h-20 rounded-lg border border-gray-300 p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-none"
+              />
+            </div>
+
+            {/* Edit Experience */}
+            <div className="space-y-4">
+              <label className="text-sm font-semibold text-gray-700">Work Experience</label>
+              {edited.experience.map((job, i) => (
+                <div key={i} className="rounded-lg border border-gray-300 p-4 space-y-3 bg-gray-50">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Job Title"
+                      value={job.title}
+                      onChange={(e) => {
+                        const newExp = [...edited.experience];
+                        newExp[i].title = e.target.value;
+                        onEditChange({ ...edited, experience: newExp });
+                      }}
+                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Company"
+                      value={job.company}
+                      onChange={(e) => {
+                        const newExp = [...edited.experience];
+                        newExp[i].company = e.target.value;
+                        onEditChange({ ...edited, experience: newExp });
+                      }}
+                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+                  <textarea
+                    placeholder="Bullet points (one per line)"
+                    value={job.bullets.join('\n')}
+                    onChange={(e) => {
+                      const newExp = [...edited.experience];
+                      newExp[i].bullets = e.target.value.split('\n').filter(b => b.trim());
+                      onEditChange({ ...edited, experience: newExp });
+                    }}
+                    className="w-full h-24 rounded border border-gray-300 p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-none"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Edit Naukri Text */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Naukri Profile Text</label>
+              <textarea
+                value={edited.naukriProfileText}
+                onChange={(e) => onEditChange({ ...edited, naukriProfileText: e.target.value })}
+                className="w-full h-28 rounded-lg border border-gray-300 p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-none"
+              />
+            </div>
+          </div>
+        )}
+
+        {tab === 'preview' && (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-500">
+              Live preview of your edited resume — exactly as it will appear when downloaded as PDF.
+            </p>
+            <ResumePreview resume={edited} />
           </div>
         )}
       </div>
