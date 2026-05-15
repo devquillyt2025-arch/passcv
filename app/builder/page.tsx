@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { createClient } from '@/utils/supabase/client';
 import ResumeCanvas from '@/components/builder/ResumeCanvas';
 import PreviewModal from '@/components/builder/PreviewModal';
 import PersonalInfo from '@/components/builder/steps/PersonalInfo';
@@ -12,6 +13,7 @@ import ExperienceStep from '@/components/builder/steps/ExperienceStep';
 import EducationStep from '@/components/builder/steps/EducationStep';
 import ProjectsStep from '@/components/builder/steps/ProjectsStep';
 import ATSScoreWidget from '@/components/builder/ATSScoreWidget';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 
 const STEPS = [
   { id: 'personal',       label: 'Personal Info' },
@@ -25,19 +27,52 @@ const STEPS = [
 
 export default function BuilderPage() {
   const [step, setStep] = useState(0);
-  const data = useResumeStore((state) => state.data);
+  const { data, resumeId, templateId, setTemplateId } = useResumeStore();
   const [showModal, setShowModal] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [dlError, setDlError] = useState('');
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const supabase = createClient();
+  const initialRender = useRef(true);
 
   const isLastStep = step === STEPS.length - 1;
+
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+
+    if (!resumeId) return;
+
+    setSaveStatus('saving');
+    const timer = setTimeout(async () => {
+      const { error } = await supabase
+        .from('resumes')
+        .update({ 
+          data: data,
+          name: data.contact.firstName ? `${data.contact.firstName} ${data.contact.lastName} Resume` : 'Untitled Resume',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', resumeId);
+
+      if (error) {
+        console.error('Error auto-saving:', error);
+        setSaveStatus('error');
+      } else {
+        setSaveStatus('saved');
+      }
+    }, 1000); // 1-second debounce
+
+    return () => clearTimeout(timer);
+  }, [data, resumeId, supabase]);
 
   const handleDownload = async () => {
     setDownloading(true);
     setDlError('');
     try {
       const { generateBuilderPdfBlob } = await import('@/lib/resumePdf');
-      const blob = await generateBuilderPdfBlob(data);
+      const blob = await generateBuilderPdfBlob(data, templateId);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -57,10 +92,31 @@ export default function BuilderPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Nav */}
       <nav className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-indigo-700 tracking-tight">
-          TailorCV
-        </Link>
-        <span className="text-sm font-medium text-gray-500">Resume Builder</span>
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="text-gray-500 hover:text-gray-900 transition-colors">
+            ← Dashboard
+          </Link>
+          <div className="w-px h-4 bg-gray-300"></div>
+          <span className="text-lg font-bold text-indigo-700 tracking-tight">
+            TailorCV
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          {saveStatus === 'saving' && (
+            <span className="flex items-center gap-1.5 text-amber-600">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
+            </span>
+          )}
+          {saveStatus === 'saved' && (
+            <span className="flex items-center gap-1.5 text-green-600">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Saved to cloud
+            </span>
+          )}
+          {saveStatus === 'error' && (
+            <span className="text-red-500">Error saving to cloud</span>
+          )}
+        </div>
       </nav>
 
       {/* Step bar */}
@@ -125,6 +181,18 @@ export default function BuilderPage() {
                   )}
 
                   <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium text-gray-700">Resume Template</label>
+                      <select 
+                        value={templateId}
+                        onChange={(e) => setTemplateId(e.target.value as 'classic' | 'modern')}
+                        className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                      >
+                        <option value="classic">Classic ATS (Standard Typography)</option>
+                        <option value="modern">Modern ATS (Roboto Typography)</option>
+                      </select>
+                    </div>
+
                     <button
                       onClick={() => setShowModal(true)}
                       className="flex items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-indigo-50 px-5 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors"
@@ -220,6 +288,7 @@ export default function BuilderPage() {
       {showModal && (
         <PreviewModal
           data={data}
+          templateId={templateId}
           onClose={() => setShowModal(false)}
           onDownload={() => { setShowModal(false); handleDownload(); }}
         />

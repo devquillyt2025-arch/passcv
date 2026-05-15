@@ -24,7 +24,11 @@ export const initialResumeData: ResumeData = {
 };
 
 interface ResumeState {
+  resumeId: string | null;
+  templateId: 'classic' | 'modern';
   data: ResumeData;
+  setResumeId: (id: string | null) => void;
+  setTemplateId: (templateId: 'classic' | 'modern') => void;
   updateContact: (contact: Partial<ResumeData['contact']>) => void;
   updateSummary: (summary: string) => void;
   
@@ -62,7 +66,12 @@ interface ResumeState {
 export const useResumeStore = create<ResumeState>()(
   persist(
     (set) => ({
+      resumeId: null,
+      templateId: 'classic',
       data: initialResumeData,
+
+      setResumeId: (id) => set({ resumeId: id }),
+      setTemplateId: (id) => set({ templateId: id }),
 
       updateContact: (contact) =>
         set((state) => ({
@@ -241,7 +250,7 @@ export const useResumeStore = create<ResumeState>()(
         }),
 
       loadResumeData: (data) => set({ data }),
-      reset: () => set({ data: initialResumeData }),
+      reset: () => set({ data: initialResumeData, resumeId: null }),
     }),
     {
       name: 'resume-builder-storage', // unique name for localStorage

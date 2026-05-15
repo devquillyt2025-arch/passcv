@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { EditedResumeProvider } from '@/lib/editedResumeContext';
 
 export const metadata: Metadata = {
   title: 'TailorCV — Job-ready in 60 seconds',
@@ -12,7 +13,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>
-        {children}
+        <EditedResumeProvider>
+          {children}
+        </EditedResumeProvider>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { ParsedResume, RewrittenResume } from '@/lib/types';
 import clsx from 'clsx';
 import ResumePreview from '@/components/ResumePreview';
@@ -113,6 +114,12 @@ export default function DiffView({ original, rewritten, edited, jobTitle, onDown
             )}
             Download PDF
           </button>
+          <button
+            onClick={() => setTab('edit')}
+            className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+          >
+            ✏️ Edit Inline
+          </button>
         </div>
       </div>
 
@@ -131,18 +138,9 @@ export default function DiffView({ original, rewritten, edited, jobTitle, onDown
       {/* Tabs */}
       <div className="flex gap-1 px-6 pt-3 pb-0 border-b border-gray-100">
         {tabs.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={clsx(
-              'px-4 py-2 text-sm font-medium rounded-t-lg transition-colors',
-              tab === t.id
-                ? 'bg-white border border-b-white border-gray-200 text-indigo-700'
-                : 'text-gray-500 hover:text-gray-700'
-            )}
-          >
+          <Link key={t.id} href={`/sections/${t.id}`} className="px-4 py-2 text-sm font-medium rounded-t-lg text-gray-500 hover:text-gray-700">
             {t.label}
-          </button>
+          </Link>
         ))}
       </div>
 
