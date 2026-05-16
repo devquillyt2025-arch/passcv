@@ -263,7 +263,8 @@ export const useResumeStore = create<ResumeState>()(
       reset: () => set({ data: initialResumeData, resumeId: null }),
     }),
     {
-      name: 'resume-builder-storage', // unique name for localStorage
+      name: 'resume-builder-storage',
+      skipHydration: true,
     }
   )
 );

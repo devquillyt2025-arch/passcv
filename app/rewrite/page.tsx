@@ -11,7 +11,7 @@ import WizardProgress from '@/components/WizardProgress';
 
 export default function RewritePage() {
   const router = useRouter();
-  const { original, rewritten, edited, jd, setEdited } = useRewriteStore();
+  const { original, rewritten, edited, jd, score, jdText, setEdited } = useRewriteStore();
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
 
@@ -118,6 +118,9 @@ export default function RewritePage() {
           rewritten={rewritten}
           edited={edited}
           jobTitle={jd.jobTitle}
+          jdText={jdText || undefined}
+          score={score || undefined}
+          jd={jd}
           onDownloadDocx={handleDownloadDocx}
           onDownloadPdf={handleDownloadPdf}
           onEditChange={setEdited}

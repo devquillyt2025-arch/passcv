@@ -13,6 +13,7 @@ import ExperienceStep from '@/components/builder/steps/ExperienceStep';
 import EducationStep from '@/components/builder/steps/EducationStep';
 import ProjectsStep from '@/components/builder/steps/ProjectsStep';
 import ATSScoreWidget from '@/components/builder/ATSScoreWidget';
+import ImportResumeModal from '@/components/builder/ImportResumeModal';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
 const STEPS = [
@@ -29,6 +30,12 @@ export default function BuilderPage() {
   const [step, setStep] = useState(0);
   const { data, resumeId, templateId, setTemplateId } = useResumeStore();
   const [showModal, setShowModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+
+  // Rehydrate zustand persist store after mount to avoid SSR/client mismatch
+  useEffect(() => {
+    useResumeStore.persist.rehydrate();
+  }, []);
   const [downloading, setDownloading] = useState(false);
   const [dlError, setDlError] = useState('');
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
@@ -100,8 +107,18 @@ export default function BuilderPage() {
           <span className="text-lg font-bold text-indigo-700 tracking-tight">
             TailorCV
           </span>
+          <div className="w-px h-4 bg-gray-300"></div>
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Import Resume
+          </button>
         </div>
-        
+
         <div className="flex items-center gap-2 text-sm text-gray-500">
           {saveStatus === 'saving' && (
             <span className="flex items-center gap-1.5 text-amber-600">
@@ -284,6 +301,10 @@ export default function BuilderPage() {
           </div>
         </div>
       </div>
+
+      {showImport && (
+        <ImportResumeModal onClose={() => setShowImport(false)} />
+      )}
 
       {showModal && (
         <PreviewModal

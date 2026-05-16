@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import UploadZone from '@/components/UploadZone';
@@ -11,7 +11,18 @@ import WizardProgress from '@/components/WizardProgress';
 
 export default function Home() {
   const router = useRouter();
-  const { original: resume, setOriginal: setResume, jdText, setJdText, setScoreData } = useRewriteStore();
+  const store = useRewriteStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const resume = mounted ? store.original : null;
+  const jdText = mounted ? store.jdText : null;
+  const setResume = store.setOriginal;
+  const setJdText = store.setJdText;
+  const setScoreData = store.setScoreData;
   const [scoring, setScoring] = useState(false);
   const [parseError, setParseError] = useState('');
   const [scoreError, setScoreError] = useState('');
@@ -100,7 +111,7 @@ export default function Home() {
         <WizardProgress 
           currentStep={1} 
           canProceedToScore={!!resume && (jdText || '').trim().length > 100} 
-          canProceedToRewrite={!!useRewriteStore.getState().score} 
+          canProceedToRewrite={mounted ? !!useRewriteStore.getState().score : false} 
         />
 
         {/* Upload + JD */}

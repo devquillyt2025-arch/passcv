@@ -83,6 +83,12 @@ export interface RewriteResult {
   rewritten: RewrittenResume;
 }
 
+export interface NaukriProfile {
+  headline: string;   // max 250 chars
+  summary: string;    // max 3000 chars
+  keySkills: string[]; // 15-20 skills
+}
+
 // --- New Resume Builder Types ---
 
 export interface ResumeContact {

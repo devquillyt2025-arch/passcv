@@ -152,9 +152,59 @@ function buildDocx(resume: ResumeInput) {
   });
 }
 
+function buildCoverLetterDocx(coverLetter: string, name: string, jobTitle: string) {
+  const paragraphs: Paragraph[] = [];
+
+  paragraphs.push(
+    new Paragraph({
+      spacing: { after: 240 },
+      children: [new TextRun({ text: name, bold: true, size: 26 })],
+    }),
+    new Paragraph({
+      spacing: { after: 480 },
+      children: [new TextRun({ text: `Application for: ${jobTitle}`, size: 20, color: '555555' })],
+    }),
+    new Paragraph({
+      spacing: { after: 240 },
+      children: [new TextRun({ text: 'Dear Hiring Manager,', size: 22 })],
+    }),
+  );
+
+  for (const para of coverLetter.split('\n\n').filter(Boolean)) {
+    paragraphs.push(
+      new Paragraph({
+        spacing: { after: 200 },
+        children: [new TextRun({ text: para.trim(), size: 22 })],
+      }),
+    );
+  }
+
+  return new Document({
+    sections: [{
+      properties: { page: { margin: { top: 900, bottom: 900, left: 900, right: 900 } } },
+      children: paragraphs,
+    }],
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
+
+    // Cover letter DOCX mode
+    if (data.type === 'cover_letter') {
+      const doc = buildCoverLetterDocx(data.coverLetter || '', data.name || 'Candidate', data.jobTitle || 'Role');
+      const buffer = await Packer.toBuffer(doc);
+      const filename = `${safeFilename(data.name || 'Candidate')}_CoverLetter_TailorCV.docx`;
+      return new Response(new Uint8Array(buffer), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+        },
+      });
+    }
+
     const resume = data.resume;
     const jobTitle = data.jobTitle || 'Resume';
     console.log('DOCX route received request', { jobTitle, name: resume?.contact?.name });
