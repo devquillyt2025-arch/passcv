@@ -167,13 +167,25 @@ export function calculateScore(resume: ParsedResume, jd: ParsedJD): ATSScore {
   if (resume.noticePeriod) {
     naukriScore += 5;
   } else {
-    naukriIssues.push('Notice period missing — add "Notice Period: Immediate / X weeks" to your contact section');
+    // Give partial credit (3pts) if they have a linkedin/github profile — strong online presence
+    const hasOnlinePresence = resumeText.includes('linkedin') || resumeText.includes('github');
+    if (hasOnlinePresence) {
+      naukriScore += 3;
+    } else {
+      naukriIssues.push('Notice period missing — add "Notice Period: Immediate / 30 days" to your contact section');
+    }
   }
 
   if (resume.ctc) {
     naukriScore += 5;
   } else {
-    naukriIssues.push('Current CTC not mentioned — Naukri recruiters filter by CTC, add it or note "Open to discuss"');
+    // Give partial credit (3pts) if contact section is complete (email + phone)
+    const hasCompleteContact = !!(resume.contact.email && resume.contact.phone);
+    if (hasCompleteContact) {
+      naukriScore += 3;
+    } else {
+      naukriIssues.push('Contact info incomplete — ensure email and phone are filled in');
+    }
   }
 
   if (resume.contact.location) {
@@ -227,12 +239,17 @@ export function calculateScore(resume: ParsedResume, jd: ParsedJD): ATSScore {
   }
 
   if (resume.summary) {
-    const summaryText = resume.summary.toLowerCase();
-    const jdKeywordHits = jd.requiredSkills.slice(0, 10).filter(kw => summaryText.includes(kw)).length;
-    const summaryScore = Math.round((jdKeywordHits / Math.max(Math.min(jd.requiredSkills.length, 10), 1)) * 5);
-    contentScore += summaryScore;
-    if (summaryScore < 3) {
-      contentIssues.push('Professional summary doesn\'t reference key JD skills — tailor it to include role-specific keywords');
+    if (jd.requiredSkills.length === 0) {
+      // No JD provided — give full credit for having a summary
+      contentScore += 5;
+    } else {
+      const summaryText = resume.summary.toLowerCase();
+      const jdKeywordHits = jd.requiredSkills.slice(0, 10).filter(kw => summaryText.includes(kw)).length;
+      const summaryScore = Math.round((jdKeywordHits / Math.min(jd.requiredSkills.length, 10)) * 5);
+      contentScore += summaryScore;
+      if (summaryScore < 3) {
+        contentIssues.push('Professional summary doesn\'t reference key JD skills — tailor it to include role-specific keywords');
+      }
     }
   } else {
     contentIssues.push('No professional summary found — add a 3–4 line summary at the top targeting this role');

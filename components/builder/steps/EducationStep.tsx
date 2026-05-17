@@ -2,8 +2,9 @@ import { useResumeStore } from '@/lib/store/useResumeStore';
 import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import MonthYearPicker from '@/components/builder/MonthYearPicker';
 
-export default function EducationStep() {
+export default function EducationStep({ headless = false }: { headless?: boolean }) {
   const education = useResumeStore((state) => state.data.education || []);
   const { addEducation, updateEducation, removeEducation, reorderEducation } = useResumeStore();
   const [expandedId, setExpandedId] = useState<string | null>(education[0]?.id || null);
@@ -15,14 +16,14 @@ export default function EducationStep() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Education</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Include your educational background.
-          </p>
+      {!headless && (
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Education</h2>
+            <p className="text-sm text-gray-500 mt-1">Include your educational background.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="education-list">
@@ -83,7 +84,7 @@ export default function EducationStep() {
                                   type="text"
                                   value={edu.institution}
                                   onChange={(e) => updateEducation(edu.id, { institution: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. Stanford University"
                                 />
                               </div>
@@ -93,7 +94,7 @@ export default function EducationStep() {
                                   type="text"
                                   value={edu.location}
                                   onChange={(e) => updateEducation(edu.id, { location: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. Stanford, CA"
                                 />
                               </div>
@@ -106,7 +107,7 @@ export default function EducationStep() {
                                   type="text"
                                   value={edu.degree}
                                   onChange={(e) => updateEducation(edu.id, { degree: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. Bachelor of Science"
                                 />
                               </div>
@@ -116,7 +117,7 @@ export default function EducationStep() {
                                   type="text"
                                   value={edu.field}
                                   onChange={(e) => updateEducation(edu.id, { field: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. Computer Science"
                                 />
                               </div>
@@ -125,22 +126,25 @@ export default function EducationStep() {
                             <div className="grid grid-cols-3 gap-4">
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                <input
-                                  type="month"
+                                <MonthYearPicker
                                   value={edu.startDate}
-                                  onChange={(e) => updateEducation(edu.id, { startDate: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  onChange={(v) => updateEducation(edu.id, { startDate: v })}
+                                  placeholder="Start date"
                                 />
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                <input
-                                  type="month"
-                                  value={edu.endDate}
-                                  disabled={edu.currentlyStudying}
-                                  onChange={(e) => updateEducation(edu.id, { endDate: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none disabled:bg-gray-100 disabled:text-gray-400"
-                                />
+                                {edu.currentlyStudying ? (
+                                  <div className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-400 bg-gray-50">
+                                    Present
+                                  </div>
+                                ) : (
+                                  <MonthYearPicker
+                                    value={edu.endDate}
+                                    onChange={(v) => updateEducation(edu.id, { endDate: v })}
+                                    placeholder="End date"
+                                  />
+                                )}
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Score / CGPA</label>
@@ -148,7 +152,7 @@ export default function EducationStep() {
                                   type="text"
                                   value={edu.score}
                                   onChange={(e) => updateEducation(edu.id, { score: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. 3.8/4.0"
                                 />
                               </div>

@@ -10,17 +10,17 @@ import WizardProgress from '@/components/WizardProgress';
 
 export default function ScorePage() {
   const router = useRouter();
-  const { original, jdText, score, jd, setRewriteData } = useRewriteStore();
+  const { original, jdText, score, jd, setRewriteData, _hasHydrated } = useRewriteStore();
   const [rewriting, setRewriting] = useState(false);
   const [scoreError, setScoreError] = useState('');
 
   useEffect(() => {
-    if (!original || !jdText || !score || !jd) {
+    if (_hasHydrated && (!original || !jdText || !score || !jd)) {
       router.push('/');
     }
-  }, [original, jdText, score, jd, router]);
+  }, [original, jdText, score, jd, router, _hasHydrated]);
 
-  if (!original || !jdText || !score || !jd) {
+  if (!_hasHydrated || !original || !jdText || !score || !jd) {
     return null;
   }
 

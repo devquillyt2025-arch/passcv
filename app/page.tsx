@@ -4,8 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import UploadZone from '@/components/UploadZone';
-import { ParsedResume, ATSScore, ParsedJD, RewrittenResume } from '@/lib/types';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { useRewriteStore } from '@/lib/store/useRewriteStore';
 import WizardProgress from '@/components/WizardProgress';
 
@@ -14,41 +12,30 @@ export default function Home() {
   const store = useRewriteStore();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
-  const resume = mounted ? store.original : null;
-  const jdText = mounted ? store.jdText : null;
-  const setResume = store.setOriginal;
-  const setJdText = store.setJdText;
+  const resume   = mounted ? store.original : null;
+  const jdText   = mounted ? store.jdText   : null;
+  const setResume   = store.setOriginal;
+  const setJdText   = store.setJdText;
   const setScoreData = store.setScoreData;
-  const [scoring, setScoring] = useState(false);
+
+  const [scoring,    setScoring]    = useState(false);
   const [parseError, setParseError] = useState('');
   const [scoreError, setScoreError] = useState('');
-  const resultsRef = useRef<HTMLDivElement>(null);
-
-  // Download functions moved to /rewrite page
 
   const handleAnalyze = async () => {
     if (!resume || !(jdText || '').trim()) return;
     setScoring(true);
     setScoreError('');
-
     try {
-      console.log('Starting score request', { resumeName: resume.contact?.name, jdLength: (jdText || '').length });
-      const res = await fetch('/api/score', {
-        method: 'POST',
+      const res  = await fetch('/api/score', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume, jdText }),
+        body:    JSON.stringify({ resume, jdText }),
       });
       const data = await res.json();
-      setScoreData({
-        original: resume,
-        jdText: jdText || '',
-        score: data.score,
-        jd: data.jd
-      });
+      setScoreData({ original: resume, jdText: jdText || '', score: data.score, jd: data.jd });
       router.push('/score');
     } catch (e) {
       setScoreError(e instanceof Error ? e.message : 'Analysis failed. Please try again.');
@@ -57,47 +44,121 @@ export default function Home() {
     }
   };
 
-  // handleRewriteClick moved to /score page
-
   const canAnalyze = resume && (jdText || '').trim().length > 100;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A0A0F] text-gray-900 dark:text-white relative transition-colors duration-200">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-100/50 via-gray-50/50 to-transparent dark:from-indigo-500/10 dark:via-[#0A0A0F]/0 dark:to-transparent"></div>
-      
-      {/* Nav */}
-      <nav className="sticky top-0 z-30 bg-white/80 dark:bg-[#0A0A0F]/40 backdrop-blur-[12px] border-b border-gray-200 dark:border-white/[0.06]">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between">
-          <span className="text-[20px] font-bold text-indigo-700 dark:text-white tracking-tight">TailorCV</span>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/builder"
-              className="text-[13px] font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition-all duration-200 ease-in-out"
-            >
-              Build Resume →
-            </Link>
-            <span className="text-[13px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/[0.06] rounded-full px-3 py-1">
-              Free ATS check · ₹49 rewrite
-            </span>
-            <ThemeToggle />
-          </div>
+    // "dark" class enables Tailwind dark: variants in child components (UploadZone, WizardProgress)
+    <div className="dark min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
+
+      {/* ── Radial glow behind hero ─────────────────────────────────────────── */}
+      <div
+        aria-hidden="true"
+        style={{
+          position:  'fixed',
+          top:        0,
+          left:      '50%',
+          transform: 'translateX(-50%)',
+          width:     '900px',
+          height:    '500px',
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.13) 0%, rgba(139,92,246,0.06) 45%, transparent 70%)',
+          filter:    'blur(40px)',
+          pointerEvents: 'none',
+          zIndex:    0,
+        }}
+      />
+
+      {/* ── Nav ─────────────────────────────────────────────────────────────── */}
+      <nav
+        className="sticky top-0 z-30 flex items-center justify-between px-6 h-14"
+        style={{
+          background:   'rgba(10,10,15,0.6)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <span style={{ fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>
+          TailorCV
+        </span>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/builder"
+            style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', transition: 'color 0.2s ease' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+          >
+            Build Resume →
+          </Link>
+          <span
+            style={{
+              fontSize:   13,
+              color:      'rgba(255,255,255,0.45)',
+              background: 'rgba(255,255,255,0.05)',
+              border:     '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '999px',
+              padding:    '4px 14px',
+            }}
+          >
+            Free ATS check · ₹49 rewrite
+          </span>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="pt-[64px] pb-0 px-4 relative overflow-hidden">
-        <div className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-[40px] z-0 pointer-events-none hidden dark:block" style={{ background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.18) 0%, rgba(139,92,246,0.08) 40%, transparent 70%)' }}></div>
-        <div className="mx-auto max-w-3xl text-center relative z-[1]">
-          <h1 className="text-[56px] leading-[1.1] font-bold tracking-tight text-gray-900 dark:text-white">
-            Job-ready in <span className="bg-gradient-to-r from-[#6366f1] to-[#a78bfa] bg-clip-text text-transparent">60 seconds</span>
+      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      <section className="relative z-10 pt-16 pb-0 px-4 text-center">
+        <div className="mx-auto max-w-3xl">
+          <h1
+            style={{
+              fontSize:   'clamp(36px, 6vw, 56px)',
+              fontWeight: 700,
+              lineHeight: 1.1,
+              letterSpacing: '-0.02em',
+              color: '#fff',
+              margin: 0,
+            }}
+          >
+            Job-ready in{' '}
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #6366f1, #a78bfa)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              60 seconds
+            </span>
           </h1>
-          <p className="mt-[24px] text-[20px] text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-            Upload your resume · paste the JD · get an ATS score and a Claude-rewritten version
-            ready to upload to Naukri
+
+          <p
+            style={{
+              marginTop: 24,
+              fontSize:  20,
+              color:     'rgba(255,255,255,0.5)',
+              maxWidth:  520,
+              margin:    '24px auto 0',
+              lineHeight: 1.5,
+            }}
+          >
+            Upload your resume · paste the JD · get an ATS score and a Claude-rewritten
+            version ready to upload to Naukri
           </p>
-          <div className="mt-[24px] flex flex-wrap justify-center gap-3">
+
+          {/* Platform badge chips */}
+          <div className="flex flex-wrap justify-center gap-2 mt-6">
             {['Naukri', 'LinkedIn', 'Taleo', 'Darwinbox', 'Keka', 'Workday'].map(name => (
-              <span key={name} className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full px-4 py-1.5 text-[13px] text-gray-600 dark:text-gray-300 shadow-sm dark:shadow-none">
+              <span
+                key={name}
+                style={{
+                  fontSize:     13,
+                  color:        'rgba(255,255,255,0.55)',
+                  background:   'rgba(255,255,255,0.05)',
+                  border:       '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '999px',
+                  padding:      '5px 14px',
+                }}
+              >
                 {name}
               </span>
             ))}
@@ -105,116 +166,295 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Main form */}
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 pt-[48px] pb-[48px] space-y-[48px]">
+      {/* ── Main tool ───────────────────────────────────────────────────────── */}
+      <main
+        className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6"
+        style={{ paddingTop: 48, paddingBottom: 48 }}
+      >
         {/* Step indicators */}
-        <WizardProgress 
-          currentStep={1} 
-          canProceedToScore={!!resume && (jdText || '').trim().length > 100} 
-          canProceedToRewrite={mounted ? !!useRewriteStore.getState().score : false} 
+        <WizardProgress
+          currentStep={1}
+          canProceedToScore={!!resume && (jdText || '').trim().length > 100}
+          canProceedToRewrite={mounted ? !!useRewriteStore.getState().score : false}
         />
 
-        {/* Upload + JD */}
-        <div className="grid gap-[24px] md:grid-cols-2 items-stretch">
-          <div className="flex flex-col h-full">
-            <label className="mb-[12px] block text-[11px] font-medium tracking-[0.08em] uppercase text-gray-500 dark:text-[rgba(255,255,255,0.45)]">
+        {/* Upload + JD two-column */}
+        <div className="grid gap-6 md:grid-cols-2 items-stretch">
+
+          {/* Step 1 — Upload */}
+          <div className="flex flex-col">
+            <label
+              style={{
+                display:       'block',
+                marginBottom:  12,
+                fontSize:      11,
+                fontWeight:    600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color:         'rgba(255,255,255,0.4)',
+              }}
+            >
               Step 1 — Your resume
             </label>
             <div className="flex-1">
-            <UploadZone onParsed={setResume} onError={setParseError} />
+              <UploadZone onParsed={setResume} onError={setParseError} />
             </div>
             {parseError && (
-              <p className="mt-2 text-[13px] text-red-500 dark:text-red-400">{parseError}</p>
+              <p style={{ marginTop: 8, fontSize: 13, color: '#f87171' }}>{parseError}</p>
             )}
             {resume && (
-              <p className="mt-2 text-[13px] text-green-600 dark:text-green-400 font-medium">
+              <p style={{ marginTop: 8, fontSize: 13, color: '#34d399', fontWeight: 500 }}>
                 ✓ Parsed: {resume.contact.name || 'Resume'} · {resume.experience.length} jobs · {resume.skills.length} skills
               </p>
             )}
           </div>
 
-          <div className="flex flex-col h-full">
-            <label className="mb-[12px] block text-[11px] font-medium tracking-[0.08em] uppercase text-gray-500 dark:text-[rgba(255,255,255,0.45)]">
+          {/* Step 2 — JD */}
+          <div className="flex flex-col">
+            <label
+              style={{
+                display:       'block',
+                marginBottom:  12,
+                fontSize:      11,
+                fontWeight:    600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color:         'rgba(255,255,255,0.4)',
+              }}
+            >
               Step 2 — Job description
             </label>
-            <div className="flex-1 h-[320px] min-h-[320px] max-h-[320px] w-full rounded-[16px] border-2 border-dashed border-gray-300 dark:border-[rgba(99,102,241,0.4)] bg-white dark:bg-[rgba(99,102,241,0.04)] focus-within:border-indigo-400 dark:focus-within:border-[rgba(99,102,241,0.8)] focus-within:bg-indigo-50/50 dark:focus-within:bg-[rgba(99,102,241,0.08)] transition-all duration-200 ease shadow-sm dark:shadow-none flex overflow-hidden">
+            <div
+              className="flex-1 flex overflow-hidden"
+              style={{
+                background:   '#13131A',
+                border:       '2px dashed rgba(99,102,241,0.35)',
+                borderRadius: 16,
+                minHeight:    320,
+                maxHeight:    320,
+                transition:   'border-color 0.2s ease, box-shadow 0.2s ease',
+              }}
+              onFocusCapture={e => {
+                const el = e.currentTarget as HTMLDivElement;
+                el.style.borderColor  = '#6366f1';
+                el.style.borderStyle  = 'solid';
+                el.style.boxShadow    = '0 0 0 3px rgba(99,102,241,0.15), inset 0 0 20px rgba(99,102,241,0.04)';
+              }}
+              onBlurCapture={e => {
+                const el = e.currentTarget as HTMLDivElement;
+                el.style.borderColor  = 'rgba(99,102,241,0.35)';
+                el.style.borderStyle  = 'dashed';
+                el.style.boxShadow    = 'none';
+              }}
+            >
               <textarea
                 value={jdText || ''}
                 onChange={e => setJdText(e.target.value)}
                 placeholder="Paste the full job description from Naukri, LinkedIn or any portal…"
-                className="flex-1 h-full w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 p-[16px] text-gray-800 dark:text-white text-[14px] leading-[1.6] placeholder-gray-400 dark:placeholder-[rgba(255,255,255,0.3)] resize-none scrollbar-hide"
+                style={{
+                  flex:        1,
+                  width:       '100%',
+                  height:      '100%',
+                  background:  'transparent',
+                  border:      'none',
+                  outline:     'none',
+                  padding:     16,
+                  fontSize:    14,
+                  lineHeight:  1.6,
+                  color:       '#fff',
+                  resize:      'none',
+                  scrollbarWidth: 'none',
+                }}
+                className="[&::-webkit-scrollbar]:hidden placeholder:text-[rgba(255,255,255,0.28)]"
               />
             </div>
-            <p className="mt-2 text-[12px] text-gray-500 dark:text-[rgba(255,255,255,0.4)]">{(jdText || '').length} characters</p>
+            <p style={{ marginTop: 8, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
+              {(jdText || '').length} characters
+            </p>
           </div>
         </div>
 
-        {/* Analyze button */}
-        <div className="flex flex-col items-center gap-[24px]">
+        {/* CTA + errors */}
+        <div className="flex flex-col items-center gap-6 mt-12">
           {scoreError && (
-            <p className="text-[13px] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2">{scoreError}</p>
+            <p
+              style={{
+                fontSize:     13,
+                color:        '#fca5a5',
+                background:   'rgba(239,68,68,0.1)',
+                border:       '1px solid rgba(239,68,68,0.2)',
+                borderRadius: 10,
+                padding:      '8px 16px',
+              }}
+            >
+              {scoreError}
+            </p>
           )}
+
           <button
             onClick={handleAnalyze}
             disabled={!canAnalyze || scoring}
-            className="w-full md:w-auto h-[56px] px-10 rounded-[14px] bg-[linear-gradient(135deg,#6366f1_0%,#8b5cf6_100%)] text-white text-[16px] font-bold border-none hover:-translate-y-[1px] hover:shadow-[0_0_32px_rgba(99,102,241,0.5)] disabled:opacity-[0.35] disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 transition-all duration-200 ease flex items-center justify-center"
+            className="w-full md:w-auto"
+            style={{
+              height:         56,
+              paddingLeft:    40,
+              paddingRight:   40,
+              borderRadius:   14,
+              background:     'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              color:          '#fff',
+              fontSize:       16,
+              fontWeight:     700,
+              border:         'none',
+              cursor:         (!canAnalyze || scoring) ? 'not-allowed' : 'pointer',
+              opacity:        (!canAnalyze || scoring) ? 0.3 : 1,
+              transition:     'all 0.2s ease',
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: 'center',
+              gap:            8,
+            }}
+            onMouseEnter={e => {
+              if (!canAnalyze || scoring) return;
+              const b = e.currentTarget as HTMLButtonElement;
+              b.style.boxShadow = '0 0 32px rgba(99,102,241,0.5)';
+              b.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={e => {
+              const b = e.currentTarget as HTMLButtonElement;
+              b.style.boxShadow = 'none';
+              b.style.transform = 'none';
+            }}
           >
             {scoring ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <>
+                <span
+                  style={{
+                    width: 16, height: 16,
+                    borderRadius: '50%',
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    borderTopColor: '#fff',
+                    animation: 'spin 0.7s linear infinite',
+                    display: 'inline-block',
+                  }}
+                />
                 Analysing…
-              </span>
+              </>
             ) : 'Analyse my resume — free'}
           </button>
-          {!resume && <p className="text-[13px] text-gray-500 dark:text-[rgba(255,255,255,0.4)]">Upload a resume to get started</p>}
-          {resume && !(jdText || '').trim() && <p className="text-[13px] text-gray-500 dark:text-[rgba(255,255,255,0.4)]">Paste a job description to continue</p>}
+
+          {!resume && (
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
+              Upload a resume to get started
+            </p>
+          )}
+          {resume && !(jdText || '').trim() && (
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
+              Paste a job description to continue
+            </p>
+          )}
         </div>
 
-        <div ref={resultsRef}>
-          {/* Results moved to /score and /rewrite */}
-        </div>
-
-        {/* How it works */}
-        <section className="pt-[64px] border-t border-gray-200 dark:border-[rgba(255,255,255,0.06)]">
-            <h2 className="text-[13px] font-semibold tracking-[0.08em] uppercase text-gray-500 dark:text-[rgba(255,255,255,0.4)] mb-[32px]">How TailorCV works</h2>
-            <div className="grid gap-[24px] sm:grid-cols-3">
-              {[
-                {
-                  icon: '📄',
-                  title: 'ATS Score (Free)',
-                  body: 'We check keyword match, formatting, Naukri-specific fields, and content quality — 100-point breakdown.',
-                },
-                {
-                  icon: '✏️',
-                  title: 'AI Rewrite (₹49)',
-                  body: 'Claude rewrites every section — summary, bullets, skills — using exact JD keywords. Never fabricates facts.',
-                },
-                {
-                  icon: '⬇️',
-                  title: 'DOCX Download',
-                  body: 'Get a single-column ATS-safe DOCX ready to upload to Naukri. Plus a Naukri profile text block.',
-                },
-              ].map(item => (
-                <div key={item.title} className="flex gap-[24px] bg-white dark:bg-[#0f0f17] border border-gray-200 dark:border-[rgba(255,255,255,0.07)] p-[24px] rounded-[16px] hover:-translate-y-[2px] hover:border-gray-300 dark:hover:border-[rgba(99,102,241,0.3)] transition-all duration-200 ease shadow-sm dark:shadow-none">
-                  <div className="shrink-0 w-[40px] h-[40px] rounded-[10px] bg-indigo-50 dark:bg-[rgba(99,102,241,0.12)] flex items-center justify-center text-indigo-600 dark:text-white text-xl">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[15px] text-gray-900 dark:text-gray-200">{item.title}</p>
-                    <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">{item.body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* ── How it works ──────────────────────────────────────────────────── */}
+        <section style={{ paddingTop: 64, borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 64 }}>
+          <p
+            style={{
+              fontSize:      13,
+              fontWeight:    600,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color:         'rgba(255,255,255,0.35)',
+              marginBottom:  32,
+            }}
+          >
+            How TailorCV works
+          </p>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {[
+              {
+                icon: '📄',
+                title: 'ATS Score (Free)',
+                body:  'We check keyword match, formatting, Naukri-specific fields, and content quality — 100-point breakdown.',
+              },
+              {
+                icon: '✏️',
+                title: 'AI Rewrite (₹49)',
+                body:  'Claude rewrites every section — summary, bullets, skills — using exact JD keywords. Never fabricates facts.',
+              },
+              {
+                icon: '⬇️',
+                title: 'DOCX Download',
+                body:  'Get a single-column ATS-safe DOCX ready to upload to Naukri. Plus a Naukri profile text block.',
+              },
+            ].map(item => (
+              <FeatureCard key={item.title} icon={item.icon} title={item.title} body={item.body} />
+            ))}
+          </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-white/[0.06] mt-[48px] py-[24px] px-4 text-center text-[13px] text-gray-400 dark:text-gray-500">
-        <p>TailorCV · Resumes uploaded are auto-deleted after 24h · No human review</p>
-        <p className="mt-1">Built for Indian job seekers · Naukri · LinkedIn · Company portals</p>
+      {/* ── Footer ──────────────────────────────────────────────────────────── */}
+      <footer
+        className="relative z-10"
+        style={{
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          marginTop: 48,
+          padding:   '24px 24px',
+          textAlign: 'center',
+          fontSize:  13,
+          color:     'rgba(255,255,255,0.3)',
+        }}
+      >
+        TailorCV · Resumes uploaded are auto-deleted after 24h · No human review
       </footer>
 
+      {/* Spinner keyframe */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+// ── Feature card — lifted out to use hover state cleanly ─────────────────────
+function FeatureCard({ icon, title, body }: { icon: string; title: string; body: string }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display:      'flex',
+        gap:          24,
+        background:   '#13131A',
+        border:       `1px solid ${hovered ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.07)'}`,
+        borderRadius: 16,
+        padding:      24,
+        transform:    hovered ? 'translateY(-2px)' : 'translateY(0)',
+        transition:   'all 0.2s ease',
+        cursor:       'default',
+      }}
+    >
+      <div
+        style={{
+          flexShrink:   0,
+          width:        40,
+          height:       40,
+          borderRadius: 10,
+          background:   'rgba(99,102,241,0.12)',
+          display:      'flex',
+          alignItems:   'center',
+          justifyContent: 'center',
+          fontSize:     20,
+        }}
+      >
+        {icon}
+      </div>
+      <div>
+        <p style={{ fontWeight: 600, fontSize: 15, color: 'rgba(255,255,255,0.9)', margin: 0 }}>
+          {title}
+        </p>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 6, lineHeight: 1.6 }}>
+          {body}
+        </p>
+      </div>
     </div>
   );
 }

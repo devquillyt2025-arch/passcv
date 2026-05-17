@@ -9,7 +9,9 @@ interface RewriteState {
   rewritten: RewrittenResume | null;
   edited: RewrittenResume | null;
   jd: ParsedJD | null;
+  _hasHydrated: boolean;
   
+  setHasHydrated: (state: boolean) => void;
   setOriginal: (original: ParsedResume | null) => void;
   setJdText: (jdText: string) => void;
   setScoreData: (data: {
@@ -39,7 +41,9 @@ export const useRewriteStore = create<RewriteState>()(
       rewritten: null,
       edited: null,
       jd: null,
+      _hasHydrated: false,
 
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
       setOriginal: (original) => set({ original }),
       setJdText: (jdText) => set({ jdText }),
       setScoreData: (data) => set({ ...data }),
@@ -50,6 +54,9 @@ export const useRewriteStore = create<RewriteState>()(
     {
       name: 'rewrite-storage', // name of the item in the storage
       storage: createJSONStorage(() => sessionStorage), // Use sessionStorage to clear when tab closes
+      onRehydrateStorage: () => (state) => {
+        if (state) state.setHasHydrated(true);
+      },
     }
   )
 );

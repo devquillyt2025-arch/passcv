@@ -142,6 +142,30 @@ export interface ResumeProject {
   endDate: string;
 }
 
+export interface ResumeCertification {
+  id: string;
+  name: string;
+  issuer: string;
+  issueDate: string;
+  expiryDate: string;
+  doesNotExpire: boolean;
+  credentialId: string;
+  credentialUrl: string;
+}
+
+export type LanguageProficiency =
+  | 'Native Speaker'
+  | 'Fluent'
+  | 'Professional Working Proficiency'
+  | 'Limited Working Proficiency'
+  | 'Elementary Proficiency';
+
+export interface ResumeLanguage {
+  id: string;
+  name: string;
+  proficiency: LanguageProficiency;
+}
+
 export interface ResumeData {
   contact: ResumeContact;
   summary: string;
@@ -149,4 +173,6 @@ export interface ResumeData {
   education: ResumeEducation[];
   skills: ResumeSkill[];
   projects: ResumeProject[];
+  certifications: ResumeCertification[];
+  languages: ResumeLanguage[];
 }

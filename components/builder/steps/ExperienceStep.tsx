@@ -2,8 +2,9 @@ import { useResumeStore } from '@/lib/store/useResumeStore';
 import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import MonthYearPicker from '@/components/builder/MonthYearPicker';
 
-export default function ExperienceStep() {
+export default function ExperienceStep({ headless = false }: { headless?: boolean }) {
   const experience = useResumeStore((state) => state.data.experience || []);
   const { addExperience, updateExperience, removeExperience, reorderExperience } = useResumeStore();
   const [expandedId, setExpandedId] = useState<string | null>(experience[0]?.id || null);
@@ -15,14 +16,16 @@ export default function ExperienceStep() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Work Experience</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Show your relevant experience (last 10 years). Use bullet points to note your achievements.
-          </p>
+      {!headless && (
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Work Experience</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Show your relevant experience (last 10 years). Use bullet points to note your achievements.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="experience-list">
@@ -83,7 +86,7 @@ export default function ExperienceStep() {
                                   type="text"
                                   value={exp.position}
                                   onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. Frontend Developer"
                                 />
                               </div>
@@ -93,7 +96,7 @@ export default function ExperienceStep() {
                                   type="text"
                                   value={exp.company}
                                   onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. Google"
                                 />
                               </div>
@@ -106,29 +109,32 @@ export default function ExperienceStep() {
                                   type="text"
                                   value={exp.location}
                                   onChange={(e) => updateExperience(exp.id, { location: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. New York, NY"
                                 />
                               </div>
                               <div className="grid grid-cols-2 gap-2">
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                  <input
-                                    type="month"
+                                  <MonthYearPicker
                                     value={exp.startDate}
-                                    onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                    onChange={(v) => updateExperience(exp.id, { startDate: v })}
+                                    placeholder="Start date"
                                   />
                                 </div>
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                  <input
-                                    type="month"
-                                    value={exp.endDate}
-                                    disabled={exp.currentlyWorking}
-                                    onChange={(e) => updateExperience(exp.id, { endDate: e.target.value })}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none disabled:bg-gray-100 disabled:text-gray-400"
-                                  />
+                                  {exp.currentlyWorking ? (
+                                    <div className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-400 bg-gray-50">
+                                      Present
+                                    </div>
+                                  ) : (
+                                    <MonthYearPicker
+                                      value={exp.endDate}
+                                      onChange={(v) => updateExperience(exp.id, { endDate: v })}
+                                      placeholder="End date"
+                                    />
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -180,7 +186,7 @@ export default function ExperienceStep() {
                               <textarea
                                 value={exp.description}
                                 onChange={(e) => updateExperience(exp.id, { description: e.target.value })}
-                                className="w-full min-h-[150px] rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                className="w-full min-h-[150px] rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                 placeholder="• Developed new features...&#10;• Improved performance by..."
                               />
                               <p className="text-xs text-gray-500 mt-1">Separate bullets with a new line or a bullet character (•).</p>

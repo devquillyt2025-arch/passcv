@@ -30,7 +30,7 @@ export default function ATSScoreWidget() {
   }
 
   return (
-    <div className="absolute top-4 right-4 z-10 w-80 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden transition-all duration-300">
+    <div className="w-72 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300">
       <div 
         className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${expanded ? 'border-b border-gray-200' : ''}`}
         onClick={() => setExpanded(!expanded)}

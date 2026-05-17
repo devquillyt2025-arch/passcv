@@ -11,17 +11,17 @@ import WizardProgress from '@/components/WizardProgress';
 
 export default function RewritePage() {
   const router = useRouter();
-  const { original, rewritten, edited, jd, score, jdText, setEdited } = useRewriteStore();
+  const { original, rewritten, edited, jd, score, jdText, setEdited, _hasHydrated } = useRewriteStore();
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
 
   useEffect(() => {
-    if (!original || !rewritten || !edited || !jd) {
+    if (_hasHydrated && (!original || !rewritten || !edited || !jd)) {
       router.push('/');
     }
-  }, [original, rewritten, edited, jd, router]);
+  }, [original, rewritten, edited, jd, router, _hasHydrated]);
 
-  if (!original || !rewritten || !edited || !jd) {
+  if (!_hasHydrated || !original || !rewritten || !edited || !jd) {
     return null; // Will redirect
   }
 

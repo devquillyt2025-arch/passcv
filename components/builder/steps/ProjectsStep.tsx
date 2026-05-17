@@ -2,8 +2,9 @@ import { useResumeStore } from '@/lib/store/useResumeStore';
 import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import MonthYearPicker from '@/components/builder/MonthYearPicker';
 
-export default function ProjectsStep() {
+export default function ProjectsStep({ headless = false }: { headless?: boolean }) {
   const projects = useResumeStore((state) => state.data.projects || []);
   const { addProject, updateProject, removeProject, reorderProjects } = useResumeStore();
   const [expandedId, setExpandedId] = useState<string | null>(projects[0]?.id || null);
@@ -15,14 +16,16 @@ export default function ProjectsStep() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Highlight personal or professional projects that showcase your skills.
-          </p>
+      {!headless && (
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Highlight personal or professional projects that showcase your skills.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="projects-list">
@@ -83,7 +86,7 @@ export default function ProjectsStep() {
                                   type="text"
                                   value={project.name}
                                   onChange={(e) => updateProject(project.id, { name: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. E-Commerce Dashboard"
                                 />
                               </div>
@@ -93,7 +96,7 @@ export default function ProjectsStep() {
                                   type="text"
                                   value={project.url}
                                   onChange={(e) => updateProject(project.id, { url: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                   placeholder="e.g. github.com/my-project"
                                 />
                               </div>
@@ -102,20 +105,18 @@ export default function ProjectsStep() {
                             <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                <input
-                                  type="month"
+                                <MonthYearPicker
                                   value={project.startDate}
-                                  onChange={(e) => updateProject(project.id, { startDate: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  onChange={(v) => updateProject(project.id, { startDate: v })}
+                                  placeholder="Start date"
                                 />
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                <input
-                                  type="month"
+                                <MonthYearPicker
                                   value={project.endDate}
-                                  onChange={(e) => updateProject(project.id, { endDate: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                  onChange={(v) => updateProject(project.id, { endDate: v })}
+                                  placeholder="End date"
                                 />
                               </div>
                             </div>
@@ -127,7 +128,7 @@ export default function ProjectsStep() {
                               <textarea
                                 value={project.description}
                                 onChange={(e) => updateProject(project.id, { description: e.target.value })}
-                                className="w-full min-h-[120px] rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 outline-none"
+                                className="w-full min-h-[120px] rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                                 placeholder="• Built with React and Node.js...&#10;• Achieved 10k daily active users..."
                               />
                             </div>

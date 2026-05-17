@@ -1,89 +1,44 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useResumeStore } from '@/lib/store/useResumeStore';
-import { createClient } from '@/utils/supabase/client';
-import ResumeCanvas from '@/components/builder/ResumeCanvas';
+import { useAutosaveSync } from '@/hooks/useAutosaveSync';
+import EditorPanel from '@/components/builder/EditorPanel';
+import ResumePreview from '@/components/builder/ResumePreview';
 import PreviewModal from '@/components/builder/PreviewModal';
-import PersonalInfo from '@/components/builder/steps/PersonalInfo';
-import SummaryStep from '@/components/builder/steps/SummaryStep';
-import SkillsStep from '@/components/builder/steps/SkillsStep';
-import ExperienceStep from '@/components/builder/steps/ExperienceStep';
-import EducationStep from '@/components/builder/steps/EducationStep';
-import ProjectsStep from '@/components/builder/steps/ProjectsStep';
-import ATSScoreWidget from '@/components/builder/ATSScoreWidget';
 import ImportResumeModal from '@/components/builder/ImportResumeModal';
-import { Loader2, CheckCircle2 } from 'lucide-react';
-
-const STEPS = [
-  { id: 'personal',       label: 'Personal Info' },
-  { id: 'summary',        label: 'Summary' },
-  { id: 'skills',         label: 'Skills' },
-  { id: 'experience',     label: 'Experience' },
-  { id: 'education',      label: 'Education' },
-  { id: 'projects',       label: 'Projects' },
-  { id: 'preview',        label: 'Preview & Download' },
-];
+import ATSScoreWidget from '@/components/builder/ATSScoreWidget';
+import ResumeStatsWidget from '@/components/builder/ResumeStatsWidget';
+import {
+  Loader2,
+  CheckCircle2,
+  Download,
+  Eye,
+  ArrowLeft,
+  Upload,
+} from 'lucide-react';
 
 export default function BuilderPage() {
-  const [step, setStep] = useState(0);
-  const { data, resumeId, templateId, setTemplateId } = useResumeStore();
+  const { data, resumeId, templateId, setTemplateId, _hasHydrated, sectionOrder } = useResumeStore();
+  const { saveStatus } = useAutosaveSync(resumeId, data);
+
   const [showModal, setShowModal] = useState(false);
   const [showImport, setShowImport] = useState(false);
-
-  // Rehydrate zustand persist store after mount to avoid SSR/client mismatch
-  useEffect(() => {
-    useResumeStore.persist.rehydrate();
-  }, []);
   const [downloading, setDownloading] = useState(false);
   const [dlError, setDlError] = useState('');
-  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
-  const supabase = createClient();
-  const initialRender = useRef(true);
-
-  const isLastStep = step === STEPS.length - 1;
-
-  useEffect(() => {
-    if (initialRender.current) {
-      initialRender.current = false;
-      return;
-    }
-
-    if (!resumeId) return;
-
-    setSaveStatus('saving');
-    const timer = setTimeout(async () => {
-      const { error } = await supabase
-        .from('resumes')
-        .update({ 
-          data: data,
-          name: data.contact.firstName ? `${data.contact.firstName} ${data.contact.lastName} Resume` : 'Untitled Resume',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', resumeId);
-
-      if (error) {
-        console.error('Error auto-saving:', error);
-        setSaveStatus('error');
-      } else {
-        setSaveStatus('saved');
-      }
-    }, 1000); // 1-second debounce
-
-    return () => clearTimeout(timer);
-  }, [data, resumeId, supabase]);
 
   const handleDownload = async () => {
     setDownloading(true);
     setDlError('');
     try {
       const { generateBuilderPdfBlob } = await import('@/lib/resumePdf');
-      const blob = await generateBuilderPdfBlob(data, templateId);
+      const blob = await generateBuilderPdfBlob(data, templateId, sectionOrder);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const fullName = [data.contact.firstName, data.contact.lastName].filter(Boolean).join('_') || 'Resume';
+      const fullName =
+        [data.contact.firstName, data.contact.lastName].filter(Boolean).join('_') || 'Resume';
       a.download = `${fullName}_TailorCV.pdf`;
       a.click();
       URL.revokeObjectURL(url);
@@ -94,224 +49,153 @@ export default function BuilderPage() {
     }
   };
 
+  if (!_hasHydrated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Nav */}
-      <nav className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-gray-500 hover:text-gray-900 transition-colors">
-            ← Dashboard
+    <div className="h-screen flex flex-col overflow-hidden bg-white">
+      {/* ── Toolbar ── */}
+      <header className="h-14 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-3 z-20">
+        {/* Left group */}
+        <div className="flex items-center gap-3 shrink-0">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Dashboard
           </Link>
-          <div className="w-px h-4 bg-gray-300"></div>
-          <span className="text-lg font-bold text-indigo-700 tracking-tight">
-            TailorCV
-          </span>
-          <div className="w-px h-4 bg-gray-300"></div>
+          <div className="w-px h-4 bg-gray-200" />
+          <span className="text-sm font-bold text-indigo-700 tracking-tight">TailorCV</span>
+          <div className="w-px h-4 bg-gray-200" />
           <button
             onClick={() => setShowImport(true)}
-            className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-700 transition-colors"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            Import Resume
+            <Upload className="w-3.5 h-3.5" />
+            Import
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          {saveStatus === 'saving' && (
-            <span className="flex items-center gap-1.5 text-amber-600">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-green-600">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Saved to cloud
-            </span>
-          )}
-          {saveStatus === 'error' && (
-            <span className="text-red-500">Error saving to cloud</span>
-          )}
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Template switcher — center */}
+        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 shrink-0">
+          <button
+            onClick={() => setTemplateId('classic')}
+            className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
+              templateId === 'classic'
+                ? 'bg-white text-indigo-700 shadow-sm'
+                : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            Classic
+          </button>
+          <button
+            onClick={() => setTemplateId('modern')}
+            className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
+              templateId === 'modern'
+                ? 'bg-white text-indigo-700 shadow-sm'
+                : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            Modern
+          </button>
         </div>
-      </nav>
 
-      {/* Step bar */}
-      <div className="bg-white border-b border-gray-200 px-4">
-        <div className="max-w-7xl mx-auto py-2.5 flex gap-1 overflow-x-auto">
-          {STEPS.map((s, i) => {
-            const state = i === step ? 'active' : i < step ? 'done' : 'upcoming';
-            return (
-              <button
-                key={s.id}
-                onClick={() => setStep(i)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                  state === 'active'
-                    ? 'bg-indigo-600 text-white'
-                    : state === 'done'
-                    ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                <span
-                  className={`h-4 w-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                    state === 'active'
-                      ? 'bg-white text-indigo-600'
-                      : state === 'done'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-200 text-gray-500'
-                  }`}
-                >
-                  {state === 'done' ? '✓' : i + 1}
-                </span>
-                {s.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        {/* Spacer */}
+        <div className="flex-1" />
 
-      {/* Main two-column layout */}
-      <div className="max-w-7xl mx-auto px-4 py-6 flex gap-5 items-start">
-        {/* Left — form panel */}
-        <div className="w-[55%] min-w-0">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-            <div className="p-6">
-              {step === 0 && <PersonalInfo />}
-              {step === 1 && <SummaryStep />}
-              {step === 2 && <SkillsStep />}
-              {step === 3 && <ExperienceStep />}
-              {step === 4 && <EducationStep />}
-              {step === 5 && <ProjectsStep />}
-              {step === 6 && (
-                <div className="space-y-5">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Preview & Download</h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Review your resume in the panel on the right. Click on your name, summary, or
-                      any bullet point in the preview to edit it directly.
-                    </p>
-                  </div>
-
-                  {dlError && (
-                    <p className="text-sm text-red-600 bg-red-50 rounded-lg px-4 py-2">{dlError}</p>
-                  )}
-
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-gray-700">Resume Template</label>
-                      <select 
-                        value={templateId}
-                        onChange={(e) => setTemplateId(e.target.value as 'classic' | 'modern')}
-                        className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
-                      >
-                        <option value="classic">Classic ATS (Standard Typography)</option>
-                        <option value="modern">Modern ATS (Roboto Typography)</option>
-                      </select>
-                    </div>
-
-                    <button
-                      onClick={() => setShowModal(true)}
-                      className="flex items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-indigo-50 px-5 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      Preview PDF
-                    </button>
-
-                    <button
-                      onClick={handleDownload}
-                      disabled={downloading}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
-                    >
-                      {downloading ? (
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      ) : (
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      )}
-                      {downloading ? 'Generating…' : 'Download PDF'}
-                    </button>
-                  </div>
-
-                  <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
-                    <p className="text-xs text-amber-700">
-                      <strong>Tip:</strong> The highlighted fields in the live preview are editable
-                      at any step — click them to make quick changes without navigating back.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Step navigation */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-              <button
-                onClick={() => setStep(s => s - 1)}
-                disabled={step === 0}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                ← Back
-              </button>
-
-              <span className="text-xs text-gray-400">
-                Step {step + 1} of {STEPS.length}
+        {/* Right group */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Save status */}
+          <div className="text-xs min-w-[70px] text-right">
+            {saveStatus === 'saving' && (
+              <span className="flex items-center gap-1 text-amber-600 justify-end">
+                <Loader2 className="w-3 h-3 animate-spin" /> Saving…
               </span>
-
-              {!isLastStep ? (
-                <button
-                  onClick={() => setStep(s => s + 1)}
-                  className="flex items-center gap-1.5 px-5 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  Next →
-                </button>
-              ) : (
-                <div className="w-20" />
-              )}
-            </div>
+            )}
+            {saveStatus === 'saved' && (
+              <span className="flex items-center gap-1 text-green-600 justify-end">
+                <CheckCircle2 className="w-3 h-3" /> Saved
+              </span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="text-red-500">Save error</span>
+            )}
           </div>
+
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            Preview
+          </button>
+
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
+            {downloading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5" />
+            )}
+            {downloading ? 'Generating…' : 'Download PDF'}
+          </button>
+        </div>
+      </header>
+
+      {/* Error bar */}
+      {dlError && (
+        <div className="shrink-0 bg-red-50 border-b border-red-200 px-4 py-2 text-xs text-red-600 text-center">
+          {dlError}
+        </div>
+      )}
+
+      {/* ── Split pane ── */}
+      <div className="flex flex-1 min-h-0">
+        {/* Left — editor */}
+        <div className="w-[50%] overflow-y-auto bg-gray-50 border-r border-gray-200">
+          <EditorPanel />
         </div>
 
         {/* Right — live preview */}
-        <div className="w-[45%] min-w-0">
-          <div className="sticky top-20">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                Live Preview
-              </span>
-              <span className="text-xs text-amber-600 font-medium">✏ Editable</span>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden relative">
-              <ATSScoreWidget />
-              <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 9rem)' }}>
-                <div className="p-6">
-                  <ResumeCanvas
-                    editable={true}
-                  />
-                </div>
-              </div>
-            </div>
+        <div className="w-[50%] overflow-y-auto bg-[#DCDDE1] flex flex-col items-center py-8 px-4 gap-3">
+          {/* Widgets float above the paper */}
+          <div className="w-[680px] flex justify-end gap-3">
+            <ResumeStatsWidget />
+            <ATSScoreWidget />
           </div>
+
+          {/* A4 paper */}
+          <ResumePreview />
+
+          {/* Bottom padding buffer */}
+          <div className="h-8" />
         </div>
       </div>
 
-      {showImport && (
-        <ImportResumeModal onClose={() => setShowImport(false)} />
-      )}
+      {/* Modals */}
+      {showImport && <ImportResumeModal onClose={() => setShowImport(false)} />}
 
       {showModal && (
         <PreviewModal
           data={data}
           templateId={templateId}
           onClose={() => setShowModal(false)}
-          onDownload={() => { setShowModal(false); handleDownload(); }}
+          onDownload={() => {
+            setShowModal(false);
+            handleDownload();
+          }}
         />
       )}
     </div>

@@ -47,7 +47,9 @@ function adaptToResumeData(input: ResumeInput): ResumeData {
       name: skill,
       level: ''
     })),
-    projects: []
+    projects: [],
+    certifications: [],
+    languages: [],
   };
 }
 
@@ -56,9 +58,13 @@ export async function generateResumePdfBlob(resume: ResumeInput): Promise<Blob> 
   return generateBuilderPdfBlob(data, 'classic');
 }
 
-export async function generateBuilderPdfBlob(data: ResumeData, templateId: 'classic' | 'modern' = 'classic'): Promise<Blob> {
+export async function generateBuilderPdfBlob(
+  data: ResumeData,
+  templateId: 'classic' | 'modern' = 'classic',
+  sectionOrder?: string[]
+): Promise<Blob> {
   const TemplateComponent = templateId === 'modern' ? ModernTemplate : ClassicTemplate;
-  const doc = React.createElement(TemplateComponent, { data });
+  const doc = React.createElement(TemplateComponent, { data, sectionOrder });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const asPdf = pdf(doc as any);
   const blob = await asPdf.toBlob();

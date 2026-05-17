@@ -1,6 +1,6 @@
 import { useResumeStore } from '@/lib/store/useResumeStore';
 
-export default function PersonalInfo() {
+export default function PersonalInfo({ headless = false }: { headless?: boolean }) {
   const { contact } = useResumeStore((state) => state.data);
   const updateContact = useResumeStore((state) => state.updateContact);
 
@@ -10,10 +10,12 @@ export default function PersonalInfo() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
-        <p className="text-sm text-gray-500 mt-1">Make sure recruiters can easily reach you.</p>
-      </div>
+      {!headless && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
+          <p className="text-sm text-gray-500 mt-1">Make sure recruiters can easily reach you.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -23,7 +25,7 @@ export default function PersonalInfo() {
             name="firstName"
             value={contact.firstName}
             onChange={handleChange}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
             placeholder="John"
           />
         </div>
@@ -34,7 +36,7 @@ export default function PersonalInfo() {
             name="lastName"
             value={contact.lastName}
             onChange={handleChange}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
             placeholder="Doe"
           />
         </div>
@@ -47,7 +49,7 @@ export default function PersonalInfo() {
           name="jobTitle"
           value={contact.jobTitle}
           onChange={handleChange}
-          className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
           placeholder="e.g. Senior Software Engineer"
         />
       </div>
@@ -60,7 +62,7 @@ export default function PersonalInfo() {
             name="email"
             value={contact.email}
             onChange={handleChange}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
             placeholder="john@example.com"
           />
         </div>
@@ -71,7 +73,7 @@ export default function PersonalInfo() {
             name="phone"
             value={contact.phone}
             onChange={handleChange}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
             placeholder="+1 (555) 000-0000"
           />
         </div>
@@ -85,7 +87,7 @@ export default function PersonalInfo() {
             name="city"
             value={contact.city}
             onChange={handleChange}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
             placeholder="San Francisco"
           />
         </div>
@@ -96,7 +98,7 @@ export default function PersonalInfo() {
             name="country"
             value={contact.country}
             onChange={handleChange}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
             placeholder="USA"
           />
         </div>
@@ -110,7 +112,7 @@ export default function PersonalInfo() {
             name="linkedin"
             value={contact.linkedin}
             onChange={handleChange}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
             placeholder="linkedin.com/in/johndoe"
           />
         </div>
@@ -121,7 +123,7 @@ export default function PersonalInfo() {
             name="github"
             value={contact.github}
             onChange={handleChange}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
             placeholder="github.com/johndoe"
           />
         </div>
