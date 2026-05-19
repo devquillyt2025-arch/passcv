@@ -82,3 +82,97 @@ export interface RewriteResult {
   original: ParsedResume;
   rewritten: RewrittenResume;
 }
+
+export interface NaukriProfile {
+  headline: string;   // max 250 chars
+  summary: string;    // max 3000 chars
+  keySkills: string[]; // 15-20 skills
+}
+
+// --- New Resume Builder Types ---
+
+export interface ResumeContact {
+  firstName: string;
+  lastName: string;
+  jobTitle: string;
+  email: string;
+  phone: string;
+  city: string;
+  country: string;
+  linkedin: string;
+  github: string;
+  website: string;
+}
+
+export interface ResumeExperience {
+  id: string;
+  company: string;
+  position: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  currentlyWorking: boolean;
+  description: string; // This can be multiple lines of bullets
+}
+
+export interface ResumeEducation {
+  id: string;
+  institution: string;
+  degree: string;
+  field: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  currentlyStudying: boolean;
+  score: string;
+}
+
+export interface ResumeSkill {
+  id: string;
+  name: string;
+  level: string; // e.g., Beginner, Intermediate, Expert
+}
+
+export interface ResumeProject {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface ResumeCertification {
+  id: string;
+  name: string;
+  issuer: string;
+  issueDate: string;
+  expiryDate: string;
+  doesNotExpire: boolean;
+  credentialId: string;
+  credentialUrl: string;
+}
+
+export type LanguageProficiency =
+  | 'Native Speaker'
+  | 'Fluent'
+  | 'Professional Working Proficiency'
+  | 'Limited Working Proficiency'
+  | 'Elementary Proficiency';
+
+export interface ResumeLanguage {
+  id: string;
+  name: string;
+  proficiency: LanguageProficiency;
+}
+
+export interface ResumeData {
+  contact: ResumeContact;
+  summary: string;
+  experience: ResumeExperience[];
+  education: ResumeEducation[];
+  skills: ResumeSkill[];
+  projects: ResumeProject[];
+  certifications: ResumeCertification[];
+  languages: ResumeLanguage[];
+}

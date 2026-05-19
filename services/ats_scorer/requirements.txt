@@ -1,0 +1,18 @@
+# ATS Scorer service dependencies
+# Install: pip install -r requirements.txt
+# After install, download the spaCy model:
+#   python -m spacy download en_core_web_sm
+
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+
+# NLP & embeddings
+sentence-transformers>=2.7.0   # pulls in torch (CPU) — ~700 MB; use container image for Lambda
+spacy>=3.7.0                   # en_core_web_sm downloaded separately (see above)
+numpy>=1.26.0
+
+# AWS Lambda adapter
+mangum>=0.17.0
+
+# Pydantic v2 (FastAPI installs this, listed for explicitness)
+pydantic>=2.7.0

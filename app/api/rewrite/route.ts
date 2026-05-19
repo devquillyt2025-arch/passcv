@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { parseJD } from '@/lib/scoring';
 import { rewriteResume } from '@/lib/claude';
 import { ParsedResume } from '@/lib/types';
+import { ParsedResumeSchema } from '@/lib/schemas';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,14 @@ export async function POST(req: NextRequest) {
 
     if (!resume || !jdText) {
       return NextResponse.json({ error: 'Missing resume or jdText' }, { status: 400 });
+    }
+
+    const parseResult = ParsedResumeSchema.safeParse(resume);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid resume data structure', details: parseResult.error.format() },
+        { status: 400 }
+      );
     }
 
     const jd = parseJD(jdText);
