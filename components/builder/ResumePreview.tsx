@@ -99,7 +99,7 @@ function HeaderBlock({ data, t, templateId }: { data: ResumeData; t: Theme; temp
   return (
     <>
       <div style={{ textAlign: t.nameAlign }}>
-        <h1 style={{ margin: 0, fontSize: t.nameSize, fontWeight: 700, color: t.nameColor, lineHeight: 1.15, letterSpacing: templateId === 'modern' ? '-0.01em' : 0 }}>
+        <h1 style={{ margin: 0, fontSize: t.nameSize, fontWeight: 700, color: t.nameColor, lineHeight: 1.25, letterSpacing: templateId === 'modern' ? '-0.01em' : 0 }}>
           {fullName || <span style={{ color: '#D1D5DB', fontStyle: 'italic', fontSize: 18 }}>Your Name</span>}
         </h1>
         {contact.jobTitle && (
@@ -418,14 +418,14 @@ export default function ResumePreview() {
           }}
         >
           {blocks.map((block, i) => (
-            // overflow:hidden establishes a block-formatting context so child margins
-            // (e.g. SectionHeading marginTop:18) are trapped inside the wrapper.
-            // This makes offsetHeight accurate — without it, margins collapse outward
-            // and offsetHeight underreports by up to 18px per block.
+            // display:flow-root establishes a BFC so child margins (e.g. SectionHeading
+            // marginTop:18) are trapped inside the wrapper, keeping offsetHeight accurate.
+            // Unlike overflow:hidden it does NOT clip content, so the name h1's
+            // ascenders are never cut off at the top edge of the first block.
             <div
               key={block.id}
               ref={(el) => { measureRefs.current[i] = el; }}
-              style={{ overflow: 'hidden' }}
+              style={{ display: 'flow-root' }}
             >
               {block.node}
             </div>
@@ -469,9 +469,8 @@ export default function ResumePreview() {
             {blockIndices
               .filter((i) => i < blocks.length)
               .map((i) => (
-                // Same overflow:hidden BFC as measurement div — ensures rendering
-                // matches what was measured so no block overflows its page box.
-                <div key={blocks[i].id} style={{ overflow: 'hidden' }}>
+                // display:flow-root matches the measurement BFC without clipping glyphs.
+                <div key={blocks[i].id} style={{ display: 'flow-root' }}>
                   {blocks[i].node}
                 </div>
               ))}

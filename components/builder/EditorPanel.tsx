@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useUIStore } from '@/lib/store/useUIStore';
 import PersonalInfo from './steps/PersonalInfo';
 import SummaryStep from './steps/SummaryStep';
 import SkillsStep from './steps/SkillsStep';
@@ -35,6 +36,7 @@ const SECTION_META: Record<string, { label: string; icon: React.ElementType }> =
 };
 
 interface SectionCardProps {
+  id?: string;
   title: string;
   icon: React.ElementType;
   count?: number;
@@ -48,6 +50,7 @@ interface SectionCardProps {
 }
 
 function SectionCard({
+  id,
   title,
   icon: Icon,
   count,
@@ -61,6 +64,7 @@ function SectionCard({
 }: SectionCardProps) {
   return (
     <div
+      id={id}
       className={`bg-white rounded-xl border overflow-hidden shadow-sm transition-colors ${
         isOpen ? 'border-indigo-200' : 'border-gray-200'
       }`}
@@ -133,7 +137,26 @@ const ALL_SECTIONS = new Set(['personal', 'summary', 'skills', 'experience', 'ed
 
 export default function EditorPanel() {
   const { data, sectionOrder, setSectionOrder } = useResumeStore();
+  const { pendingSectionFocus, clearSectionFocus } = useUIStore();
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(ALL_SECTIONS));
+
+  // Respond to external navigation requests (from dashboard cards)
+  useEffect(() => {
+    if (!pendingSectionFocus) return;
+    const id = pendingSectionFocus;
+    // Open the target accordion first, then scroll after React commits
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    clearSectionFocus();
+    const t = setTimeout(() => {
+      document.getElementById(`editor-section-${id}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+    return () => clearTimeout(t);
+  }, [pendingSectionFocus, clearSectionFocus]);
 
   const toggleSection = (id: string) => {
     setOpenSections((prev) => {
@@ -158,6 +181,7 @@ export default function EditorPanel() {
     <div className="p-4 space-y-3 pb-16">
       {/* Personal Info — always first, not reorderable */}
       <SectionCard
+        id="editor-section-personal"
         title="Personal Info"
         icon={User}
         isOpen={openSections.has('personal')}
@@ -183,6 +207,7 @@ export default function EditorPanel() {
         return (
           <SectionCard
             key={sectionId}
+            id={`editor-section-${sectionId}`}
             title={meta.label}
             icon={meta.icon}
             count={countMap[sectionId]}

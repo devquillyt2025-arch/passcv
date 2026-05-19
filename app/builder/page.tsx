@@ -10,6 +10,10 @@ import PreviewModal from '@/components/builder/PreviewModal';
 import ImportResumeModal from '@/components/builder/ImportResumeModal';
 import ATSScoreWidget from '@/components/builder/ATSScoreWidget';
 import ResumeStatsWidget from '@/components/builder/ResumeStatsWidget';
+import ATSKeywordScanner from '@/components/builder/ATSKeywordScanner';
+import ScoreBreakdownWidget from '@/components/builder/ScoreBreakdownWidget';
+import ResumeHealthWidget from '@/components/builder/ResumeHealthWidget';
+import { useUIStore } from '@/lib/store/useUIStore';
 import {
   Loader2,
   CheckCircle2,
@@ -22,6 +26,8 @@ import {
 export default function BuilderPage() {
   const { data, resumeId, templateId, setTemplateId, _hasHydrated, sectionOrder } = useResumeStore();
   const { saveStatus } = useAutosaveSync(resumeId, data);
+
+  const { jdText, setJdText } = useUIStore();
 
   const [showModal, setShowModal] = useState(false);
   const [showImport, setShowImport] = useState(false);
@@ -170,11 +176,24 @@ export default function BuilderPage() {
 
         {/* Right — live preview */}
         <div className="w-[50%] overflow-y-auto bg-[#DCDDE1] flex flex-col items-center py-8 px-4 gap-3">
-          {/* Widgets float above the paper */}
-          <div className="w-[680px] flex justify-end gap-3">
-            <ResumeStatsWidget />
-            <ATSScoreWidget />
+          {/* Row 1: three equal columns — Stats | Insights | ATS Score */}
+          <div className="w-[680px] flex gap-3 items-stretch">
+            <div className="flex-1 min-w-0 h-full">
+              <ResumeStatsWidget className="w-full h-full" />
+            </div>
+            <div className="flex-1 min-w-0 h-full">
+              <ResumeHealthWidget className="w-full h-full" />
+            </div>
+            <div className="flex-1 min-w-0 h-full">
+              <ATSScoreWidget className="w-full h-full" jdText={jdText} onJdChange={setJdText} />
+            </div>
           </div>
+
+          {/* Row 2: Score Breakdown — full width, 4-column tile grid */}
+          <ScoreBreakdownWidget jdText={jdText} />
+
+          {/* Row 3: ATS keyword scanner — full width, collapsible */}
+          <ATSKeywordScanner />
 
           {/* A4 paper */}
           <ResumePreview />

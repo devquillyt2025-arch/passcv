@@ -13,6 +13,17 @@ function fmtDate(d: string): string {
   return d;
 }
 
+// Replace common Unicode characters that confuse ATS parsers with ASCII equivalents.
+function sanitize(text: string): string {
+  return text
+    .replace(/[‘’]/g, "'")   // smart single quotes
+    .replace(/[“”]/g, '"')   // smart double quotes
+    .replace(/—/g, '-')           // em dash
+    .replace(/–/g, '-')           // en dash
+    .replace(/…/g, '...')         // ellipsis
+    .replace(/ /g, ' ');          // non-breaking space
+}
+
 Font.register({
   family: 'Roboto',
   fonts: [
@@ -34,8 +45,9 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
   },
   header: {
-    marginBottom: 14,
+    paddingTop: 4,
     paddingBottom: 10,
+    marginBottom: 14,
     borderBottomWidth: 2,
     borderBottomColor: '#2563eb',
   },
@@ -43,14 +55,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 700,
     color: '#1e3a8a',
-    marginBottom: 2,
-    letterSpacing: 0.5,
+    marginBottom: 6,
+    lineHeight: 1.2,
   },
   jobTitle: {
     fontSize: 12,
     fontWeight: 500,
     color: '#4b5563',
-    marginBottom: 4,
+    marginBottom: 5,
   },
   contact: {
     fontSize: 9,
@@ -124,7 +136,7 @@ const styles = StyleSheet.create({
   bullet: {
     width: 10,
     fontSize: 10,
-    color: '#2563eb',
+    color: '#374151',
     flexShrink: 0,
   },
   bulletText: {
@@ -170,8 +182,8 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <View style={styles.header} wrap={false}>
           {fullName && <Text style={styles.name}>{fullName}</Text>}
-          {contact.jobTitle && <Text style={styles.jobTitle}>{contact.jobTitle}</Text>}
-          {contactParts.length > 0 && <Text style={styles.contact}>{contactParts.join('  •  ')}</Text>}
+          {contact.jobTitle && <Text style={styles.jobTitle}>{sanitize(contact.jobTitle)}</Text>}
+          {contactParts.length > 0 && <Text style={styles.contact}>{contactParts.join('  |  ')}</Text>}
         </View>
 
         {/* ── Sections in user-specified order ────────────────────────────── */}
@@ -183,7 +195,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
             return (
               <View key="summary" wrap={false}>
                 <Text style={styles.sectionTitle}>Summary</Text>
-                <Text style={styles.summary}>{summary}</Text>
+                <Text style={styles.summary}>{sanitize(summary)}</Text>
               </View>
             );
           }
@@ -194,7 +206,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
             return (
               <View key="skills" wrap={false}>
                 <Text style={styles.sectionTitle}>Skills</Text>
-                <Text style={styles.skillText}>{skills.map(s => s.name).join('  •  ')}</Text>
+                <Text style={styles.skillText}>{skills.map(s => sanitize(s.name)).join(', ')}</Text>
               </View>
             );
           }
@@ -208,11 +220,11 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                 {experience.map((exp, idx) => {
                   const bullets = exp.description
                     .split('\n').map(b => b.trim()).filter(Boolean)
-                    .map(b => b.replace(/^[-•]\s*/, ''));
+                    .map(b => sanitize(b.replace(/^[-•]\s*/, '')));
                   const dateStr = [
                     fmtDate(exp.startDate),
                     exp.currentlyWorking ? 'Present' : fmtDate(exp.endDate),
-                  ].filter(Boolean).join(' – ');
+                  ].filter(Boolean).join(' - ');
                   const rightStr = [dateStr, exp.location].filter(Boolean).join('  |  ');
 
                   return (
@@ -221,8 +233,8 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
-                            <Text style={styles.title}>{exp.position}</Text>
-                            {exp.company ? <Text style={styles.company}>— {exp.company}</Text> : null}
+                            <Text style={styles.title}>{sanitize(exp.position)}</Text>
+                            {exp.company ? <Text style={styles.company}>- {sanitize(exp.company)}</Text> : null}
                           </View>
                           {rightStr ? <Text style={styles.dateLocation}>{rightStr}</Text> : null}
                         </View>
@@ -230,7 +242,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                           <View style={styles.bulletList}>
                             {bullets.map((bullet, bIdx) => (
                               <View key={bIdx} style={styles.bulletPoint}>
-                                <Text style={styles.bullet}>•</Text>
+                                <Text style={styles.bullet}>-</Text>
                                 <Text style={styles.bulletText}>{bullet}</Text>
                               </View>
                             ))}
@@ -251,11 +263,11 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
               // eslint-disable-next-line react/jsx-no-useless-fragment
               <>
                 {education.map((edu, idx) => {
-                  const deg = [edu.degree, edu.field ? `in ${edu.field}` : ''].filter(Boolean).join(' ');
+                  const deg = sanitize([edu.degree, edu.field ? `in ${edu.field}` : ''].filter(Boolean).join(' '));
                   const dateStr = [
                     fmtDate(edu.startDate),
                     edu.currentlyStudying ? 'Present' : fmtDate(edu.endDate),
-                  ].filter(Boolean).join(' – ');
+                  ].filter(Boolean).join(' - ');
                   const rightStr = [dateStr, edu.location].filter(Boolean).join('  |  ');
 
                   return (
@@ -265,7 +277,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
                             {deg ? <Text style={styles.title}>{deg}</Text> : null}
-                            {edu.institution ? <Text style={styles.company}>— {edu.institution}</Text> : null}
+                            {edu.institution ? <Text style={styles.company}>- {sanitize(edu.institution)}</Text> : null}
                           </View>
                           {rightStr ? <Text style={styles.dateLocation}>{rightStr}</Text> : null}
                         </View>
@@ -288,7 +300,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                   const dateStr = [
                     fmtDate(cert.issueDate),
                     cert.doesNotExpire ? 'No Expiry' : fmtDate(cert.expiryDate),
-                  ].filter(Boolean).join(' – ');
+                  ].filter(Boolean).join(' - ');
                   const meta = [
                     cert.credentialId ? `ID: ${cert.credentialId}` : '',
                     cert.credentialUrl || '',
@@ -300,8 +312,8 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
-                            <Text style={styles.title}>{cert.name}</Text>
-                            {cert.issuer ? <Text style={styles.company}>— {cert.issuer}</Text> : null}
+                            <Text style={styles.title}>{sanitize(cert.name)}</Text>
+                            {cert.issuer ? <Text style={styles.company}>- {sanitize(cert.issuer)}</Text> : null}
                           </View>
                           {dateStr ? <Text style={styles.dateLocation}>{dateStr}</Text> : null}
                         </View>
@@ -325,7 +337,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                     {idx === 0 && <Text style={styles.sectionTitle}>Languages</Text>}
                     <View style={[styles.entry, { marginBottom: 4 }]}>
                       <View style={styles.itemHeader}>
-                        <Text style={styles.title}>{lang.name}</Text>
+                        <Text style={styles.title}>{sanitize(lang.name)}</Text>
                         <Text style={styles.dateLocation}>{lang.proficiency}</Text>
                       </View>
                     </View>
@@ -344,8 +356,8 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                 {projects.map((proj, idx) => {
                   const bullets = proj.description
                     .split('\n').map(b => b.trim()).filter(Boolean)
-                    .map(b => b.replace(/^[-•]\s*/, ''));
-                  const dateStr = [fmtDate(proj.startDate), fmtDate(proj.endDate)].filter(Boolean).join(' – ');
+                    .map(b => sanitize(b.replace(/^[-•]\s*/, '')));
+                  const dateStr = [fmtDate(proj.startDate), fmtDate(proj.endDate)].filter(Boolean).join(' - ');
 
                   return (
                     <View key={`proj-${idx}`} wrap={false}>
@@ -353,8 +365,8 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
-                            <Text style={styles.title}>{proj.name}</Text>
-                            {proj.url ? <Text style={styles.company}>— {proj.url}</Text> : null}
+                            <Text style={styles.title}>{sanitize(proj.name)}</Text>
+                            {proj.url ? <Text style={styles.company}>- {proj.url}</Text> : null}
                           </View>
                           {dateStr ? <Text style={styles.dateLocation}>{dateStr}</Text> : null}
                         </View>
@@ -362,13 +374,13 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                           <View style={styles.bulletList}>
                             {bullets.map((bullet, bIdx) => (
                               <View key={bIdx} style={styles.bulletPoint}>
-                                <Text style={styles.bullet}>•</Text>
+                                <Text style={styles.bullet}>-</Text>
                                 <Text style={styles.bulletText}>{bullet}</Text>
                               </View>
                             ))}
                           </View>
                         ) : proj.description ? (
-                          <Text style={styles.bulletText}>{proj.description}</Text>
+                          <Text style={styles.bulletText}>{sanitize(proj.description)}</Text>
                         ) : null}
                       </View>
                     </View>

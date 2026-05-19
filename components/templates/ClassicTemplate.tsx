@@ -13,6 +13,16 @@ function fmtDate(d: string): string {
   return d;
 }
 
+function sanitize(text: string): string {
+  return text
+    .replace(/['']/g, "'")
+    .replace(/[""]/g, '"')
+    .replace(/—/g, '-')
+    .replace(/–/g, '-')
+    .replace(/…/g, '...')
+    .replace(/ /g, ' ');
+}
+
 Font.register({
   family: 'Open Sans',
   fonts: [
@@ -34,21 +44,22 @@ const styles = StyleSheet.create({
     lineHeight: 1.45,
   },
   header: {
+    paddingTop: 4,
     marginBottom: 12,
     textAlign: 'center',
   },
   name: {
     fontSize: 22,
     fontWeight: 700,
-    marginBottom: 2,
+    marginBottom: 6,
+    lineHeight: 1.2,
     textTransform: 'uppercase',
-    letterSpacing: 1,
   },
   jobTitle: {
     fontSize: 11,
     fontWeight: 600,
     color: '#374151',
-    marginBottom: 3,
+    marginBottom: 4,
   },
   contact: {
     fontSize: 9.5,
@@ -156,7 +167,7 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <View style={styles.header} wrap={false}>
           {fullName && <Text style={styles.name}>{fullName}</Text>}
-          {contact.jobTitle && <Text style={styles.jobTitle}>{contact.jobTitle}</Text>}
+          {contact.jobTitle && <Text style={styles.jobTitle}>{sanitize(contact.jobTitle)}</Text>}
           {contactParts.length > 0 && <Text style={styles.contact}>{contactParts.join('  |  ')}</Text>}
         </View>
 
@@ -169,7 +180,7 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
             return (
               <View key="summary" wrap={false}>
                 <Text style={styles.sectionTitle}>Professional Summary</Text>
-                <Text style={styles.summary}>{summary}</Text>
+                <Text style={styles.summary}>{sanitize(summary)}</Text>
               </View>
             );
           }
@@ -180,7 +191,7 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
             return (
               <View key="skills" wrap={false}>
                 <Text style={styles.sectionTitle}>Skills</Text>
-                <Text style={{ fontSize: 10.5, lineHeight: 1.5 }}>{skills.map(s => s.name).join('  •  ')}</Text>
+                <Text style={{ fontSize: 10.5, lineHeight: 1.5 }}>{skills.map(s => sanitize(s.name)).join(', ')}</Text>
               </View>
             );
           }
@@ -194,11 +205,11 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                 {experience.map((exp, idx) => {
                   const bullets = exp.description
                     .split('\n').map(b => b.trim()).filter(Boolean)
-                    .map(b => b.replace(/^[-•]\s*/, ''));
+                    .map(b => sanitize(b.replace(/^[-•]\s*/, '')));
                   const dateStr = [
                     fmtDate(exp.startDate),
                     exp.currentlyWorking ? 'Present' : fmtDate(exp.endDate),
-                  ].filter(Boolean).join(' – ');
+                  ].filter(Boolean).join(' - ');
 
                   return (
                     <View key={`exp-${idx}`} wrap={false}>
@@ -206,8 +217,8 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
-                            <Text style={styles.title}>{exp.position}</Text>
-                            {exp.company ? <Text style={styles.company}>{exp.company}</Text> : null}
+                            <Text style={styles.title}>{sanitize(exp.position)}</Text>
+                            {exp.company ? <Text style={styles.company}>{sanitize(exp.company)}</Text> : null}
                           </View>
                           <View style={styles.dateLocation}>
                             {exp.location ? <Text>{exp.location}</Text> : null}
@@ -218,7 +229,7 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                           <View style={styles.bulletList}>
                             {bullets.map((bullet, bIdx) => (
                               <View key={bIdx} style={styles.bulletPoint}>
-                                <Text style={styles.bullet}>•</Text>
+                                <Text style={styles.bullet}>-</Text>
                                 <Text style={styles.bulletText}>{bullet}</Text>
                               </View>
                             ))}
@@ -239,11 +250,11 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
               // eslint-disable-next-line react/jsx-no-useless-fragment
               <>
                 {education.map((edu, idx) => {
-                  const deg = [edu.degree, edu.field ? `in ${edu.field}` : ''].filter(Boolean).join(' ');
+                  const deg = sanitize([edu.degree, edu.field ? `in ${edu.field}` : ''].filter(Boolean).join(' '));
                   const dateStr = [
                     fmtDate(edu.startDate),
                     edu.currentlyStudying ? 'Present' : fmtDate(edu.endDate),
-                  ].filter(Boolean).join(' – ');
+                  ].filter(Boolean).join(' - ');
 
                   return (
                     <View key={`edu-${idx}`} wrap={false}>
@@ -252,7 +263,7 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
                             {deg ? <Text style={styles.title}>{deg}</Text> : null}
-                            {edu.institution ? <Text style={styles.company}>{edu.institution}</Text> : null}
+                            {edu.institution ? <Text style={styles.company}>{sanitize(edu.institution)}</Text> : null}
                           </View>
                           <View style={styles.dateLocation}>
                             {edu.location ? <Text>{edu.location}</Text> : null}
@@ -278,7 +289,7 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                   const dateStr = [
                     fmtDate(cert.issueDate),
                     cert.doesNotExpire ? 'No Expiry' : fmtDate(cert.expiryDate),
-                  ].filter(Boolean).join(' – ');
+                  ].filter(Boolean).join(' - ');
                   const meta = [
                     cert.credentialId ? `ID: ${cert.credentialId}` : '',
                     cert.credentialUrl || '',
@@ -290,8 +301,8 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
-                            <Text style={styles.title}>{cert.name}</Text>
-                            {cert.issuer ? <Text style={styles.company}>{cert.issuer}</Text> : null}
+                            <Text style={styles.title}>{sanitize(cert.name)}</Text>
+                            {cert.issuer ? <Text style={styles.company}>{sanitize(cert.issuer)}</Text> : null}
                           </View>
                           {dateStr ? <Text style={styles.dateLocation}>{dateStr}</Text> : null}
                         </View>
@@ -315,7 +326,7 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                     {idx === 0 && <Text style={styles.sectionTitle}>Languages</Text>}
                     <View style={[styles.entry, { marginBottom: 4 }]}>
                       <View style={styles.itemHeader}>
-                        <Text style={styles.title}>{lang.name}</Text>
+                        <Text style={styles.title}>{sanitize(lang.name)}</Text>
                         <Text style={styles.dateLocation}>{lang.proficiency}</Text>
                       </View>
                     </View>
@@ -334,8 +345,8 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                 {projects.map((proj, idx) => {
                   const bullets = proj.description
                     .split('\n').map(b => b.trim()).filter(Boolean)
-                    .map(b => b.replace(/^[-•]\s*/, ''));
-                  const dateStr = [fmtDate(proj.startDate), fmtDate(proj.endDate)].filter(Boolean).join(' – ');
+                    .map(b => sanitize(b.replace(/^[-•]\s*/, '')));
+                  const dateStr = [fmtDate(proj.startDate), fmtDate(proj.endDate)].filter(Boolean).join(' - ');
 
                   return (
                     <View key={`proj-${idx}`} wrap={false}>
@@ -343,7 +354,7 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
-                            <Text style={styles.title}>{proj.name}</Text>
+                            <Text style={styles.title}>{sanitize(proj.name)}</Text>
                             {proj.url ? <Text style={styles.company}>{proj.url}</Text> : null}
                           </View>
                           {dateStr ? <Text style={styles.dateLocation}>{dateStr}</Text> : null}
@@ -352,13 +363,13 @@ export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateP
                           <View style={styles.bulletList}>
                             {bullets.map((bullet, bIdx) => (
                               <View key={bIdx} style={styles.bulletPoint}>
-                                <Text style={styles.bullet}>•</Text>
+                                <Text style={styles.bullet}>-</Text>
                                 <Text style={styles.bulletText}>{bullet}</Text>
                               </View>
                             ))}
                           </View>
                         ) : proj.description ? (
-                          <Text style={styles.bulletText}>{proj.description}</Text>
+                          <Text style={styles.bulletText}>{sanitize(proj.description)}</Text>
                         ) : null}
                       </View>
                     </View>
