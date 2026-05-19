@@ -15,7 +15,7 @@ export interface BulletIssue {
   text: string;
   /** Full original bullet text (untrimmed) */
   fullText: string;
-  type: 'weak-verb' | 'passive-voice' | 'no-metric';
+  type: 'weak-verb' | 'passive-voice' | 'no-metric' | 'corporate-jargon';
   /** Human-readable suggestion surfaced in the UI */
   message: string;
 }
@@ -43,6 +43,27 @@ const PASSIVE_VOICE_RULES: RegExp[] = [
 ];
 
 const HAS_METRIC = /\d/;
+
+// Corporate jargon patterns to warn about
+const CORPORATE_JARGON_RULES: { pattern: RegExp; label: string }[] = [
+  { pattern: /cross-?functional/i,          label: 'cross-functional' },
+  { pattern: /stakeholder\s+management/i,   label: 'stakeholder management' },
+  { pattern: /\bdata-?driven\b/i,           label: 'data-driven' },
+  { pattern: /\bgovernance\b/i,             label: 'governance' },
+  { pattern: /\balignment\b/i,              label: 'alignment' },
+  { pattern: /\bsynerg/i,                   label: 'synergy' },
+  { pattern: /\bleverage\b/i,               label: 'leverage' },
+  { pattern: /\butilize\b/i,                label: 'utilize' },
+  { pattern: /\bimplement\b/i,              label: 'implement' },
+  { pattern: /strategic\s+initiative/i,     label: 'strategic initiative' },
+  { pattern: /best\s+practice/i,            label: 'best practice' },
+  { pattern: /\bholistic\b/i,               label: 'holistic' },
+  { pattern: /\brobust\b/i,                 label: 'robust' },
+  { pattern: /\bscalable\b/i,               label: 'scalable' },
+  { pattern: /\bseamless\b/i,               label: 'seamless' },
+  { pattern: /cutting-?edge/i,              label: 'cutting-edge' },
+  { pattern: /mission-?critical/i,          label: 'mission-critical' },
+];
 
 // ── Core analyzer ─────────────────────────────────────────────────────────────
 
@@ -79,6 +100,18 @@ export function analyzeBullet(
         text: displayText, fullText: trimmed,
         type: 'passive-voice',
         message: 'Passive voice — rewrite in active voice with a strong verb',
+      };
+    }
+  }
+
+  // Check for corporate jargon (lower priority than weak verbs/passive voice)
+  for (const { pattern, label } of CORPORATE_JARGON_RULES) {
+    if (pattern.test(trimmed)) {
+      return {
+        expId, expIndex, bulletIndex,
+        text: displayText, fullText: trimmed,
+        type: 'corporate-jargon',
+        message: `Cliché "${label}" — use specific action words instead`,
       };
     }
   }

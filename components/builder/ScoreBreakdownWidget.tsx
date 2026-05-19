@@ -54,7 +54,7 @@ export default function ScoreBreakdownWidget({ jdText }: Props) {
     : 'text-red-600 bg-red-50 border-red-200';
 
   return (
-    <div className="w-[680px] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <div className="w-full max-w-[680px] overflow-hidden rounded-xl border border-gray-200 bg-white leading-relaxed shadow-lg">
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
         <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Score Breakdown</h3>
@@ -64,18 +64,18 @@ export default function ScoreBreakdownWidget({ jdText }: Props) {
       </div>
 
       {/* ── Four category tiles ── */}
-      <div className="grid grid-cols-4 divide-x divide-gray-100">
+      <div className="grid grid-cols-1 divide-y divide-gray-100 gap-y-3 sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-1 xl:divide-x-0 xl:divide-y">
         {CATEGORIES.map(({ key, label, max, description, color }) => {
           const score = breakdown[key];
           const pct = Math.round((score / max) * 100);
 
           return (
-            <div key={key} className="px-4 py-4 flex flex-col gap-2.5">
+            <div key={key} className="flex flex-col gap-3 px-4 py-4">
               {/* Label + score */}
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-xs font-bold text-gray-800 leading-tight">{label}</p>
-                  <p className="text-xs text-gray-400 leading-tight mt-0.5">{description}</p>
+                  <p className="text-xs font-bold leading-relaxed text-gray-800">{label}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-gray-400">{description}</p>
                 </div>
                 <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-md border ${color.light} ${color.text} ${color.border}`}>
                   {score}/{max}

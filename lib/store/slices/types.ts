@@ -4,12 +4,19 @@ import { ResumeData, ResumeExperience, ResumeEducation, ResumeSkill, ResumeProje
 export interface GlobalSlice {
   resumeId: string | null;
   templateId: 'classic' | 'modern';
+  builderDesign: {
+    accentColor: string;
+    fontPair: 'editorial' | 'modern' | 'classic';
+    spacing: 'compact' | 'balanced' | 'airy';
+    zoom: number;
+  };
   data: ResumeData;
   sectionOrder: string[];
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setResumeId: (id: string | null) => void;
   setTemplateId: (templateId: 'classic' | 'modern') => void;
+  setBuilderDesign: (design: Partial<GlobalSlice['builderDesign']>) => void;
   setSectionOrder: (order: string[]) => void;
   loadResumeData: (data: ResumeData) => void;
   reset: () => void;

@@ -31,6 +31,11 @@ export const useResumeStore = create<StoreState>()(
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         state.setHasHydrated(true);
+        if (!state.builderDesign) {
+          state.setBuilderDesign({});
+        } else if (state.builderDesign.zoom === 0.82) {
+          state.setBuilderDesign({ zoom: 0.9 });
+        }
         // Migrate old persisted data that predates the certifications / languages fields
         if (!state.data.certifications || !state.data.languages) {
           state.loadResumeData(state.data);

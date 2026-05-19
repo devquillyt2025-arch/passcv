@@ -8,11 +8,11 @@ import type { ResumeData, ResumeExperience, ResumeEducation, ResumeProject, Resu
 // ── Page geometry (preview scale: 680px wide = A4 at ~83dpi) ─────────────────
 const PAGE_W   = 680;
 const PAGE_H   = 960;   // px — proportional A4 height at this width
-const PAD_T    = 48;    // top padding per page
-const PAD_B    = 56;    // bottom padding per page
-const PAD_SIDE = 52;    // horizontal padding
-const USABLE_H = PAGE_H - PAD_T - PAD_B;   // 856px usable content height per page
-const CONTENT_W = PAGE_W - PAD_SIDE * 2;   // 576px — used for measurement div width
+const PAD_T    = 32;    // top padding per page (symmetric margins: 32px 40px)
+const PAD_B    = 32;    // bottom padding per page
+const PAD_SIDE = 40;    // horizontal padding (symmetric)
+const USABLE_H = PAGE_H - PAD_T - PAD_B;   // 896px usable content height per page
+const CONTENT_W = PAGE_W - PAD_SIDE * 2;   // 600px — used for measurement div width
 
 // ── Themes ────────────────────────────────────────────────────────────────────
 const CLASSIC = {
@@ -26,6 +26,9 @@ const CLASSIC = {
   nameAlign: 'center' as const,
   nameSize: 23,
   lineHeight: 1.5,
+  sectionTop: 18,
+  sectionBottom: 8,
+  itemGap: 12,
   headingStyle: {
     borderBottom: '1.5px solid #1E3A8A',
     borderLeft: 'none',
@@ -46,6 +49,9 @@ const MODERN = {
   nameAlign: 'left' as const,
   nameSize: 26,
   lineHeight: 1.65,
+  sectionTop: 18,
+  sectionBottom: 8,
+  itemGap: 12,
   headingStyle: {
     borderBottom: 'none',
     borderLeft: '3px solid #4F46E5',
@@ -55,7 +61,28 @@ const MODERN = {
   showDivider: false,
 };
 
-type Theme = typeof CLASSIC;
+type Theme = {
+  font: string;
+  nameColor: string;
+  titleColor: string;
+  contactColor: string;
+  headingColor: string;
+  bodyColor: string;
+  mutedColor: string;
+  nameAlign: 'center' | 'left';
+  nameSize: number;
+  lineHeight: number;
+  sectionTop: number;
+  sectionBottom: number;
+  itemGap: number;
+  headingStyle: {
+    borderBottom: string;
+    borderLeft: string;
+    paddingLeft: number;
+    paddingBottom: number;
+  };
+  showDivider: boolean;
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmtDate(d: string) {
@@ -77,7 +104,7 @@ function parseBullets(text: string) {
 
 function SectionHeading({ title, t }: { title: string; t: Theme }) {
   return (
-    <div style={{ marginTop: 18, marginBottom: 8, ...t.headingStyle }}>
+    <div style={{ marginTop: t.sectionTop, marginBottom: t.sectionBottom, ...t.headingStyle }}>
       <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.headingColor }}>
         {title}
       </span>
@@ -125,7 +152,7 @@ function ExperienceBlock({ job, isFirst, t }: { job: ResumeExperience; isFirst: 
 
   return (
     // isFirst merges the section heading into this block to prevent orphan headings
-    <div style={{ marginTop: isFirst ? 0 : 12 }}>
+    <div style={{ marginTop: isFirst ? 0 : t.itemGap }}>
       {isFirst && <SectionHeading title="Work Experience" t={t} />}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: t.bodyColor }}>
@@ -158,7 +185,7 @@ function EducationBlock({ edu, isFirst, t }: { edu: ResumeEducation; isFirst: bo
     .filter(Boolean).join('  ');
 
   return (
-    <div style={{ marginTop: isFirst ? 0 : 8 }}>
+    <div style={{ marginTop: isFirst ? 0 : Math.max(6, t.itemGap - 4) }}>
       {isFirst && <SectionHeading title="Education" t={t} />}
       {deg && <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: t.bodyColor }}>{deg}</p>}
       {line2 && <p style={{ margin: '2px 0 0 0', fontSize: 10.5, color: t.mutedColor }}>{line2}</p>}
@@ -171,7 +198,7 @@ function ProjectBlock({ proj, isFirst, t }: { proj: ResumeProject; isFirst: bool
   const dates = [fmtDate(proj.startDate), fmtDate(proj.endDate)].filter(Boolean).join(' – ');
 
   return (
-    <div style={{ marginTop: isFirst ? 0 : 10 }}>
+    <div style={{ marginTop: isFirst ? 0 : Math.max(8, t.itemGap - 2) }}>
       {isFirst && <SectionHeading title="Projects" t={t} />}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: t.bodyColor }}>
@@ -203,7 +230,7 @@ function CertificationBlock({ cert, isFirst, t }: { cert: ResumeCertification; i
   ].filter(Boolean).join('  |  ');
 
   return (
-    <div style={{ marginTop: isFirst ? 0 : 8 }}>
+    <div style={{ marginTop: isFirst ? 0 : Math.max(6, t.itemGap - 4) }}>
       {isFirst && <SectionHeading title="Certifications" t={t} />}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: t.bodyColor }}>
@@ -367,15 +394,42 @@ function packBlocks(heights: number[], usableH: number): number[][] {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ResumePreview() {
-  const { data, templateId, sectionOrder } = useResumeStore();
-  const t = templateId === 'modern' ? MODERN : CLASSIC;
+  const { data, templateId, sectionOrder, builderDesign } = useResumeStore();
+  const t = useMemo(() => {
+    const base = templateId === 'modern' ? MODERN : CLASSIC;
+    const accent = builderDesign?.accentColor || base.headingColor;
+    const fontByPair = {
+      modern: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif',
+      editorial: '"Georgia", "Times New Roman", serif',
+      classic: '"Times New Roman", Georgia, serif',
+    };
+    const spacingByMode = {
+      compact: { lineHeight: 1.38, sectionTop: 13, sectionBottom: 5, itemGap: 8 },
+      balanced: { lineHeight: base.lineHeight, sectionTop: 18, sectionBottom: 8, itemGap: 12 },
+      airy: { lineHeight: 1.78, sectionTop: 23, sectionBottom: 10, itemGap: 16 },
+    };
+    const spacing = spacingByMode[builderDesign?.spacing || 'balanced'];
+
+    return {
+      ...base,
+      ...spacing,
+      font: fontByPair[builderDesign?.fontPair || 'modern'],
+      nameColor: accent,
+      headingColor: accent,
+      headingStyle: {
+        ...base.headingStyle,
+        borderBottom: base.headingStyle.borderBottom === 'none' ? 'none' : `1.5px solid ${accent}`,
+        borderLeft: base.headingStyle.borderLeft === 'none' ? 'none' : `3px solid ${accent}`,
+      },
+    };
+  }, [templateId, builderDesign]);
   const order = sectionOrder?.length ? sectionOrder : DEFAULT_SECTION_ORDER;
 
   // Rebuild flat block list whenever data or template changes
   const blocks = useMemo(
     () => buildBlocks(data, t, templateId, order),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, templateId, sectionOrder]
+    [data, templateId, sectionOrder, t]
   );
 
   // One ref per block in the hidden measurement container
@@ -444,7 +498,7 @@ export default function ResumePreview() {
               backgroundColor: 'white',
               boxSizing: 'border-box',
               padding: `${PAD_T}px ${PAD_SIDE}px ${PAD_B}px`,
-              boxShadow: '0 4px 32px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
               flexShrink: 0,
               fontFamily: t.font,
               overflow: 'hidden',

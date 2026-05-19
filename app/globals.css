@@ -31,3 +31,76 @@ body {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+.builder-editor :is(input:not([type="checkbox"]), textarea, select) {
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+
+.builder-editor :is(label) {
+  margin-bottom: 6px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.builder-editor :is(.space-y-5) > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(20px * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(20px * var(--tw-space-y-reverse));
+}
+
+.builder-editor :is(.space-y-2.5) > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(10px * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(10px * var(--tw-space-y-reverse));
+}
+
+.builder-editor :is(.grid.gap-4) {
+  gap: 20px;
+}
+
+.ats-jd-textarea::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ats-jd-textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ats-jd-textarea::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 999px;
+}
+
+.ats-jd-textarea {
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
+.hover-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.hover-scrollbar:hover {
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.hover-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.hover-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hover-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 999px;
+  visibility: hidden;
+}
+
+.hover-scrollbar:hover::-webkit-scrollbar-thumb {
+  visibility: visible;
+}

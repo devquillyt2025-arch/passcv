@@ -63,19 +63,38 @@ function analyzeBullets(description: string): BulletIssue[] {
 }
 
 function BulletWeaknessPanel({ description }: { description: string }) {
+  const [expandedIssue, setExpandedIssue] = useState<number | null>(null);
   const issues = analyzeBullets(description);
   if (issues.length === 0) return null;
 
   return (
-    <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 space-y-1.5">
+    <div className="mt-3 space-y-2">
       <p className="text-xs font-semibold text-amber-700 flex items-center gap-1.5">
         <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-        {issues.length} bullet{issues.length > 1 ? 's' : ''} need improvement
+        {issues.length} AI suggestion{issues.length > 1 ? 's' : ''}
       </p>
       {issues.map((issue) => (
-        <p key={issue.index} className="text-xs text-amber-800 leading-snug pl-5">
-          {issue.type === 'weak-verb' ? '⚠' : '📊'} {issue.message}
-        </p>
+        <button
+          key={issue.index}
+          type="button"
+          onClick={() => setExpandedIssue((current) => current === issue.index ? null : issue.index)}
+          className="flex w-full items-start gap-2 rounded-lg border border-slate-200 bg-[#f9fafb] px-3 py-2.5 text-left transition hover:border-indigo-200 hover:bg-white"
+          title={issue.message}
+        >
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-amber-600 shadow-sm">
+            <AlertTriangle className="h-3.5 w-3.5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className={`block text-xs font-medium leading-5 text-slate-700 ${expandedIssue === issue.index ? '' : 'truncate'}`}>
+              {issue.message}
+            </span>
+            {expandedIssue === issue.index && (
+              <span className="mt-1 block text-[11px] leading-5 text-slate-500">
+                {issue.text}
+              </span>
+            )}
+          </span>
+        </button>
       ))}
     </div>
   );
@@ -86,7 +105,6 @@ function BulletWeaknessPanel({ description }: { description: string }) {
 export default function ExperienceStep({ headless = false }: { headless?: boolean }) {
   const experience = useResumeStore((state) => state.data.experience || []);
   const { addExperience, updateExperience, removeExperience, reorderExperience } = useResumeStore();
-  const jdText            = useUIStore((s) => s.jdText);
   const highlightExpId    = useUIStore((s) => s.highlightExpId);
   const setHighlightExpId = useUIStore((s) => s.setHighlightExpId);
   const [expandedId, setExpandedId] = useState<string | null>(experience[0]?.id || null);
@@ -120,7 +138,7 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
     ? `Role: ${activeExperience.position || 'Role'} at ${activeExperience.company || 'Company'}`
     : '';
 
-  const { isLoading, isStreaming, canRevert, error, enhance, revert, abort, buildPayload } = useAiEnhancer(
+  const { isLoading, isStreaming, canRevert, error, enhance, revert, abort } = useAiEnhancer(
     activeExperience?.description ?? '',
     validationErrors,
     jobTitleContext,

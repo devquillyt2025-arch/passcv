@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   Target, AlertCircle, CheckCircle2, Zap,
   ChevronDown, ChevronUp, Loader2, Copy, Check, Plus,
@@ -155,7 +155,7 @@ function ScoreContent({
       )}
 
       {/* Score ring */}
-      <div className="flex items-center gap-3 px-4 pt-4 pb-3 shrink-0">
+      <div className="flex items-center gap-4 px-5 pb-5 pt-5 shrink-0">
         <div className={`w-14 h-14 rounded-full border-4 flex flex-col items-center justify-center shrink-0 ${scoreColor} ${ringColor}`}>
           <span className="font-black text-xl leading-none">{total}</span>
           <span className="text-[9px] font-semibold opacity-70 leading-none mt-0.5">/ 100</span>
@@ -165,7 +165,7 @@ function ScoreContent({
             <Target className="w-4 h-4 text-gray-400 shrink-0" />
             ATS Score
           </h3>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="mt-1 text-xs leading-relaxed text-gray-500">
             {total >= 80 ? 'Strong — keep optimising'
             : total >= 50 ? 'Good — a few fixes will help'
             : 'Needs work — start with Quick Win'}
@@ -175,15 +175,15 @@ function ScoreContent({
 
       {/* Quick Win + missing keyword pills */}
       {(quickWin || pillKeywords.length > 0) && (
-        <div className="px-4 pb-3 shrink-0">
-          <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 space-y-2">
+        <div className="px-5 pb-4 shrink-0">
+          <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2.5 space-y-2.5">
             {quickWin && (
               <>
                 <div className="flex items-center gap-1.5">
                   <Zap className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide">Quick Win</span>
                 </div>
-                <p className="text-xs text-emerald-800 leading-snug">{quickWin}</p>
+                <p className="text-xs leading-relaxed text-emerald-800">{quickWin}</p>
               </>
             )}
 
@@ -210,24 +210,24 @@ function ScoreContent({
       )}
 
       {/* Score breakdown — per-bar skeletons while refreshing are handled by the overlay */}
-      <div className="px-4 pb-3 shrink-0">
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Score Breakdown</p>
-        <div className="space-y-1.5">
+      <div className="px-5 pb-4 pt-1 shrink-0">
+        <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">Score Breakdown</p>
+        <div className="space-y-3">
           {([
             { label: 'Keywords',   score: breakdown.keyword,    max: 40, color: 'bg-indigo-400' },
             { label: 'Formatting', score: breakdown.formatting, max: 20, color: 'bg-emerald-400' },
             { label: 'Content',    score: breakdown.content,    max: 20, color: 'bg-violet-400' },
             { label: 'Recruiter',  score: breakdown.naukri,     max: 20, color: 'bg-rose-400' },
           ] as const).map(({ label, score: s, max, color }) => (
-            <div key={label} className="flex items-center gap-2 h-6">
-              <span className="text-[11px] text-gray-500 w-[4.5rem] shrink-0">{label}</span>
+            <div key={label} className="flex items-center gap-3">
+              <span className="w-[4.9rem] shrink-0 text-[11px] leading-relaxed text-gray-500">{label}</span>
               <div className="flex-1 bg-gray-100 rounded-full h-1 overflow-hidden">
                 <div
                   className={`h-1 rounded-full transition-all duration-500 ${color}`}
                   style={{ width: `${(s / max) * 100}%` }}
                 />
               </div>
-              <span className="text-[11px] font-semibold text-gray-700 tabular-nums w-8 text-right shrink-0">
+              <span className="w-8 shrink-0 text-right text-[11px] font-semibold tabular-nums leading-relaxed text-gray-700">
                 {s}/{max}
               </span>
             </div>
@@ -237,7 +237,7 @@ function ScoreContent({
 
       {/* More fixes */}
       {otherFixes.length > 0 && (
-        <div className="px-4 pb-4 shrink-0">
+        <div className="px-5 pb-5 shrink-0">
           <button
             onClick={() => setShowMoreFixes((v) => !v)}
             className="flex items-center gap-1 text-[10px] font-bold text-amber-600 hover:text-amber-700 uppercase tracking-wide transition-colors mb-1.5"
@@ -249,7 +249,7 @@ function ScoreContent({
           {showMoreFixes && (
             <ul className="space-y-1">
               {otherFixes.map((fix, i) => (
-                <li key={i} className="text-xs text-gray-600 bg-amber-50 px-2.5 py-1.5 rounded-lg border border-amber-100 leading-snug">
+                <li key={i} className="rounded-lg border border-amber-100 bg-amber-50 px-2.5 py-1.5 text-xs leading-relaxed text-gray-600">
                   {fix}
                 </li>
               ))}
@@ -281,7 +281,10 @@ export default function ATSScoreWidget({ className, jdText, onJdChange }: ATSSco
   const { score, isLoadingScore, isRefreshingScore } = useAtsScoreQuery(data, jdText);
 
   // Pre-compute a lowercase Set of existing skill names for O(1) lookup
-  const existingSkillNames = new Set(currentSkills.map((s) => s.name.toLowerCase()));
+  const existingSkillNames = useMemo(
+    () => new Set(currentSkills.map((s) => s.name.toLowerCase())),
+    [currentSkills],
+  );
 
   // "Add to Skills" action — deduplicates before inserting
   const handleAddSkill = useCallback((keyword: string) => {
@@ -295,13 +298,13 @@ export default function ATSScoreWidget({ className, jdText, onJdChange }: ATSSco
   }, [currentSkills, setSkills, existingSkillNames]);
 
   return (
-    <div className={`${className ?? 'w-72'} h-full flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200`}>
+    <div className={`${className ?? 'w-72'} flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden leading-relaxed hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200`}>
 
       {/*
         JD textarea — always interactive, outside the score boundary.
         The user can keep editing even while the ATS score is recomputing.
       */}
-      <div className="px-4 pt-4 pb-3 shrink-0">
+      <div className="px-5 pt-5 pb-4 shrink-0">
         <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
           Target Job Description{' '}
           <span className="normal-case font-normal text-gray-400">(optional)</span>
@@ -311,7 +314,7 @@ export default function ATSScoreWidget({ className, jdText, onJdChange }: ATSSco
           onChange={(e) => onJdChange(e.target.value)}
           placeholder="Paste job description to score against specific keywords…"
           rows={2}
-          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-900 focus:border-indigo-400 focus:bg-white focus:ring-1 focus:ring-indigo-200 outline-none resize-none transition-colors"
+          className="ats-jd-textarea w-full resize-none overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-900 outline-none transition-colors focus:border-indigo-400 focus:bg-white focus:ring-1 focus:ring-indigo-200"
         />
       </div>
 
