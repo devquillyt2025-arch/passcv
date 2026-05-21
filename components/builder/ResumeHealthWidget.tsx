@@ -86,7 +86,6 @@ function computeGapActions(
 export default function ResumeHealthWidget({ className }: { className?: string }) {
   const { experience, skills, projects, certifications, education, summary, contact } = useHealthSelectors();
   const requestSectionFocus = useUIStore((s) => s.requestSectionFocus);
-  const data = { experience, skills, projects, certifications, education, summary, contact };
 
   // ── Derived state ──
   const completeness = useMemo(

@@ -3,7 +3,7 @@
 import { useUIStore } from '@/lib/store/useUIStore';
 import { useResumeStats } from '@/hooks/useResumeStats';
 import { useStatsData } from '@/lib/store/selectors';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { BarChart2, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function ResumeStatsWidget({ className }: { className?: string }) {
