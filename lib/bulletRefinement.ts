@@ -243,10 +243,9 @@ export function replaceJargon(bullet: string): string {
 
   for (const [jargon, replacements] of Object.entries(JARGON_REPLACEMENTS)) {
     const pattern = new RegExp(`\\b${jargon.replace(/[-]/g, '-?')}\\b`, 'gi');
-    const alternatives = Array.isArray(replacements) ? replacements : replacements.split('|');
     if (pattern.test(refined)) {
       // Pick a random alternative
-      const replacement = alternatives[Math.floor(Math.random() * alternatives.length)];
+      const replacement = replacements[Math.floor(Math.random() * replacements.length)];
       refined = refined.replace(pattern, replacement);
     }
   }
