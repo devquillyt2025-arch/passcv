@@ -51,5 +51,7 @@ export function parsedToBuilderData(parsed: ParsedResume): ResumeData {
       level: 'Intermediate' as const,
     })),
     projects: [],
+    certifications: [],
+    languages: [],
   };
 }
