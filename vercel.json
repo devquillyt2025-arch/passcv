@@ -1,10 +1,10 @@
 {
   "functions": {
     "api/parse.py": {
-      "runtime": "python3.12"
+      "maxDuration": 30
     },
     "api/generate_docx.py": {
-      "runtime": "python3.12"
+      "maxDuration": 30
     }
   }
 }
