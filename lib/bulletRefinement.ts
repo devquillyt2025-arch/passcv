@@ -65,7 +65,7 @@ const JARGON_REPLACEMENTS: Record<string, string[]> = {
   'cross-functional': ['across', 'between teams', 'with'],
   'stakeholder management': ['coordination', 'communication', 'alignment'],
   'data-driven': ['measurable', 'fact-based', 'metrics-backed'],
-  'governance': 'oversight|oversight',
+  'governance': ['oversight', 'control', 'supervision'],
   'alignment': ['coordination', 'agreement', 'sync'],
   'leverage': ['use', 'employ', 'tap'],
   'utilize': ['use', 'apply', 'employ'],
