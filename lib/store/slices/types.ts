@@ -1,23 +1,25 @@
 import { StateCreator } from 'zustand';
-import { ResumeData, ResumeExperience, ResumeEducation, ResumeSkill, ResumeProject, ResumeCertification, ResumeLanguage } from '../../types';
+import { ResumeData, ResumeExperience, ResumeEducation, ResumeSkill, ResumeProject, ResumeCertification, ResumeLanguage, ResumePublication, ResumeCourse, ResumeAward, ResumeVolunteer, ResumeCustomItem } from '../../types';
 
 export interface GlobalSlice {
   resumeId: string | null;
   templateId: 'classic' | 'modern';
   builderDesign: {
     accentColor: string;
-    fontPair: 'editorial' | 'modern' | 'classic';
+    fontPair: 'modern' | 'arial' | 'helvetica' | 'verdana' | 'times' | 'calibri' | 'courier' | 'editorial' | 'classic';
     spacing: 'compact' | 'balanced' | 'airy';
     zoom: number;
   };
   data: ResumeData;
   sectionOrder: string[];
+  hiddenSections: string[];
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setResumeId: (id: string | null) => void;
   setTemplateId: (templateId: 'classic' | 'modern') => void;
   setBuilderDesign: (design: Partial<GlobalSlice['builderDesign']>) => void;
   setSectionOrder: (order: string[]) => void;
+  toggleSectionVisibility: (id: string) => void;
   loadResumeData: (data: ResumeData) => void;
   reset: () => void;
 }
@@ -70,5 +72,43 @@ export interface LanguageSlice {
   reorderLanguages: (startIndex: number, endIndex: number) => void;
 }
 
-export type StoreState = GlobalSlice & ContactSlice & ExperienceSlice & EducationSlice & SkillSlice & ProjectSlice & CertificationSlice & LanguageSlice;
+export interface PublicationSlice {
+  addPublication: () => void;
+  updatePublication: (id: string, pub: Partial<ResumePublication>) => void;
+  removePublication: (id: string) => void;
+  reorderPublications: (startIndex: number, endIndex: number) => void;
+}
+
+export interface CourseSlice {
+  addCourse: () => void;
+  updateCourse: (id: string, course: Partial<ResumeCourse>) => void;
+  removeCourse: (id: string) => void;
+  reorderCourses: (startIndex: number, endIndex: number) => void;
+}
+
+export interface AwardSlice {
+  addAward: () => void;
+  updateAward: (id: string, award: Partial<ResumeAward>) => void;
+  removeAward: (id: string) => void;
+  reorderAwards: (startIndex: number, endIndex: number) => void;
+}
+
+export interface VolunteerSlice {
+  addVolunteer: () => void;
+  updateVolunteer: (id: string, vol: Partial<ResumeVolunteer>) => void;
+  removeVolunteer: (id: string) => void;
+  reorderVolunteer: (startIndex: number, endIndex: number) => void;
+}
+
+export interface CustomSectionSlice {
+  addCustomSection: (title: string) => void;
+  updateCustomSectionTitle: (sectionId: string, title: string) => void;
+  removeCustomSection: (sectionId: string) => void;
+  addCustomItem: (sectionId: string) => void;
+  updateCustomItem: (sectionId: string, itemId: string, itemData: Partial<ResumeCustomItem>) => void;
+  removeCustomItem: (sectionId: string, itemId: string) => void;
+  reorderCustomItems: (sectionId: string, startIndex: number, endIndex: number) => void;
+}
+
+export type StoreState = GlobalSlice & ContactSlice & ExperienceSlice & EducationSlice & SkillSlice & ProjectSlice & CertificationSlice & LanguageSlice & PublicationSlice & CourseSlice & AwardSlice & VolunteerSlice & CustomSectionSlice;
 export type StoreSlice<T> = StateCreator<StoreState, [], [], T>;

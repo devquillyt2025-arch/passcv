@@ -20,6 +20,11 @@ export const emptyResumeData: ResumeData = {
   projects: [],
   certifications: [],
   languages: [],
+  publications: [],
+  courses: [],
+  awards: [],
+  volunteer: [],
+  customSections: [],
 };
 
 export const DEMO_RESUME_DATA: ResumeData = {
@@ -97,4 +102,8 @@ export const DEMO_RESUME_DATA: ResumeData = {
   ],
   certifications: [],
   languages: [],
+  publications: [],
+  courses: [],
+  awards: [],
+  volunteer: [],
 };
