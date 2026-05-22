@@ -2,21 +2,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { StoreSlice } from './types';
 import { emptyResumeData, DEMO_RESUME_DATA } from './defaultData';
 
-export const DEFAULT_SECTION_ORDER = ['summary', 'skills', 'experience', 'education', 'certifications', 'languages', 'projects'];
+export const DEFAULT_SECTION_ORDER = ['summary', 'skills', 'experience', 'education', 'certifications', 'courses', 'languages', 'projects', 'publications', 'volunteer', 'awards'];
 
 export const DEFAULT_BUILDER_DESIGN = {
   accentColor: '#4F46E5',
-  fontPair: 'modern' as const,
+  fontPair: 'editorial' as const,
   spacing: 'balanced' as const,
   zoom: 0.9,
 };
 
-export const createGlobalSlice: StoreSlice<Pick<import('./types').StoreState, 'resumeId' | 'templateId' | 'builderDesign' | 'data' | 'sectionOrder' | '_hasHydrated' | 'setHasHydrated' | 'setResumeId' | 'setTemplateId' | 'setBuilderDesign' | 'setSectionOrder' | 'loadResumeData' | 'reset'>> = (set) => ({
+export const createGlobalSlice: StoreSlice<Pick<import('./types').StoreState, 'resumeId' | 'templateId' | 'builderDesign' | 'data' | 'sectionOrder' | 'hiddenSections' | '_hasHydrated' | 'setHasHydrated' | 'setResumeId' | 'setTemplateId' | 'setBuilderDesign' | 'setSectionOrder' | 'toggleSectionVisibility' | 'loadResumeData' | 'reset'>> = (set) => ({
   resumeId: null,
   templateId: 'classic',
   builderDesign: DEFAULT_BUILDER_DESIGN,
   data: DEMO_RESUME_DATA,
   sectionOrder: DEFAULT_SECTION_ORDER,
+  hiddenSections: [],
   _hasHydrated: false,
 
   setHasHydrated: (state) => set({ _hasHydrated: state }),
@@ -26,6 +27,11 @@ export const createGlobalSlice: StoreSlice<Pick<import('./types').StoreState, 'r
     builderDesign: { ...DEFAULT_BUILDER_DESIGN, ...state.builderDesign, ...design },
   })),
   setSectionOrder: (order) => set({ sectionOrder: order }),
+  toggleSectionVisibility: (id) => set((state) => ({
+    hiddenSections: state.hiddenSections.includes(id)
+      ? state.hiddenSections.filter((s) => s !== id)
+      : [...state.hiddenSections, id],
+  })),
 
   loadResumeData: (data) => set({
     data: {
@@ -37,6 +43,10 @@ export const createGlobalSlice: StoreSlice<Pick<import('./types').StoreState, 'r
       projects: data.projects || [],
       certifications: data.certifications || [],
       languages: data.languages || [],
+      publications: data.publications || [],
+      courses: data.courses || [],
+      awards: data.awards || [],
+      volunteer: data.volunteer || [],
       contact: { ...emptyResumeData.contact, ...(data.contact || {}) },
     },
   }),

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { Plus, Trash2, GripVertical, Sparkles, Loader2 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function SkillsStep({ headless = false }: { headless?: boolean }) {
@@ -42,10 +43,15 @@ export default function SkillsStep({ headless = false }: { headless?: boolean })
     prevLengthRef.current = skills.length;
   }, [skills.length]);
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-    reorderSkills(result.source.index, result.destination.index);
-  };
+
+
+  const parentRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: skills.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 72,
+    overscan: 5,
+  });
 
   // Index-based helpers — work correctly even when skill.id is missing,
   // which is the root cause of the "skill name not editable" regression.
@@ -57,6 +63,11 @@ export default function SkillsStep({ headless = false }: { headless?: boolean })
 
   const removeAtIndex = (index: number) =>
     setSkills(skills.filter((_, i) => i !== index));
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    reorderSkills(result.source.index, result.destination.index);
+  };
 
   const handleSuggestSkills = async () => {
     try {
@@ -105,81 +116,106 @@ export default function SkillsStep({ headless = false }: { headless?: boolean })
         </button>
       </div>
 
-      {/* Skill rows */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="skills-list">
-          {(provided) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="space-y-3"
-            >
-              {skills.map((skill, index) => {
-                // Fallback key/draggableId for the first render before the mount
-                // effect assigns UUIDs to any id-less skills from old persisted state.
-                const draggableId = skill.id || `skill-${index}`;
-                return (
-                  <Draggable key={draggableId} draggableId={draggableId} index={index}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={`flex items-center gap-3 bg-white p-3 rounded-xl border group transition-shadow ${
-                          snapshot.isDragging
-                            ? 'shadow-lg border-indigo-300'
-                            : 'border-gray-200'
-                        }`}
-                      >
-                        <div
-                          {...provided.dragHandleProps}
-                          className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing focus:outline-none"
-                        >
-                          <GripVertical className="w-5 h-5" />
-                        </div>
+      <div ref={parentRef} className="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="skills-list" mode="virtual">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualItem) => {
+                  const index = virtualItem.index;
+                  const skill = skills[index];
+                  if (!skill) return null;
+                  const draggableId = skill.id || `skill-${index}`;
+                  
+                  return (
+                    <Draggable key={draggableId} draggableId={draggableId} index={index}>
+                      {(provided, snapshot) => {
+                        const style = provided.draggableProps.style || {};
+                        return (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            style={{
+                              ...style,
+                              position: 'absolute',
+                              top: virtualItem.start,
+                              left: 0,
+                              width: '100%',
+                              height: virtualItem.size,
+                              paddingBottom: '12px', // spacing between items
+                            }}
+                          >
+                            <div
+                              className={`flex items-center gap-3 bg-white p-3 rounded-xl border group transition-shadow h-full ${
+                                snapshot.isDragging
+                                  ? 'shadow-lg border-indigo-300'
+                                  : 'border-gray-200'
+                              }`}
+                            >
+                              <div
+                                {...provided.dragHandleProps}
+                                className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing focus:outline-none"
+                              >
+                                <GripVertical className="w-5 h-5" />
+                              </div>
 
-                        <div className="flex-1">
-                          <input
-                            ref={(el) => { inputRefs.current[index] = el; }}
-                            type="text"
-                            value={skill.name}
-                            onChange={(e) => updateName(index, e.target.value)}
-                            placeholder="e.g. React.js, Python, Project Management"
-                            className="w-full text-sm font-medium text-gray-900 bg-white focus:outline-none placeholder-gray-400"
-                          />
-                        </div>
+                              <div className="flex-1">
+                                <input
+                                  ref={(el) => { inputRefs.current[index] = el; }}
+                                  type="text"
+                                  value={skill.name}
+                                  onChange={(e) => updateName(index, e.target.value)}
+                                  placeholder="e.g. React.js, Python, Project Management"
+                                  className="w-full text-sm font-medium text-gray-900 bg-white focus:outline-none placeholder-gray-400"
+                                />
+                              </div>
 
-                        <select
-                          value={skill.level || 'Intermediate'}
-                          onChange={(e) => updateLevel(index, e.target.value)}
-                          className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-                        >
-                          <option value="Beginner">Beginner</option>
-                          <option value="Intermediate">Intermediate</option>
-                          <option value="Advanced">Advanced</option>
-                          <option value="Expert">Expert</option>
-                        </select>
+                              <select
+                                value={skill.level || 'Intermediate'}
+                                onChange={(e) => updateLevel(index, e.target.value)}
+                                className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                              >
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                                <option value="Expert">Expert</option>
+                              </select>
 
-                        <button
-                          onClick={() => removeAtIndex(index)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </Draggable>
-                );
-              })}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+                              <button
+                                onClick={() => removeAtIndex(index)}
+                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }}
+                    </Draggable>
+                  );
+                })}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </div>
 
+      {skills.length === 0 && (
+        <p className="text-[13px] text-gray-400 italic text-center py-4">No entries yet.</p>
+      )}
       {/* Add skill — calls the store action directly; useEffect above handles focus */}
       <button
         onClick={addSkill}
-        className="flex items-center gap-2 text-sm font-semibold text-indigo-600 bg-indigo-50 px-4 py-2.5 rounded-xl hover:bg-indigo-100 transition-colors w-full justify-center border border-indigo-100"
+        className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-violet-700 border border-dashed border-violet-300 rounded-[10px] bg-transparent hover:bg-violet-50 transition-colors"
       >
         <Plus className="w-4 h-4" />
         Add Skill

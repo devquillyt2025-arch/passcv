@@ -4,20 +4,23 @@ import { NextResponse } from 'next/server';
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || '' });
 
 // ── System prompt ─────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are an expert ATS Resume Writer. Rewrite the provided resume section to be highly optimized for Applicant Tracking Systems and human hiring managers.
+const SYSTEM_PROMPT = `You are an expert ATS Resume Writer. Rewrite the provided resume section to be highly optimized for Applicant Tracking Systems and human hiring managers. The output must be achievement-oriented, not just descriptive.
 
 RULES:
 
-1. KEYWORDS
-   Extract the most impactful technical terms, tools, and domain skills from the Job Description (if provided) and embed them naturally. Prioritise exact keyword matches over synonyms.
+1. WORK EXPERIENCE BULLETS
+   Rewrite each bullet point to lead with a strong action verb, include at least one quantified metric (use realistic estimates if exact numbers unavailable), and demonstrate business impact. Output only the improved bullets, no commentary.
 
-2. ACTION VERBS
+2. KEYWORDS
+   Extract the most impactful technical terms, tools, and domain skills from the Job Description (if provided) and embed them naturally. If no JD is provided, proactively match keywords from common JDs for the role. Prioritise exact keyword matches over synonyms.
+
+3. ACTION VERBS
    Every bullet point must open with a strong, industry-specific verb.
    ✓ Preferred: Led, Engineered, Scaled, Deployed, Architected, Delivered, Optimised, Automated, Designed, Reduced, Increased, Launched, Drove, Built, Migrated, Implemented, Spearheaded
    ✗ Banned: Helped, Worked, Assisted, Participated, Was responsible for, Handled, Utilised, Made sure, Supported, Contributed
 
-3. QUANTIFY
-   Turn every vague impact into a measurable result.
+4. QUANTIFY
+   Turn every vague impact into a measurable result. You MUST add quantified metrics (%, $, time saved).
    ✓ "Reduced API latency by 35% via connection pooling, cutting p99 from 420 ms to 270 ms"
    ✗ "Improved API performance"
    When no figures are available, use [N]%, [X]x, or [$Y] as fill-in placeholders.
@@ -50,9 +53,9 @@ function buildUserMessage(
 
   if (sectionType === 'summary') {
     const action = originalText.trim()
-      ? `CURRENT PROFESSIONAL SUMMARY (rewrite this):\n${originalText}`
-      : 'Generate a compelling professional summary for this candidate. Use the context below.';
-    return `TASK: Optimise Professional Summary${jdSection}${contextSection}\n${action}`;
+      ? `CURRENT PROFESSIONAL SUMMARY:\n${originalText}`
+      : 'Generate a compelling professional summary for this candidate.';
+    return `TASK: You are a professional resume writer. Rewrite this professional summary in under 80 words. Lead with years of experience and domain. Include 2–3 quantified achievements. End with a value proposition. Use active voice. No buzzwords. Output only the rewritten summary.${jdSection}${contextSection}\n${action}`;
   }
 
   return `TASK: Optimise Work Experience Bullets${jdSection}${contextSection}\nCURRENT BULLETS (rewrite these):\n${originalText}`;

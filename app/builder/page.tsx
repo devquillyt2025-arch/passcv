@@ -1,38 +1,63 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ArrowLeft,
+  Check,
   CheckCircle2,
+  ChevronDown,
   Download,
   Eye,
-  LayoutTemplate,
   Loader2,
   Maximize2,
   Minus,
-  Palette,
   Plus,
-  Text,
   Upload,
 } from 'lucide-react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { useUIStore } from '@/lib/store/useUIStore';
 import { useAutosaveSync } from '@/hooks/useAutosaveSync';
 import { useResumeStats } from '@/hooks/useResumeStats';
+import { useDebounce } from '@/hooks/useDebounce';
 import EditorPanel from '@/components/builder/EditorPanel';
 import ResumePreview from '@/components/builder/ResumePreview';
 import PreviewModal from '@/components/builder/PreviewModal';
 import ImportResumeModal from '@/components/builder/ImportResumeModal';
+import ScoreFooterBar from '@/components/builder/ScoreFooterBar';
+import PortalPopover from '@/components/ui/PortalPopover';
 import { calculateScore, mapResumeDataToParsedResume, parseJD } from '@/lib/scoring';
 
-const ACCENTS = ['#4F46E5', '#0F766E', '#B45309', '#BE123C', '#2563EB'];
-const FONT_PAIRS = [
-  { id: 'modern', label: 'Inter' },
-  { id: 'editorial', label: 'Editorial' },
-  { id: 'classic', label: 'Classic' },
+const ACCENTS = [
+  { color: '#4F46E5', name: 'Indigo' },
+  { color: '#0F766E', name: 'Teal' },
+  { color: '#B45309', name: 'Amber' },
+  { color: '#BE123C', name: 'Rose' },
+  { color: '#2563EB', name: 'Blue' },
 ] as const;
+const FONT_PAIRS = [
+  { id: 'editorial', label: 'Georgia (Editorial)' },
+  { id: 'modern', label: 'Inter (Modern)' },
+  { id: 'helvetica', label: 'Helvetica' },
+  { id: 'verdana', label: 'Verdana' },
+  { id: 'times', label: 'Times New Roman' },
+  { id: 'calibri', label: 'Calibri' },
+  { id: 'courier', label: 'Courier New' },
+  { id: 'classic', label: 'Classic (Times)' },
+  { id: 'arial', label: 'Arial' },
+] as const;
+const FONT_CSS_MAP: Record<string, string> = {
+  modern: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif',
+  arial: 'Arial, Helvetica, sans-serif',
+  helvetica: 'Helvetica, Arial, sans-serif',
+  verdana: 'Verdana, Geneva, sans-serif',
+  times: '"Times New Roman", Times, serif',
+  calibri: 'Calibri, Roboto, sans-serif',
+  courier: '"Courier New", Courier, monospace',
+  editorial: '"Georgia", "Times New Roman", serif',
+  classic: '"Times New Roman", Georgia, serif',
+};
 const SPACING = [
   { id: 'compact', label: 'Compact' },
   { id: 'balanced', label: 'Balanced' },
@@ -73,16 +98,16 @@ function Segmented<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div className="inline-flex rounded-xl bg-slate-100 p-1">
+    <div className="inline-flex rounded-[8px] bg-slate-100 p-[3px]">
       {options.map((option) => (
         <button
           key={option.id}
           type="button"
           onClick={() => onChange(option.id)}
-          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+          className={`rounded-[5px] px-3 py-[3px] text-[11px] font-semibold transition-all ${
             value === option.id
-              ? 'bg-white text-slate-950 shadow-sm'
-              : 'text-slate-500 hover:text-slate-900'
+              ? 'bg-[#1E293B] text-white shadow-sm'
+              : 'text-slate-400 hover:text-slate-700'
           }`}
         >
           {option.label}
@@ -92,92 +117,258 @@ function Segmented<T extends string>({
   );
 }
 
+function TemplateSwitch({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: 'modern' | 'classic') => void;
+}) {
+  return (
+    <div className="relative inline-flex h-7 items-stretch rounded-[8px] bg-slate-100 p-[3px]">
+      {/* Sliding thumb */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-[3px] top-[3px] w-[52px] rounded-[5px] bg-white shadow-sm transition-[left] duration-200 ease-out"
+        style={{ left: value === 'modern' ? '55px' : '3px' }}
+      />
+      {(['classic', 'modern'] as const).map((id) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => onChange(id)}
+          className={`relative z-10 w-[52px] text-[11px] font-semibold capitalize transition-colors duration-150 ${
+            value === id ? 'text-slate-900' : 'text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          {id.charAt(0).toUpperCase() + id.slice(1)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ColorSwatchStrip({
+  accents,
+  value,
+  onChange,
+}: {
+  accents: readonly { color: string; name: string }[];
+  value: string;
+  onChange: (color: string) => void;
+}) {
+  return (
+    <div className="inline-flex items-center gap-1 rounded-[8px] bg-slate-100 p-[3px]">
+      {accents.map(({ color, name }) => {
+        const isActive = value === color;
+        return (
+          <button
+            key={color}
+            type="button"
+            title={name}
+            onClick={() => onChange(color)}
+            className={`relative h-[22px] w-8 flex-shrink-0 rounded-[5px] border transition-all duration-150 ${
+              isActive
+                ? 'z-10 border-white shadow-md ring-2 ring-black/20'
+                : 'border-black/[0.08] hover:opacity-90 hover:shadow-sm'
+            }`}
+            style={{ backgroundColor: color }}
+          >
+            {isActive && (
+              <span aria-hidden className="absolute inset-0 flex items-center justify-center">
+                <Check className="h-[11px] w-[11px] text-white [filter:drop-shadow(0_1px_1px_rgba(0,0,0,0.3))]" />
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ToolbarGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-start gap-[5px] px-4">
+      <span className="select-none text-[9px] font-bold uppercase leading-none tracking-[0.14em] text-slate-400">
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+}
+
+function ToolbarDivider() {
+  return <div className="h-9 w-px flex-shrink-0 self-center bg-slate-100" />;
+}
+
+function FontSelect<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: readonly { id: T; label: string }[];
+  onChange: (value: T) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  const current = options.find((o) => o.id === value) ?? options[0];
+
+  return (
+    <>
+      <button
+        ref={ref}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex h-8 min-w-[148px] items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-900 shadow-sm transition hover:border-slate-300 hover:shadow focus:outline-none"
+        style={{ fontFamily: FONT_CSS_MAP[value] ?? 'sans-serif' }}
+      >
+        <span className="truncate">{current.label}</span>
+        <ChevronDown
+          className={`h-3.5 w-3.5 flex-shrink-0 text-slate-400 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      <PortalPopover isOpen={open} onClose={() => setOpen(false)} anchorRef={ref}>
+        <div className="min-w-[220px] overflow-hidden rounded-xl border border-slate-100 bg-white py-1 shadow-2xl shadow-slate-300/40 ring-1 ring-slate-900/[0.06]">
+          {options.map((option) => {
+            const fontCss = FONT_CSS_MAP[option.id] ?? 'sans-serif';
+            const isSelected = option.id === value;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => { onChange(option.id); setOpen(false); }}
+                className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
+                  isSelected
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-slate-700 hover:bg-slate-50/80'
+                }`}
+              >
+                <span
+                  className="w-7 flex-shrink-0 text-[15px] leading-none text-slate-400"
+                  style={{ fontFamily: fontCss }}
+                  aria-hidden
+                >
+                  Aa
+                </span>
+                <span className="flex-1 text-xs font-medium leading-none" style={{ fontFamily: fontCss }}>
+                  {option.label}
+                </span>
+                {isSelected && <Check className="h-3.5 w-3.5 flex-shrink-0 text-indigo-500" />}
+              </button>
+            );
+          })}
+        </div>
+      </PortalPopover>
+    </>
+  );
+}
+
 export default function BuilderPage() {
-  const {
-    data,
-    resumeId,
-    templateId,
-    setTemplateId,
-    builderDesign,
-    setBuilderDesign,
-    _hasHydrated,
-    sectionOrder,
-  } = useResumeStore();
-  const { saveStatus } = useAutosaveSync(resumeId, data);
+  const { data, resumeId, templateId, sectionOrder, hiddenSections, builderDesign, _hasHydrated, setBuilderDesign, setTemplateId } = useResumeStore();
+  const debouncedData = useDebounce(data, 300);
   const { jdText } = useUIStore();
-  const stats = useResumeStats(data);
+  const stats = useResumeStats(debouncedData);
+  const { saveStatus } = useAutosaveSync(resumeId, data);
 
   const [showModal, setShowModal] = useState(false);
   const [showImport, setShowImport] = useState(false);
-  const [activeScoreChip, setActiveScoreChip] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [dlError, setDlError] = useState('');
 
-  const fullName = [data.contact.firstName, data.contact.lastName].filter(Boolean).join(' ') || 'Untitled resume';
+  // ── Resizable split ──────────────────────────────────────────────────────────
+  const splitRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ x: number; width: number } | null>(null);
+  const [leftWidth, setLeftWidth] = useState<number | undefined>(undefined);
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    if (leftWidth !== undefined || !splitRef.current) return;
+    setLeftWidth(splitRef.current.offsetWidth / 2);
+  }, [leftWidth]);
+
+  const handleSplitMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    dragStartRef.current = { x: e.clientX, width: leftWidth ?? 0 };
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e: MouseEvent) => {
+      if (!dragStartRef.current || !splitRef.current) return;
+      const cw = splitRef.current.offsetWidth;
+      const delta = e.clientX - dragStartRef.current.x;
+      setLeftWidth(Math.max(340, Math.min(cw - 340, dragStartRef.current.width + delta)));
+    };
+    const onUp = () => { setIsDragging(false); dragStartRef.current = null; };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+  }, [isDragging]);
+
+  useEffect(() => {
+    if (!_hasHydrated) return;
+    const saved = localStorage.getItem('resumeBuilder_font');
+    setBuilderDesign({ fontPair: (saved || 'editorial') as 'modern' | 'arial' | 'helvetica' | 'verdana' | 'times' | 'calibri' | 'courier' | 'editorial' | 'classic' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_hasHydrated]);
+
+  const fullName = [debouncedData.contact.firstName, debouncedData.contact.lastName].filter(Boolean).join(' ') || 'Untitled resume';
   const completion = useMemo(() => {
     const checks = [
-      data.contact.email,
-      data.contact.phone,
-      data.summary,
-      data.skills.length,
-      data.experience.length,
-      data.education.length,
+      debouncedData.contact.email,
+      debouncedData.contact.phone,
+      debouncedData.summary,
+      debouncedData.skills.length,
+      debouncedData.experience.length,
+      debouncedData.education.length,
     ];
     return Math.round((checks.filter(Boolean).length / checks.length) * 100);
-  }, [data]);
+  }, [debouncedData]);
 
-  const score = useMemo(() => {
-    const parsedResume = mapResumeDataToParsedResume(data);
+  const [score, setScore] = useState(() => {
+    const parsedResume = mapResumeDataToParsedResume(debouncedData);
     return calculateScore(parsedResume, parseJD(jdText));
-  }, [data, jdText]);
+  });
 
-  const scoreChips = [
-    {
-      id: 'ats',
-      label: 'ATS Score',
-      value: `${score.total}/100`,
-      pct: score.total,
-      details: score.topFixes.length ? score.topFixes : ['No major issues found.'],
-    },
-    {
-      id: 'keywords',
-      label: 'Keywords',
-      value: `${score.breakdown.keyword}/40`,
-      pct: (score.breakdown.keyword / 40) * 100,
-      details: [
-        score.matchedKeywords.length ? `Matched: ${score.matchedKeywords.slice(0, 8).join(', ')}` : 'No JD keywords matched yet.',
-        score.missingKeywords.length ? `Missing: ${score.missingKeywords.slice(0, 8).join(', ')}` : 'No missing keywords detected.',
-      ],
-    },
-    {
-      id: 'formatting',
-      label: 'Formatting',
-      value: `${score.breakdown.formatting}/20`,
-      pct: (score.breakdown.formatting / 20) * 100,
-      details: score.formattingIssues.length ? score.formattingIssues : ['ATS-safe formatting looks good.'],
-    },
-    {
-      id: 'content',
-      label: 'Content',
-      value: `${score.breakdown.content}/20`,
-      pct: (score.breakdown.content / 20) * 100,
-      details: score.contentIssues.length ? score.contentIssues : ['Content quality checks look good.'],
-    },
-    {
-      id: 'recruiter',
-      label: 'Recruiter',
-      value: `${score.breakdown.naukri}/20`,
-      pct: (score.breakdown.naukri / 20) * 100,
-      details: score.naukriIssues.length ? score.naukriIssues : ['Recruiter checks look good.'],
-    },
-  ];
+  const workerRef = useRef<Worker | null>(null);
+
+  useEffect(() => {
+    workerRef.current = new Worker(new URL('../../lib/workers/score.worker.ts', import.meta.url));
+    workerRef.current.onmessage = (e) => {
+      if (e.data.type === 'SUCCESS') {
+        setScore(e.data.score);
+      }
+    };
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (workerRef.current) {
+      workerRef.current.postMessage({ data: debouncedData, jdText });
+    }
+  }, [debouncedData, jdText]);
 
   const handleDownload = async () => {
     setDownloading(true);
     setDlError('');
     try {
-      const { generateBuilderPdfBlob } = await import('@/lib/resumePdf');
-      const blob = await generateBuilderPdfBlob(data, templateId, sectionOrder);
+      const res = await fetch('/api/builder/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: debouncedData, templateId, sectionOrder }),
+      });
+      if (!res.ok) throw new Error('Failed to generate PDF');
+      
+      const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -199,8 +390,17 @@ export default function BuilderPage() {
     );
   }
 
+  const accentColor = builderDesign?.accentColor || '#4F46E5';
+
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#eef1f6] text-slate-950">
+    <div
+      className="flex h-screen flex-col overflow-hidden bg-[#eef1f6] text-slate-950"
+      style={{
+        ...(isDragging ? { cursor: 'col-resize', userSelect: 'none' } : {}),
+        '--accent-color': accentColor,
+        '--accent-ring': `${accentColor}26`,
+      } as React.CSSProperties}
+    >
       <header className="relative z-20 border-b border-slate-200/80 bg-white/90 px-6 py-3.5 shadow-sm shadow-slate-200/40 backdrop-blur-xl">
         <div className="flex flex-wrap items-center gap-4">
           <Link
@@ -259,6 +459,7 @@ export default function BuilderPage() {
         </div>
       )}
 
+<<<<<<< HEAD
       <div className="sticky top-0 z-10 flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white/90 px-6 py-3 backdrop-blur-xl">
         <div className="inline-flex items-center gap-2">
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500">
@@ -277,78 +478,105 @@ export default function BuilderPage() {
             onChange={setTemplateId}
           />
         </div>
+=======
+      <div className="sticky top-0 z-10 shrink-0 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
+        <div className="flex items-center overflow-x-auto py-2">
+>>>>>>> 74d72eb30fec5171e2ffb4f8f8aa1b742eb9650f
 
-        <div className="h-6 w-px bg-slate-200" />
+          {/* ─ Template ─────────────────────────────── */}
+          <ToolbarGroup label="Template">
+            <TemplateSwitch value={templateId} onChange={setTemplateId} />
+          </ToolbarGroup>
 
-        <div className="inline-flex items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-            <Text className="h-4 w-4" />
-            Font:
-          </div>
-          <Segmented
-            value={builderDesign.fontPair}
-            options={FONT_PAIRS}
-            onChange={(fontPair) => setBuilderDesign({ fontPair })}
-          />
-        </div>
+          <ToolbarDivider />
 
-        <div className="h-6 w-px bg-slate-200" />
-
-        <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
-          <Palette className="mx-2 h-4 w-4 text-slate-400" />
-          {ACCENTS.map((color) => (
-            <button
-              key={color}
-              type="button"
-              title={color}
-              onClick={() => setBuilderDesign({ accentColor: color })}
-              className={`h-6 w-6 rounded-full border-2 transition ${
-                builderDesign.accentColor === color ? 'border-slate-950' : 'border-white'
-              }`}
-              style={{ backgroundColor: color }}
+          {/* ─ Font ─────────────────────────────────── */}
+          <ToolbarGroup label="Font">
+            <FontSelect
+              value={builderDesign.fontPair || 'editorial'}
+              options={FONT_PAIRS}
+              onChange={(fontPair) => {
+                setBuilderDesign({ fontPair });
+                localStorage.setItem('resumeBuilder_font', fontPair);
+              }}
             />
-          ))}
-        </div>
+          </ToolbarGroup>
 
-        <div className="h-6 w-px bg-slate-200" />
+          <ToolbarDivider />
 
-        <div className="inline-flex items-center gap-2">
-          <Segmented
-            value={builderDesign.spacing}
-            options={SPACING}
-            onChange={(spacing) => setBuilderDesign({ spacing })}
-          />
+          {/* ─ Accent color ─────────────────────────── */}
+          <ToolbarGroup label="Accent Color">
+            <ColorSwatchStrip
+              accents={ACCENTS}
+              value={builderDesign.accentColor}
+              onChange={(accentColor) => setBuilderDesign({ accentColor })}
+            />
+          </ToolbarGroup>
 
-          <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
-            <IconButton
-              label="Zoom out"
-              onClick={() => setBuilderDesign({ zoom: Math.max(0.55, Number((builderDesign.zoom - 0.05).toFixed(2))) })}
-            >
-              <Minus className="h-3.5 w-3.5" />
-            </IconButton>
-            <span className="w-11 text-center text-xs font-semibold tabular-nums text-slate-600">
-              {Math.round(builderDesign.zoom * 100)}%
-            </span>
-            <IconButton
-              label="Zoom in"
-              onClick={() => setBuilderDesign({ zoom: Math.min(1, Number((builderDesign.zoom + 0.05).toFixed(2))) })}
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </IconButton>
-            <IconButton label="Fit preview" onClick={() => setBuilderDesign({ zoom: 0.9 })}>
-              <Maximize2 className="h-3.5 w-3.5" />
-            </IconButton>
-          </div>
+          <ToolbarDivider />
+
+          {/* ─ Spacing & Zoom ───────────────────────── */}
+          <ToolbarGroup label="Spacing & Zoom">
+            <div className="flex items-center gap-2">
+              <Segmented
+                value={builderDesign.spacing}
+                options={SPACING}
+                onChange={(spacing) => setBuilderDesign({ spacing })}
+              />
+              <div className="inline-flex items-center divide-x divide-slate-200 rounded-[8px] border border-slate-200 bg-white shadow-sm">
+                <button
+                  type="button"
+                  title="Zoom out"
+                  onClick={() => setBuilderDesign({ zoom: Math.max(0.55, Number((builderDesign.zoom - 0.05).toFixed(2))) })}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-l-[7px] text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                >
+                  <Minus className="h-3 w-3" />
+                </button>
+                <span className="w-10 py-1 text-center text-[11px] font-semibold tabular-nums text-slate-600">
+                  {Math.round(builderDesign.zoom * 100)}%
+                </span>
+                <button
+                  type="button"
+                  title="Zoom in"
+                  onClick={() => setBuilderDesign({ zoom: Math.min(1, Number((builderDesign.zoom + 0.05).toFixed(2))) })}
+                  className="inline-flex h-7 w-7 items-center justify-center text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+                <button
+                  type="button"
+                  title="Fit preview"
+                  onClick={() => setBuilderDesign({ zoom: 0.9 })}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-r-[7px] text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                >
+                  <Maximize2 className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </ToolbarGroup>
+
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-2 overflow-hidden bg-white">
-        <section className="builder-editor hover-scrollbar min-h-0 w-[50vw] overflow-y-auto border-r border-slate-200 bg-slate-50">
-          <div className="sticky top-0 z-10 border-b border-slate-200/80 bg-slate-50/95 px-5 py-4 backdrop-blur-xl">
+      {/* ── Split layout ──────────────────────────────────────────────────────── */}
+      <div ref={splitRef} className="flex min-h-0 flex-1 overflow-hidden">
+
+        {/* ── Left: Editor panel ──────────────────────────────────────────────── */}
+        <section
+          className="builder-editor hover-scrollbar flex-none overflow-y-auto"
+          style={{ width: leftWidth ?? '50%', backgroundColor: '#F7F8FA', minWidth: 0 }}
+        >
+          <div
+            className="sticky top-0 z-10 border-b border-slate-200/60 px-5 py-4 backdrop-blur-xl"
+            style={{ backgroundColor: 'rgba(247,248,250,0.95)' }}
+          >
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Editor</p>
-                <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">Resume studio</h1>
+                <p className="text-[13px] text-slate-500">
+                  <Link href="/dashboard" className="hover:text-slate-900 transition-colors">← Resume Builder</Link>
+                  <span className="mx-2 text-slate-300">&gt;</span>
+                  <span className="font-medium text-slate-900">{fullName}</span>
+                </p>
               </div>
             </div>
           </div>
@@ -356,8 +584,42 @@ export default function BuilderPage() {
           <EditorPanel />
         </section>
 
-        <section className="flex min-h-0 w-[50vw] flex-col bg-[#e8e8e8]">
-          <div className="hover-scrollbar min-h-0 flex-1 overflow-y-auto py-10 pl-8 pr-8">
+        {/* ── Drag handle ─────────────────────────────────────────────────────── */}
+        <div
+          role="separator"
+          aria-label="Drag to resize panels"
+          onMouseDown={handleSplitMouseDown}
+          className="group relative z-10 flex-none cursor-col-resize select-none"
+          style={{ width: 10 }}
+        >
+          {/* Visible line */}
+          <div
+            className={`absolute inset-y-0 left-[4px] w-[1.5px] transition-colors duration-150 ${
+              isDragging ? 'bg-indigo-400' : 'bg-slate-200 group-hover:bg-indigo-300'
+            }`}
+          />
+          {/* Gripper chip — fades in on hover, stays visible while dragging */}
+          <div
+            className={`absolute left-[1px] top-1/2 z-10 -translate-y-1/2 flex flex-col items-center justify-center gap-[4px] rounded-full border bg-white px-[3px] py-[7px] shadow-md transition-all duration-200 ${
+              isDragging
+                ? 'opacity-100 border-indigo-300 bg-indigo-50'
+                : 'opacity-0 group-hover:opacity-100 border-slate-200 group-hover:border-indigo-200 group-hover:bg-indigo-50'
+            }`}
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={`block h-[3px] w-[3px] rounded-full transition-colors duration-150 ${
+                  isDragging ? 'bg-indigo-400' : 'bg-slate-400 group-hover:bg-indigo-400'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* ── Right: Preview panel ────────────────────────────────────────────── */}
+        <section className="flex min-h-0 flex-1 flex-col" style={{ backgroundColor: '#E8E8E8' }}>
+          <div className="hover-scrollbar min-h-0 flex-1 overflow-y-auto py-12 pl-8 pr-8">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -365,53 +627,18 @@ export default function BuilderPage() {
               className="mx-auto flex min-h-full max-w-[794px] justify-center"
             >
               <div className="mx-auto origin-top" style={{ transform: `scale(${builderDesign.zoom})` }}>
-                <ResumePreview />
+                <ResumePreview
+                  data={debouncedData}
+                  templateId={templateId}
+                  sectionOrder={sectionOrder}
+                  hiddenSections={hiddenSections}
+                  builderDesign={builderDesign}
+                />
               </div>
             </motion.div>
           </div>
 
-          <div className="scrollbar-hide relative flex h-11 shrink-0 items-center gap-2 overflow-x-auto border-t border-slate-200 bg-white/95 px-4 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur">
-            {scoreChips.map((chip) => (
-              <div key={chip.id} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setActiveScoreChip((current) => current === chip.id ? null : chip.id)}
-                  className={`inline-flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full px-[14px] py-1.5 text-xs font-semibold transition ${
-                    activeScoreChip === chip.id
-                      ? 'bg-slate-800 text-white'
-                      : 'bg-[#f1f5f9] text-slate-700 hover:bg-[#e2e8f0]'
-                  }`}
-                >
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      chip.pct >= 80 ? 'bg-emerald-500' : chip.pct >= 50 ? 'bg-orange-500' : 'bg-red-500'
-                    }`}
-                  />
-                  <span>{chip.label}</span>
-                  <span className="tabular-nums">{chip.value}</span>
-                </button>
-
-                <AnimatePresence>
-                  {activeScoreChip === chip.id && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                      transition={{ duration: 0.16 }}
-                      className="absolute bottom-10 left-0 z-30 w-72 rounded-xl border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-600 shadow-2xl shadow-slate-400/30"
-                    >
-                      <p className="mb-2 font-semibold text-slate-950">{chip.label} details</p>
-                      <ul className="space-y-1.5">
-                        {chip.details.map((detail, index) => (
-                          <li key={index}>{detail}</li>
-                        ))}
-                      </ul>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
+          <ScoreFooterBar score={score} />
         </section>
       </div>
 

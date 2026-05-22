@@ -53,6 +53,7 @@ function adaptToResumeData(input: ResumeInput): ResumeData {
     projects: [],
     certifications: [],
     languages: [],
+    customSections: [],
   };
 }
 

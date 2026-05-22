@@ -37,6 +37,13 @@ body {
   line-height: 1.5;
 }
 
+.builder-editor input:not([type="checkbox"]):not([type="radio"]):focus,
+.builder-editor textarea:focus {
+  outline: none;
+  border-color: var(--accent-color, #4F46E5) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #4F46E5) 20%, transparent);
+}
+
 .builder-editor :is(label) {
   margin-bottom: 6px;
   white-space: normal;

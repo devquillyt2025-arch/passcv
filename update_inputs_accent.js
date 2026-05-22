@@ -1,0 +1,21 @@
+const fs = require('fs');
+const path = require('path');
+
+const dir = path.join(process.cwd(), 'components/builder/steps');
+const files = fs.readdirSync(dir).filter(f => f.endsWith('.tsx'));
+
+const oldInputClsRegex = /const inputCls\s*=\s*['"`][^`'"]+['"`];/s;
+const newInputCls = `const inputCls =\n    'w-full rounded-[8px] border border-[#E2E8F0] bg-white px-[14px] py-[10px] text-[14px] text-slate-900 transition-colors duration-150 placeholder:text-slate-400 focus:border-[var(--accent-color)] focus:ring-[3px] focus:ring-[var(--accent-ring)] focus:outline-none';`;
+
+for (const file of files) {
+  const p = path.join(dir, file);
+  let content = fs.readFileSync(p, 'utf8');
+  let original = content;
+
+  content = content.replace(oldInputClsRegex, newInputCls);
+  
+  if (content !== original) {
+    fs.writeFileSync(p, content, 'utf8');
+    console.log('Updated', file);
+  }
+}

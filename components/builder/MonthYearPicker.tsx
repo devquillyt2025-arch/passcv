@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import PortalPopover from '@/components/ui/PortalPopover';
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const CURRENT_YEAR = new Date().getFullYear();
@@ -32,18 +33,7 @@ export default function MonthYearPicker({ value, onChange, disabled, placeholder
   const [pendingMonth, setPendingMonth] = useState<number | null>(null);
   const [pendingYear, setPendingYear] = useState<number>(CURRENT_YEAR);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const handleOpen = () => {
     if (disabled) return;
@@ -63,9 +53,10 @@ export default function MonthYearPicker({ value, onChange, disabled, placeholder
   const canConfirm = pendingMonth !== null;
 
   return (
-    <div ref={containerRef} className="relative">
+    <>
       {/* Trigger */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={handleOpen}
         disabled={disabled}
@@ -78,8 +69,8 @@ export default function MonthYearPicker({ value, onChange, disabled, placeholder
       </button>
 
       {/* Dropdown */}
-      {open && (
-        <div className="absolute z-50 mt-1 w-full min-w-[220px] rounded-xl border border-gray-700 bg-gray-900 shadow-2xl overflow-hidden">
+      <PortalPopover isOpen={open} onClose={() => setOpen(false)} anchorRef={triggerRef} position="bottom-left">
+        <div className="mt-1 w-[220px] rounded-xl border border-gray-700 bg-gray-900 shadow-2xl overflow-hidden">
 
           {/* Month grid — 3×4 */}
           <div className="p-3 grid grid-cols-3 gap-1.5">
@@ -142,7 +133,7 @@ export default function MonthYearPicker({ value, onChange, disabled, placeholder
           </div>
 
         </div>
-      )}
-    </div>
+      </PortalPopover>
+    </>
   );
 }

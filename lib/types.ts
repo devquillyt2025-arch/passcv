@@ -166,6 +166,54 @@ export interface ResumeLanguage {
   proficiency: LanguageProficiency;
 }
 
+export interface ResumeCustomItem {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface ResumeCustomSection {
+  id: string; // e.g. "custom-uuid"
+  title: string;
+  items: ResumeCustomItem[];
+}
+
+export interface ResumePublication {
+  id: string;
+  title: string;
+  publisher: string;
+  date: string;
+  coAuthors: string;
+  url: string;
+}
+
+export interface ResumeCourse {
+  id: string;
+  name: string;
+  platform: string;
+  completionDate: string;
+  certificateUrl: string;
+}
+
+export interface ResumeAward {
+  id: string;
+  name: string;
+  issuer: string;
+  date: string;
+  description: string;
+}
+
+export interface ResumeVolunteer {
+  id: string;
+  organization: string;
+  role: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  currentlyVolunteering: boolean;
+  description: string;
+}
+
 export interface ResumeData {
   contact: ResumeContact;
   summary: string;
@@ -175,4 +223,9 @@ export interface ResumeData {
   projects: ResumeProject[];
   certifications: ResumeCertification[];
   languages: ResumeLanguage[];
+  publications?: ResumePublication[];
+  courses?: ResumeCourse[];
+  awards?: ResumeAward[];
+  volunteer?: ResumeVolunteer[];
+  customSections?: ResumeCustomSection[];
 }
