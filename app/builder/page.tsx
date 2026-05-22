@@ -28,6 +28,7 @@ import ImportResumeModal from '@/components/builder/ImportResumeModal';
 import ScoreFooterBar from '@/components/builder/ScoreFooterBar';
 import PortalPopover from '@/components/ui/PortalPopover';
 import { calculateScore, mapResumeDataToParsedResume, parseJD } from '@/lib/scoring';
+import { generateBuilderPdfBlob } from '@/lib/resumePdf';
 
 const ACCENTS = [
   { color: '#4F46E5', name: 'Indigo' },
@@ -365,14 +366,7 @@ export default function BuilderPage() {
     setDownloading(true);
     setDlError('');
     try {
-      const res = await fetch('/api/builder/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: debouncedData, templateId, sectionOrder, builderDesign }),
-      });
-      if (!res.ok) throw new Error('Failed to generate PDF');
-      
-      const blob = await res.blob();
+      const blob = await generateBuilderPdfBlob(debouncedData, templateId, sectionOrder, accentColor);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
