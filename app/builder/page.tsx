@@ -117,31 +117,35 @@ function Segmented<T extends string>({
   );
 }
 
+const TEMPLATE_OPTIONS = [
+  { id: 'classic'   as const, label: 'Classic'   },
+  { id: 'modern'    as const, label: 'Modern'    },
+  { id: 'minimal'   as const, label: 'Minimal'   },
+  { id: 'executive' as const, label: 'Executive' },
+  { id: 'sidebar'   as const, label: 'Sidebar'   },
+];
+
 function TemplateSwitch({
   value,
   onChange,
 }: {
   value: string;
-  onChange: (v: 'modern' | 'classic') => void;
+  onChange: (v: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar') => void;
 }) {
   return (
-    <div className="relative inline-flex h-7 items-stretch rounded-[8px] bg-slate-100 p-[3px]">
-      {/* Sliding thumb */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute bottom-[3px] top-[3px] w-[52px] rounded-[5px] bg-white shadow-sm transition-[left] duration-200 ease-out"
-        style={{ left: value === 'modern' ? '55px' : '3px' }}
-      />
-      {(['classic', 'modern'] as const).map((id) => (
+    <div className="inline-flex rounded-[8px] bg-slate-100 p-[3px]">
+      {TEMPLATE_OPTIONS.map(({ id, label }) => (
         <button
           key={id}
           type="button"
           onClick={() => onChange(id)}
-          className={`relative z-10 w-[52px] text-[11px] font-semibold capitalize transition-colors duration-150 ${
-            value === id ? 'text-slate-900' : 'text-slate-400 hover:text-slate-600'
+          className={`rounded-[5px] px-3 py-[3px] text-[11px] font-semibold transition-all ${
+            value === id
+              ? 'bg-[#1E293B] text-white shadow-sm'
+              : 'text-slate-400 hover:text-slate-700'
           }`}
         >
-          {id.charAt(0).toUpperCase() + id.slice(1)}
+          {label}
         </button>
       ))}
     </div>
@@ -364,7 +368,7 @@ export default function BuilderPage() {
       const res = await fetch('/api/builder/pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: debouncedData, templateId, sectionOrder }),
+        body: JSON.stringify({ data: debouncedData, templateId, sectionOrder, builderDesign }),
       });
       if (!res.ok) throw new Error('Failed to generate PDF');
       
@@ -459,29 +463,8 @@ export default function BuilderPage() {
         </div>
       )}
 
-<<<<<<< HEAD
-      <div className="sticky top-0 z-10 flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white/90 px-6 py-3 backdrop-blur-xl">
-        <div className="inline-flex items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-            <LayoutTemplate className="h-4 w-4" />
-            Theme:
-          </div>
-          <Segmented
-            value={templateId}
-            options={[
-              { id: 'classic',   label: 'Classic'   },
-              { id: 'modern',    label: 'Modern'    },
-              { id: 'minimal',   label: 'Minimal'   },
-              { id: 'executive', label: 'Executive' },
-              { id: 'sidebar',   label: 'Sidebar'   },
-            ]}
-            onChange={setTemplateId}
-          />
-        </div>
-=======
       <div className="sticky top-0 z-10 shrink-0 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
         <div className="flex items-center overflow-x-auto py-2">
->>>>>>> 74d72eb30fec5171e2ffb4f8f8aa1b742eb9650f
 
           {/* ─ Template ─────────────────────────────── */}
           <ToolbarGroup label="Template">
@@ -648,6 +631,7 @@ export default function BuilderPage() {
         <PreviewModal
           data={data}
           templateId={templateId}
+          accentColor={accentColor}
           onClose={() => setShowModal(false)}
           onDownload={() => {
             setShowModal(false);

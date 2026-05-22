@@ -160,9 +160,11 @@ const styles = StyleSheet.create({
 interface ModernTemplateProps {
   data: ResumeData;
   sectionOrder?: string[];
+  accentColor?: string;
 }
 
-export default function ModernTemplate({ data, sectionOrder }: ModernTemplateProps) {
+export default function ModernTemplate({ data, sectionOrder, accentColor }: ModernTemplateProps) {
+  const accent = accentColor || '#2563eb';
   const { contact, summary, experience, education, skills, projects, certifications, languages } = data;
   const order = (sectionOrder || SECTION_KEYS).filter(id => SECTION_KEYS.includes(id) || id.startsWith('custom-'));
 
@@ -180,8 +182,8 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
       <Page size="A4" style={styles.page}>
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
-        <View style={styles.header} wrap={false}>
-          {fullName && <Text style={styles.name}>{fullName}</Text>}
+        <View style={[styles.header, { borderBottomColor: accent }]} wrap={false}>
+          {fullName && <Text style={[styles.name, { color: accent }]}>{fullName}</Text>}
           {contact.jobTitle && <Text style={styles.jobTitle}>{sanitize(contact.jobTitle)}</Text>}
           {contactParts.length > 0 && <Text style={styles.contact}>{contactParts.join('  |  ')}</Text>}
         </View>
@@ -194,7 +196,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
             if (!summary) return null;
             return (
               <View key="summary" wrap={false}>
-                <Text style={styles.sectionTitle}>Summary</Text>
+                <Text style={[styles.sectionTitle, { color: accent }]}>Summary</Text>
                 <Text style={styles.summary}>{sanitize(summary)}</Text>
               </View>
             );
@@ -205,7 +207,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
             if (!skills || skills.length === 0) return null;
             return (
               <View key="skills" wrap={false}>
-                <Text style={styles.sectionTitle}>Skills</Text>
+                <Text style={[styles.sectionTitle, { color: accent }]}>Skills</Text>
                 <Text style={styles.skillText}>{skills.map(s => sanitize(s.name)).join(', ')}</Text>
               </View>
             );
@@ -229,7 +231,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
 
                   return (
                     <View key={`exp-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Experience</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Experience</Text>}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -272,7 +274,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
 
                   return (
                     <View key={`edu-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Education</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Education</Text>}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -308,7 +310,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
 
                   return (
                     <View key={`cert-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Certifications</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Certifications</Text>}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -334,7 +336,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
               <>
                 {languages.map((lang: ResumeLanguage, idx: number) => (
                   <View key={`lang-${idx}`} wrap={false}>
-                    {idx === 0 && <Text style={styles.sectionTitle}>Languages</Text>}
+                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Languages</Text>}
                     <View style={[styles.entry, { marginBottom: 4 }]}>
                       <View style={styles.itemHeader}>
                         <Text style={styles.title}>{sanitize(lang.name)}</Text>
@@ -361,7 +363,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
 
                   return (
                     <View key={`proj-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Projects</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Projects</Text>}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -399,7 +401,7 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
               <>
                 {customSection.items.map((item, idx) => (
                   <View key={`${sectionId}-${idx}`} wrap={false}>
-                    {idx === 0 && <Text style={styles.sectionTitle}>{sanitize(customSection.title || 'Custom Section')}</Text>}
+                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>{sanitize(customSection.title || 'Custom Section')}</Text>}
                     <View style={styles.entry}>
                       <View style={styles.itemHeader}>
                         <View style={styles.titleWrapper}>

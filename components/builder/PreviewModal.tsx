@@ -6,19 +6,20 @@ import { generateBuilderPdfBlob } from '@/lib/resumePdf';
 
 interface Props {
   data: ResumeData;
-  templateId: 'classic' | 'modern';
+  templateId: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar';
+  accentColor?: string;
   onClose: () => void;
   onDownload: () => void;
 }
 
-export default function PreviewModal({ data, templateId, onClose, onDownload }: Props) {
+export default function PreviewModal({ data, templateId, accentColor, onClose, onDownload }: Props) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const urlRef = useRef<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
-    generateBuilderPdfBlob(data, templateId)
+    generateBuilderPdfBlob(data, templateId, undefined, accentColor)
       .then(blob => {
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         const url = URL.createObjectURL(blob);
@@ -34,7 +35,7 @@ export default function PreviewModal({ data, templateId, onClose, onDownload }: 
     return () => {
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     };
-  }, [data, templateId]);
+  }, [data, templateId, accentColor]);
 
   // Close on Escape key
   useEffect(() => {

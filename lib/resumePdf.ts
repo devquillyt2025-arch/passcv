@@ -73,10 +73,11 @@ const TEMPLATE_MAP = {
 export async function generateBuilderPdfBlob(
   data: ResumeData,
   templateId: keyof typeof TEMPLATE_MAP = 'classic',
-  sectionOrder?: string[]
+  sectionOrder?: string[],
+  accentColor?: string
 ): Promise<Blob> {
   const TemplateComponent = TEMPLATE_MAP[templateId] ?? ClassicTemplate;
-  const doc = React.createElement(TemplateComponent, { data, sectionOrder });
+  const doc = React.createElement(TemplateComponent, { data, sectionOrder, accentColor });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const asPdf = pdf(doc as any);
   const blob = await asPdf.toBlob();

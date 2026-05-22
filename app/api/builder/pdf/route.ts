@@ -3,20 +3,32 @@ import { renderToStream } from '@react-pdf/renderer';
 import type { DocumentProps } from '@react-pdf/renderer';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import ModernTemplate from '@/components/templates/ModernTemplate';
+import MinimalTemplate from '@/components/templates/MinimalTemplate';
+import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
+import SidebarTemplate from '@/components/templates/SidebarTemplate';
+
+const TEMPLATE_MAP = {
+  classic: ClassicTemplate,
+  modern: ModernTemplate,
+  minimal: MinimalTemplate,
+  executive: ExecutiveTemplate,
+  sidebar: SidebarTemplate,
+} as const;
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { data, templateId, sectionOrder } = body;
-    
+    const { data, templateId, sectionOrder, builderDesign } = body;
+
     if (!data) {
       return new Response(JSON.stringify({ error: 'Missing resume data' }), { status: 400 });
     }
 
-    const TemplateComponent = templateId === 'modern' ? ModernTemplate : ClassicTemplate;
-    const doc = React.createElement(TemplateComponent, { data, sectionOrder }) as unknown as React.ReactElement<DocumentProps>;
+    const TemplateComponent = TEMPLATE_MAP[templateId as keyof typeof TEMPLATE_MAP] ?? ClassicTemplate;
+    const accentColor = builderDesign?.accentColor;
+    const doc = React.createElement(TemplateComponent, { data, sectionOrder, accentColor }) as unknown as React.ReactElement<DocumentProps>;
     const stream = await renderToStream(doc);
-    
+
     return new Response(stream as unknown as BodyInit, {
       status: 200,
       headers: {

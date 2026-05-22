@@ -1,13 +1,8 @@
 'use client';
 
-<<<<<<< HEAD
-import { useLayoutEffect, useRef, useState, useMemo, type CSSProperties } from 'react';
-import { useResumeStore } from '@/lib/store/useResumeStore';
-=======
-import { useLayoutEffect, useRef, useState, useMemo, memo } from 'react';
+import { useLayoutEffect, useRef, useState, useMemo, memo, type CSSProperties } from 'react';
 import type { ResumeData, ResumeExperience, ResumeEducation, ResumeProject, ResumeCertification, ResumeLanguage, ResumePublication, ResumeCourse, ResumeAward, ResumeVolunteer } from '@/lib/types';
 import type { StoreState } from '@/lib/store/slices/types';
->>>>>>> 74d72eb30fec5171e2ffb4f8f8aa1b742eb9650f
 import { DEFAULT_SECTION_ORDER } from '@/lib/store/slices/globalSlice';
 
 // ── Page geometry (preview scale: 680px wide = A4 at ~83dpi) ─────────────────
@@ -618,7 +613,6 @@ function packBlocks(heights: number[], usableH: number): number[][] {
   return pages;
 }
 
-<<<<<<< HEAD
 // ── Sidebar preview (two-column layout, bypasses block system) ────────────────
 const SIDEBAR_MAIN_SECTIONS = new Set(['summary', 'experience', 'education', 'certifications', 'projects']);
 
@@ -824,9 +818,6 @@ function SidebarPreview({ data, builderDesign, order }: { data: ResumeData; buil
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function ResumePreview() {
-  const { data, templateId, sectionOrder, builderDesign } = useResumeStore();
-=======
 interface ResumePreviewProps {
   data: ResumeData;
   templateId: string;
@@ -836,9 +827,8 @@ interface ResumePreviewProps {
 }
 
 const ResumePreview = memo(function ResumePreview({ data, templateId, sectionOrder, hiddenSections, builderDesign }: ResumePreviewProps) {
->>>>>>> 74d72eb30fec5171e2ffb4f8f8aa1b742eb9650f
   const t = useMemo(() => {
-    const baseMap: Record<string, typeof CLASSIC> = {
+    const baseMap: Record<string, Theme> = {
       classic: CLASSIC,
       modern: MODERN,
       minimal: MINIMAL,
@@ -867,13 +857,8 @@ const ResumePreview = memo(function ResumePreview({ data, templateId, sectionOrd
     return {
       ...base,
       ...spacing,
-<<<<<<< HEAD
-      font: fontByPair[builderDesign?.fontPair || 'modern'],
-      nameColor: templateId === 'executive' ? '#FFFFFF' : accent,
-=======
       font: fontByPair[builderDesign?.fontPair || 'editorial'],
-      nameColor: accent,
->>>>>>> 74d72eb30fec5171e2ffb4f8f8aa1b742eb9650f
+      nameColor: templateId === 'executive' ? '#FFFFFF' : accent,
       headingColor: accent,
       headingStyle: {
         ...base.headingStyle,
@@ -888,15 +873,9 @@ const ResumePreview = memo(function ResumePreview({ data, templateId, sectionOrd
   // All hooks must be called unconditionally (Rules of Hooks).
   // For sidebar, blocks and measurements are skipped via guards inside each hook.
   const blocks = useMemo(
-<<<<<<< HEAD
-    () => isSidebar ? [] : buildBlocks(data, t, templateId, order),
+    () => isSidebar ? [] : buildBlocks(data, t, templateId, order, hiddenSections),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, templateId, sectionOrder, t, isSidebar]
-=======
-    () => buildBlocks(data, t, templateId, order, hiddenSections),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, templateId, sectionOrder, hiddenSections, t]
->>>>>>> 74d72eb30fec5171e2ffb4f8f8aa1b742eb9650f
+    [data, templateId, sectionOrder, hiddenSections, t, isSidebar]
   );
 
   const measureRefs = useRef<(HTMLDivElement | null)[]>([]);

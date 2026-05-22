@@ -202,9 +202,11 @@ const styles = StyleSheet.create({
 interface SidebarTemplateProps {
   data: ResumeData;
   sectionOrder?: string[];
+  accentColor?: string;
 }
 
-export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateProps) {
+export default function SidebarTemplate({ data, sectionOrder, accentColor }: SidebarTemplateProps) {
+  const accent = accentColor || ACCENT;
   const { contact, summary, experience, education, skills, projects, certifications, languages } = data;
   const mainOrder = (sectionOrder || MAIN_KEYS).filter(id => MAIN_KEYS.includes(id));
 
@@ -222,7 +224,7 @@ export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateP
       <Page size="A4" style={styles.page}>
 
         {/* ── Left sidebar ────────────────────────────────────────────────── */}
-        <View style={styles.sidebar}>
+        <View style={[styles.sidebar, { backgroundColor: accent }]}>
           {fullName ? <Text style={styles.sName}>{fullName}</Text> : null}
           {contact.jobTitle ? <Text style={styles.sJobTitle}>{sanitize(contact.jobTitle)}</Text> : null}
 
@@ -268,7 +270,7 @@ export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateP
               if (!summary) return null;
               return (
                 <View key="summary" wrap={false}>
-                  <Text style={styles.mSectionTitle}>Summary</Text>
+                  <Text style={[styles.mSectionTitle, { color: accent }]}>Summary</Text>
                   <Text style={styles.mSummary}>{sanitize(summary)}</Text>
                 </View>
               );
@@ -291,7 +293,7 @@ export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateP
 
                     return (
                       <View key={`exp-${idx}`} wrap={false}>
-                        {idx === 0 && <Text style={styles.mSectionTitle}>Experience</Text>}
+                        {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>Experience</Text>}
                         <View style={styles.mEntry}>
                           <View style={styles.mItemHeader}>
                             <View style={styles.mTitleWrapper}>
@@ -304,7 +306,7 @@ export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateP
                             <View style={styles.mBulletList}>
                               {bullets.map((bullet, bIdx) => (
                                 <View key={bIdx} style={styles.mBulletPoint}>
-                                  <Text style={styles.mBullet}>▸</Text>
+                                  <Text style={[styles.mBullet, { color: accent }]}>▸</Text>
                                   <Text style={styles.mBulletText}>{bullet}</Text>
                                 </View>
                               ))}
@@ -332,7 +334,7 @@ export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateP
 
                     return (
                       <View key={`edu-${idx}`} wrap={false}>
-                        {idx === 0 && <Text style={styles.mSectionTitle}>Education</Text>}
+                        {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>Education</Text>}
                         <View style={styles.mEntry}>
                           <View style={styles.mItemHeader}>
                             <View style={styles.mTitleWrapper}>
@@ -363,7 +365,7 @@ export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateP
 
                     return (
                       <View key={`cert-${idx}`} wrap={false}>
-                        {idx === 0 && <Text style={styles.mSectionTitle}>Certifications</Text>}
+                        {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>Certifications</Text>}
                         <View style={styles.mEntry}>
                           <View style={styles.mItemHeader}>
                             <View style={styles.mTitleWrapper}>
@@ -393,7 +395,7 @@ export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateP
 
                     return (
                       <View key={`proj-${idx}`} wrap={false}>
-                        {idx === 0 && <Text style={styles.mSectionTitle}>Projects</Text>}
+                        {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>Projects</Text>}
                         <View style={styles.mEntry}>
                           <View style={styles.mItemHeader}>
                             <View style={styles.mTitleWrapper}>
@@ -406,7 +408,7 @@ export default function SidebarTemplate({ data, sectionOrder }: SidebarTemplateP
                             <View style={styles.mBulletList}>
                               {bullets.map((bullet, bIdx) => (
                                 <View key={bIdx} style={styles.mBulletPoint}>
-                                  <Text style={styles.mBullet}>▸</Text>
+                                  <Text style={[styles.mBullet, { color: accent }]}>▸</Text>
                                   <Text style={styles.mBulletText}>{bullet}</Text>
                                 </View>
                               ))}

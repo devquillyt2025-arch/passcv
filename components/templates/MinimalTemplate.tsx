@@ -152,9 +152,11 @@ const styles = StyleSheet.create({
 interface MinimalTemplateProps {
   data: ResumeData;
   sectionOrder?: string[];
+  accentColor?: string;
 }
 
-export default function MinimalTemplate({ data, sectionOrder }: MinimalTemplateProps) {
+export default function MinimalTemplate({ data, sectionOrder, accentColor }: MinimalTemplateProps) {
+  const accent = accentColor || '#6b7280';
   const { contact, summary, experience, education, skills, projects, certifications, languages } = data;
   const order = (sectionOrder || SECTION_KEYS).filter(id => SECTION_KEYS.includes(id));
 
@@ -186,7 +188,7 @@ export default function MinimalTemplate({ data, sectionOrder }: MinimalTemplateP
             if (!summary) return null;
             return (
               <View key="summary" wrap={false}>
-                <Text style={styles.sectionTitle}>Summary</Text>
+                <Text style={[styles.sectionTitle, { color: accent }]}>Summary</Text>
                 <Text style={styles.summary}>{sanitize(summary)}</Text>
               </View>
             );
@@ -196,7 +198,7 @@ export default function MinimalTemplate({ data, sectionOrder }: MinimalTemplateP
             if (!skills || skills.length === 0) return null;
             return (
               <View key="skills" wrap={false}>
-                <Text style={styles.sectionTitle}>Skills</Text>
+                <Text style={[styles.sectionTitle, { color: accent }]}>Skills</Text>
                 <Text style={{ fontSize: 10, color: '#374151', lineHeight: 1.5 }}>
                   {skills.map(s => sanitize(s.name)).join('  ·  ')}
                 </Text>
@@ -221,7 +223,7 @@ export default function MinimalTemplate({ data, sectionOrder }: MinimalTemplateP
 
                   return (
                     <View key={`exp-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Experience</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Experience</Text>}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -263,7 +265,7 @@ export default function MinimalTemplate({ data, sectionOrder }: MinimalTemplateP
 
                   return (
                     <View key={`edu-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Education</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Education</Text>}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -294,7 +296,7 @@ export default function MinimalTemplate({ data, sectionOrder }: MinimalTemplateP
 
                   return (
                     <View key={`cert-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Certifications</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Certifications</Text>}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -319,7 +321,7 @@ export default function MinimalTemplate({ data, sectionOrder }: MinimalTemplateP
               <>
                 {languages.map((lang: ResumeLanguage, idx: number) => (
                   <View key={`lang-${idx}`} wrap={false}>
-                    {idx === 0 && <Text style={styles.sectionTitle}>Languages</Text>}
+                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Languages</Text>}
                     <View style={[styles.entry, { marginBottom: 4 }]}>
                       <View style={styles.itemHeader}>
                         <Text style={styles.title}>{sanitize(lang.name)}</Text>
@@ -345,7 +347,7 @@ export default function MinimalTemplate({ data, sectionOrder }: MinimalTemplateP
 
                   return (
                     <View key={`proj-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Projects</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Projects</Text>}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>

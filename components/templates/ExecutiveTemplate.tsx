@@ -162,9 +162,11 @@ const styles = StyleSheet.create({
 interface ExecutiveTemplateProps {
   data: ResumeData;
   sectionOrder?: string[];
+  accentColor?: string;
 }
 
-export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTemplateProps) {
+export default function ExecutiveTemplate({ data, sectionOrder, accentColor }: ExecutiveTemplateProps) {
+  const accent = accentColor || ACCENT;
   const { contact, summary, experience, education, skills, projects, certifications, languages } = data;
   const order = (sectionOrder || SECTION_KEYS).filter(id => SECTION_KEYS.includes(id));
 
@@ -196,7 +198,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
               if (!summary) return null;
               return (
                 <View key="summary" wrap={false}>
-                  <Text style={styles.sectionTitle}>Professional Summary</Text>
+                  <Text style={[styles.sectionTitle, { color: accent, borderLeftColor: accent }]}>Professional Summary</Text>
                   <Text style={styles.summary}>{sanitize(summary)}</Text>
                 </View>
               );
@@ -206,7 +208,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
               if (!skills || skills.length === 0) return null;
               return (
                 <View key="skills" wrap={false}>
-                  <Text style={styles.sectionTitle}>Core Skills</Text>
+                  <Text style={[styles.sectionTitle, { color: accent, borderLeftColor: accent }]}>Core Skills</Text>
                   <Text style={{ fontSize: 10, color: '#334155', lineHeight: 1.5 }}>
                     {skills.map(s => sanitize(s.name)).join('  ·  ')}
                   </Text>
@@ -231,7 +233,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
 
                     return (
                       <View key={`exp-${idx}`} wrap={false}>
-                        {idx === 0 && <Text style={styles.sectionTitle}>Professional Experience</Text>}
+                        {idx === 0 && <Text style={[styles.sectionTitle, { color: accent, borderLeftColor: accent }]}>Professional Experience</Text>}
                         <View style={styles.entry}>
                           <View style={styles.itemHeader}>
                             <View style={styles.titleWrapper}>
@@ -244,7 +246,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
                             <View style={styles.bulletList}>
                               {bullets.map((bullet, bIdx) => (
                                 <View key={bIdx} style={styles.bulletPoint}>
-                                  <Text style={styles.bullet}>▸</Text>
+                                  <Text style={[styles.bullet, { color: accent }]}>▸</Text>
                                   <Text style={styles.bulletText}>{bullet}</Text>
                                 </View>
                               ))}
@@ -273,7 +275,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
 
                     return (
                       <View key={`edu-${idx}`} wrap={false}>
-                        {idx === 0 && <Text style={styles.sectionTitle}>Education</Text>}
+                        {idx === 0 && <Text style={[styles.sectionTitle, { color: accent, borderLeftColor: accent }]}>Education</Text>}
                         <View style={styles.entry}>
                           <View style={styles.itemHeader}>
                             <View style={styles.titleWrapper}>
@@ -304,7 +306,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
 
                     return (
                       <View key={`cert-${idx}`} wrap={false}>
-                        {idx === 0 && <Text style={styles.sectionTitle}>Certifications</Text>}
+                        {idx === 0 && <Text style={[styles.sectionTitle, { color: accent, borderLeftColor: accent }]}>Certifications</Text>}
                         <View style={styles.entry}>
                           <View style={styles.itemHeader}>
                             <View style={styles.titleWrapper}>
@@ -329,7 +331,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
                 <>
                   {languages.map((lang: ResumeLanguage, idx: number) => (
                     <View key={`lang-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={styles.sectionTitle}>Languages</Text>}
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent, borderLeftColor: accent }]}>Languages</Text>}
                       <View style={[styles.entry, { marginBottom: 4 }]}>
                         <View style={styles.itemHeader}>
                           <Text style={styles.title}>{sanitize(lang.name)}</Text>
@@ -355,7 +357,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
 
                     return (
                       <View key={`proj-${idx}`} wrap={false}>
-                        {idx === 0 && <Text style={styles.sectionTitle}>Projects</Text>}
+                        {idx === 0 && <Text style={[styles.sectionTitle, { color: accent, borderLeftColor: accent }]}>Projects</Text>}
                         <View style={styles.entry}>
                           <View style={styles.itemHeader}>
                             <View style={styles.titleWrapper}>
@@ -368,7 +370,7 @@ export default function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTempl
                             <View style={styles.bulletList}>
                               {bullets.map((bullet, bIdx) => (
                                 <View key={bIdx} style={styles.bulletPoint}>
-                                  <Text style={styles.bullet}>▸</Text>
+                                  <Text style={[styles.bullet, { color: accent }]}>▸</Text>
                                   <Text style={styles.bulletText}>{bullet}</Text>
                                 </View>
                               ))}

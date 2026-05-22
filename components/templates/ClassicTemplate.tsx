@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
 interface ClassicTemplateProps {
   data: ResumeData;
   sectionOrder?: string[];
+  accentColor?: string;
 }
 
 export default function ClassicTemplate({ data, sectionOrder }: ClassicTemplateProps) {
