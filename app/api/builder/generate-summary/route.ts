@@ -33,7 +33,7 @@ ${skillsText}
 Return ONLY the generated summary text. Do not include any intro, outro, or quotes.`;
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307', // Using haiku for speed
+      model: 'claude-haiku-4-5-20251001', // Using haiku for speed
       max_tokens: 300,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,

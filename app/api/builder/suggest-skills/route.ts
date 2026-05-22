@@ -28,7 +28,7 @@ Mix hard technical skills and important soft skills that ATS systems typically s
 Output exactly a comma-separated list of 10 skills. No numbers, no bullet points, no introductory text. For example: React.js, TypeScript, Project Management, Agile, Communication, Node.js, GraphQL, SEO, Data Analysis, Leadership`;
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 150,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.6,

@@ -56,7 +56,7 @@ Please transform these into punchy, natural-sounding achievement bullets. Each b
 Format ONLY as a bullet list using '-'. No intro, no explanations, no markdown backticks.`;
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 600,
       system: HUMAN_LIKE_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userPrompt }],

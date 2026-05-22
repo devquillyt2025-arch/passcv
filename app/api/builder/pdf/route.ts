@@ -28,8 +28,15 @@ export async function POST(req: Request) {
     const accentColor = builderDesign?.accentColor;
     const doc = React.createElement(TemplateComponent, { data, sectionOrder, accentColor }) as unknown as React.ReactElement<DocumentProps>;
     const stream = await renderToStream(doc);
+    
+    // Convert Node stream to a Buffer for Next.js Web Response
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+      chunks.push(Buffer.from(chunk));
+    }
+    const pdfBuffer = Buffer.concat(chunks);
 
-    return new Response(stream as unknown as BodyInit, {
+    return new Response(pdfBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
