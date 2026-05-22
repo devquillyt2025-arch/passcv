@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { ResumeData, ResumeLanguage } from '@/lib/types';
 
 const SECTION_KEYS = ['summary', 'skills', 'experience', 'education', 'certifications', 'languages', 'projects'];
@@ -23,22 +23,12 @@ function sanitize(text: string): string {
     .replace(/ /g, ' ');
 }
 
-Font.register({
-  family: 'Roboto',
-  fonts: [
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-400-normal.ttf' },
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-500-normal.ttf', fontWeight: 500 },
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-700-normal.ttf', fontWeight: 700 },
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-400-italic.ttf', fontStyle: 'italic' },
-  ],
-});
-
 const styles = StyleSheet.create({
   page: {
     paddingTop: 36,
     paddingBottom: 48,
     paddingHorizontal: 44,
-    fontFamily: 'Roboto',
+    fontFamily: 'Helvetica',
     fontSize: 10,
     color: '#1f2937',
     lineHeight: 1.55,
