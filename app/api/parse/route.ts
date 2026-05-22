@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { ParsedResume } from '@/lib/types';
 
-const PARSE_PROMPT = `Extract all information from this resume and return it as JSON matching this exact schema. If a field is not found, use an empty string or empty array.
+export const maxDuration = 60;
 
-Return ONLY valid JSON, no markdown fences, no explanation:
+const PARSE_PROMPT = `Extract ALL information from this resume and return it as JSON matching the exact schema below.
+
+CRITICAL RULES:
+- Find EVERY work/job entry. Look for sections titled: Experience, Work Experience, Professional Experience, Employment History, Work History, Career History, Internship, Internships. Include internships as experience entries.
+- If a field is not found, use empty string "" or empty array [].
+- Return ONLY valid JSON with no markdown fences or explanation.
+
 {
   "contact": {
     "name": "full name",
@@ -17,16 +23,16 @@ Return ONLY valid JSON, no markdown fences, no explanation:
   "experience": [
     {
       "company": "company name",
-      "title": "job title",
+      "title": "job title or role",
       "startDate": "Mon YYYY",
       "endDate": "Mon YYYY or Present",
-      "bullets": ["bullet point 1", "bullet point 2"]
+      "bullets": ["responsibility or achievement 1", "responsibility or achievement 2"]
     }
   ],
   "education": [
     {
       "institution": "college or university name",
-      "degree": "degree type e.g. B.Tech MBA",
+      "degree": "degree type e.g. B.Tech MBA B.E. MCA",
       "field": "field of study",
       "year": "graduation year YYYY",
       "cgpa": "cgpa or percentage or empty string"
@@ -91,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2048,
+      max_tokens: 4096,
       messages: [{ role: 'user', content: claudeContent }],
     });
 

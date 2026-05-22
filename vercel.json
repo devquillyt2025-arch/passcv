@@ -1,10 +1,13 @@
 {
   "functions": {
-    "api/parse.py": {
-      "maxDuration": 30
-    },
-    "api/generate_docx.py": {
-      "maxDuration": 30
-    }
+    "app/api/parse/route.ts": { "maxDuration": 60 },
+    "app/api/rewrite/route.ts": { "maxDuration": 60 },
+    "app/api/builder/rewrite/route.ts": { "maxDuration": 60 },
+    "app/api/builder/generate-summary/route.ts": { "maxDuration": 60 },
+    "app/api/builder/enhance-bullets/route.ts": { "maxDuration": 60 },
+    "app/api/builder/suggest-keywords/route.ts": { "maxDuration": 60 },
+    "app/api/builder/suggest-skills/route.ts": { "maxDuration": 60 },
+    "app/api/cover-letter/route.ts": { "maxDuration": 60 },
+    "app/api/score/route.ts": { "maxDuration": 60 }
   }
 }
