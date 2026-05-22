@@ -1,7 +1,8 @@
 'use client';
 
 import { useLayoutEffect, useRef, useState, useMemo, memo } from 'react';
-import type { ResumeData, ResumeExperience, ResumeEducation, ResumeProject, ResumeCertification, ResumeLanguage, ResumePublication, ResumeCourse, ResumeAward, ResumeVolunteer, StoreState } from '@/lib/types';
+import type { ResumeData, ResumeExperience, ResumeEducation, ResumeProject, ResumeCertification, ResumeLanguage, ResumePublication, ResumeCourse, ResumeAward, ResumeVolunteer } from '@/lib/types';
+import type { StoreState } from '@/lib/store/slices/types';
 import { DEFAULT_SECTION_ORDER } from '@/lib/store/slices/globalSlice';
 
 // ── Page geometry (preview scale: 680px wide = A4 at ~83dpi) ─────────────────

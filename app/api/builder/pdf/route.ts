@@ -1,5 +1,6 @@
 import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
+import type { DocumentProps } from '@react-pdf/renderer';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import ModernTemplate from '@/components/templates/ModernTemplate';
 
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
     }
 
     const TemplateComponent = templateId === 'modern' ? ModernTemplate : ClassicTemplate;
-    const doc = React.createElement(TemplateComponent, { data, sectionOrder });
+    const doc = React.createElement(TemplateComponent, { data, sectionOrder }) as unknown as React.ReactElement<DocumentProps>;
     const stream = await renderToStream(doc);
     
     return new Response(stream as unknown as BodyInit, {

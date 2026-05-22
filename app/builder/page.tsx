@@ -270,7 +270,7 @@ export default function BuilderPage() {
   const { data, resumeId, templateId, sectionOrder, hiddenSections, builderDesign, _hasHydrated, setBuilderDesign, setTemplateId } = useResumeStore();
   const debouncedData = useDebounce(data, 300);
   const { jdText } = useUIStore();
-  const stats = useResumeStats(debouncedData, templateId);
+  const stats = useResumeStats(debouncedData);
   const { saveStatus } = useAutosaveSync(resumeId, data);
 
   const [showModal, setShowModal] = useState(false);
