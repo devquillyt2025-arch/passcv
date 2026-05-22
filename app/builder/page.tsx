@@ -28,7 +28,6 @@ import ImportResumeModal from '@/components/builder/ImportResumeModal';
 import ScoreFooterBar from '@/components/builder/ScoreFooterBar';
 import PortalPopover from '@/components/ui/PortalPopover';
 import { calculateScore, mapResumeDataToParsedResume, parseJD } from '@/lib/scoring';
-import { generateBuilderPdfBlob } from '@/lib/resumePdf';
 
 const ACCENTS = [
   { color: '#4F46E5', name: 'Indigo' },
@@ -366,6 +365,7 @@ export default function BuilderPage() {
     setDownloading(true);
     setDlError('');
     try {
+      const { generateBuilderPdfBlob } = await import('@/lib/resumePdf');
       const blob = await generateBuilderPdfBlob(debouncedData, templateId, sectionOrder, accentColor);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

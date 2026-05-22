@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ResumeData } from '@/lib/types';
-import { generateBuilderPdfBlob } from '@/lib/resumePdf';
 
 interface Props {
   data: ResumeData;
@@ -19,7 +18,8 @@ export default function PreviewModal({ data, templateId, accentColor, onClose, o
 
   useEffect(() => {
     setLoading(true);
-    generateBuilderPdfBlob(data, templateId, undefined, accentColor)
+    import('@/lib/resumePdf')
+      .then(({ generateBuilderPdfBlob }) => generateBuilderPdfBlob(data, templateId, undefined, accentColor))
       .then(blob => {
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         const url = URL.createObjectURL(blob);
