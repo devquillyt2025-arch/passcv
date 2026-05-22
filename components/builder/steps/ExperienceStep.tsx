@@ -39,26 +39,14 @@ function analyzeBullets(description: string): BulletIssue[] {
     .filter((b) => b.length > 15);
 
   const issues: BulletIssue[] = [];
-
   bullets.forEach((bullet, i) => {
     const weakMatch = WEAK_PATTERNS.find(({ pattern }) => pattern.test(bullet));
     if (weakMatch) {
-      issues.push({
-        index: i + 1,
-        text: bullet.slice(0, 55) + (bullet.length > 55 ? '…' : ''),
-        type: 'weak-verb',
-        message: `Bullet ${i + 1}: ${weakMatch.label} — try Led, Built, Drove, Designed, Delivered`,
-      });
+      issues.push({ index: i + 1, text: bullet.slice(0, 55) + (bullet.length > 55 ? '…' : ''), type: 'weak-verb', message: `Bullet ${i + 1}: ${weakMatch.label} — try Led, Built, Drove, Designed, Delivered` });
     } else if (!/\d/.test(bullet)) {
-      issues.push({
-        index: i + 1,
-        text: bullet.slice(0, 55) + (bullet.length > 55 ? '…' : ''),
-        type: 'no-metric',
-        message: `Bullet ${i + 1}: No metric — add a number, %, $, or time saved`,
-      });
+      issues.push({ index: i + 1, text: bullet.slice(0, 55) + (bullet.length > 55 ? '…' : ''), type: 'no-metric', message: `Bullet ${i + 1}: No metric — add a number, %, $, or time saved` });
     }
   });
-
   return issues;
 }
 
@@ -89,15 +77,17 @@ function BulletWeaknessPanel({ description }: { description: string }) {
               {issue.message}
             </span>
             {expandedIssue === issue.index && (
-              <span className="mt-1 block text-[11px] leading-5 text-slate-500">
-                {issue.text}
-              </span>
+              <span className="mt-1 block text-[11px] leading-5 text-slate-500">{issue.text}</span>
             )}
           </span>
         </button>
       ))}
     </div>
   );
+}
+
+function GroupLabel({ children }: { children: React.ReactNode }) {
+  return <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">{children}</p>;
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -109,8 +99,6 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
   const setHighlightExpId = useUIStore((s) => s.setHighlightExpId);
   const [expandedId, setExpandedId] = useState<string | null>(experience[0]?.id || null);
 
-  // When ResumeStatsWidget dispatches a highlight signal, open the matching card,
-  // scroll to it, and auto-clear the ring after 3 s.
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!highlightExpId) return;
@@ -119,9 +107,7 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
       document.getElementById(`exp-desc-${highlightExpId}`)
         ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
-    clearTimerRef.current = setTimeout(() => {
-      setHighlightExpId(null);
-    }, 3000);
+    clearTimerRef.current = setTimeout(() => setHighlightExpId(null), 3000);
     return () => {
       clearTimeout(scrollTimer);
       if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
@@ -155,11 +141,7 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
     const errors = analyzeBullets(description).map((issue) => issue.message);
     enhance(
       (text) => updateExperience(expId, { description: text }),
-      {
-        rawText: description,
-        validationErrors: errors,
-        jobTitle: `Role: ${position} at ${company}`,
-      },
+      { rawText: description, validationErrors: errors, jobTitle: `Role: ${position} at ${company}` },
     );
   };
 
@@ -167,6 +149,9 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
     revert();
     setActiveExpId(null);
   };
+
+  const inputCls =
+    'w-full rounded-[8px] border border-[#E2E8F0] bg-white px-[14px] py-[10px] text-[14px] text-slate-900 transition-colors duration-150 placeholder:text-slate-400 focus:border-[var(--accent-color)] focus:ring-[3px] focus:ring-[var(--accent-ring)] focus:outline-none';
 
   return (
     <div className="space-y-5">
@@ -182,7 +167,7 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="experience-list">
           {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
+            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
               {experience.map((exp, index) => {
                 const isExpanded = expandedId === exp.id;
                 return (
@@ -191,86 +176,95 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={`bg-white rounded-xl border overflow-hidden transition-all ${
+                        className={`rounded-xl border overflow-hidden transition-all ${
                           snapshot.isDragging ? 'shadow-lg border-indigo-300' : 'border-gray-200 shadow-sm'
                         }`}
                       >
                         {/* ── Card header ── */}
                         <div
-                          className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 ${isExpanded ? 'bg-gray-50 border-b border-gray-200' : ''}`}
+                          className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-gray-50 border-b border-gray-200' : 'bg-white'}`}
                           onClick={() => setExpandedId(isExpanded ? null : exp.id)}
                         >
                           <div
                             {...provided.dragHandleProps}
-                            className="cursor-grab active:cursor-grabbing text-gray-400 focus:outline-none"
+                            className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 focus:outline-none"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <GripVertical className="w-5 h-5" />
+                            <GripVertical className="w-4 h-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-semibold text-gray-900 truncate">
                               {exp.position || '(Not specified)'}
                             </h3>
-                            <p className="text-xs text-gray-500 truncate mt-0.5">
-                              {exp.company || 'Company Name'} · {exp.startDate || 'Start'} -{' '}
+                            <p className="text-xs text-gray-400 truncate mt-0.5">
+                              {exp.company || 'Company Name'} · {exp.startDate || 'Start'} –{' '}
                               {exp.currentlyWorking ? 'Present' : exp.endDate || 'End'}
                             </p>
                           </div>
                           <button
                             onClick={(e) => { e.stopPropagation(); removeExperience(exp.id); }}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors mr-1"
+                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors mr-1"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                           <div className="text-gray-400">
-                            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                           </div>
                         </div>
 
                         {/* ── Expanded form ── */}
                         {isExpanded && (
-                          <div className="p-4 space-y-4 bg-white">
+                          <div className="divide-y divide-slate-100 bg-white">
                             {/* Per-job error */}
                             {error && activeExpId === exp.id && (
-                              <p className="text-xs text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100">{error}</p>
+                              <div className="px-4 pt-4 pb-0">
+                                <p className="text-xs text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100">{error}</p>
+                              </div>
                             )}
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
-                                <input
-                                  type="text"
-                                  value={exp.position}
-                                  onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-                                  placeholder="e.g. Frontend Developer"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                                <input
-                                  type="text"
-                                  value={exp.company}
-                                  onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-                                  placeholder="e.g. Google"
-                                />
-                              </div>
-                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            {/* ─ Position Details ─ */}
+                            <div className="px-4 py-4 space-y-3">
+                              <GroupLabel>Position Details</GroupLabel>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Job Title</label>
+                                  <input
+                                    type="text"
+                                    value={exp.position}
+                                    onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
+                                    className={inputCls}
+                                    placeholder="e.g. Frontend Developer"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Company</label>
+                                  <input
+                                    type="text"
+                                    value={exp.company}
+                                    onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
+                                    className={inputCls}
+                                    placeholder="e.g. Google"
+                                  />
+                                </div>
+                              </div>
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                <label className="block text-xs font-medium text-gray-600 mb-1.5">Location</label>
                                 <input
                                   type="text"
                                   value={exp.location}
                                   onChange={(e) => updateExperience(exp.id, { location: e.target.value })}
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                                  className={inputCls}
                                   placeholder="e.g. New York, NY"
                                 />
                               </div>
-                              <div className="grid grid-cols-2 gap-2">
+                            </div>
+
+                            {/* ─ Duration ─ */}
+                            <div className="px-4 py-4 space-y-3">
+                              <GroupLabel>Duration</GroupLabel>
+                              <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Start Date</label>
                                   <MonthYearPicker
                                     value={exp.startDate}
                                     onChange={(v) => updateExperience(exp.id, { startDate: v })}
@@ -278,7 +272,7 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
                                   />
                                 </div>
                                 <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                  <label className="block text-xs font-medium text-gray-600 mb-1.5">End Date</label>
                                   {exp.currentlyWorking ? (
                                     <div className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-400 bg-gray-50">
                                       Present
@@ -292,86 +286,90 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
                                   )}
                                 </div>
                               </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                id={`current-${exp.id}`}
-                                checked={exp.currentlyWorking}
-                                onChange={(e) => updateExperience(exp.id, { currentlyWorking: e.target.checked, endDate: '' })}
-                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                              />
-                              <label htmlFor={`current-${exp.id}`} className="text-sm text-gray-700 cursor-pointer">
-                                I currently work here
+                              <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  id={`current-${exp.id}`}
+                                  checked={exp.currentlyWorking}
+                                  onChange={(e) => updateExperience(exp.id, { currentlyWorking: e.target.checked, endDate: '' })}
+                                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-400"
+                                />
+                                <span className="text-xs text-gray-600">I currently work here</span>
                               </label>
                             </div>
 
-                            <div>
-                              <div className="flex justify-between items-center mb-1">
-                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                            {/* ─ Description ─ */}
+                            <div className="px-4 py-4 space-y-3">
+                              <GroupLabel>Description</GroupLabel>
+                              <div>
+                                <div
+                                  id={`exp-desc-${exp.id}`}
+                                  className={`relative rounded-[8px] border transition-colors duration-150 ${
+                                    highlightExpId === exp.id
+                                      ? 'border-[var(--accent-color)] ring-[3px] ring-[var(--accent-ring)]'
+                                      : isStreaming && activeExpId === exp.id
+                                      ? 'border-[var(--accent-color)] ring-[3px] ring-[var(--accent-ring)]'
+                                      : 'border-[#E2E8F0] focus-within:border-[var(--accent-color)] focus-within:ring-[3px] focus-within:ring-[var(--accent-ring)]'
+                                  }`}
+                                >
+                                  <textarea
+                                    value={exp.description}
+                                    onChange={(e) => updateExperience(exp.id, { description: e.target.value })}
+                                    disabled={isBusy && activeExpId === exp.id}
+                                    className="w-full min-h-[150px] rounded-[8px] px-[14px] py-[10px] text-[14px] text-slate-900 bg-transparent outline-none disabled:bg-slate-50 disabled:text-slate-500 resize-none"
+                                    placeholder={"- Developed new features...\n- Improved performance by..."}
+                                  />
+                                  {isStreaming && activeExpId === exp.id && (
+                                    <span className="absolute bottom-2.5 right-2.5 w-1.5 h-4 rounded-sm animate-pulse" style={{ backgroundColor: 'var(--accent-color)' }} />
+                                  )}
+                                </div>
+                                <p className="mt-1.5 text-[11px] text-gray-400">One bullet per line. Start with strong action verbs.</p>
+                                <BulletWeaknessPanel description={exp.description} />
+                              </div>
+
+                              {/* Revert / Stop strip */}
+                              {(canRevert || isStreaming) && activeExpId === exp.id && (
                                 <div className="flex items-center gap-2">
-                                  {/* Revert — 8s window after successful rewrite of this job */}
-                                  {canRevert && activeExpId === exp.id && (
+                                  {canRevert && (
                                     <button
                                       onClick={handleRevert}
-                                      className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100 transition-colors"
                                     >
                                       <RotateCcw className="w-3 h-3" /> Revert
                                     </button>
                                   )}
-                                  {/* Stop — only while this job is streaming */}
-                                  {isStreaming && activeExpId === exp.id && (
+                                  {isStreaming && (
                                     <button
                                       onClick={abort}
-                                      className="flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-lg hover:bg-gray-200 transition-colors"
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 transition-colors"
                                     >
                                       <Square className="w-3 h-3 fill-current" /> Stop
                                     </button>
                                   )}
-                                  {/* Rewrite */}
-                                  <button
-                                    onClick={() => handleRewrite(exp.id, exp.description, exp.position, exp.company)}
-                                    disabled={!exp.description.trim() || (isBusy && activeExpId === exp.id)}
-                                    className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors disabled:opacity-50"
-                                  >
-                                    {isBusy && activeExpId === exp.id
-                                      ? <><Loader2 className="w-3 h-3 animate-spin" />{isLoading ? 'Generating…' : 'Streaming…'}</>
-                                      : <><Sparkles className="w-3 h-3" /> Enhance with AI</>}
-                                  </button>
                                 </div>
-                              </div>
-                              <div
-                                id={`exp-desc-${exp.id}`}
-                                className={`relative rounded-lg border transition-colors ${
-                                  highlightExpId === exp.id
-                                    ? 'border-indigo-400 ring-2 ring-indigo-200'
-                                    : isStreaming && activeExpId === exp.id
-                                    ? 'border-indigo-400 ring-1 ring-indigo-200'
-                                    : 'border-gray-300'
-                                }`}
+                              )}
+
+                              {/* ── AI Enhance CTA ── */}
+                              <button
+                                onClick={() => handleRewrite(exp.id, exp.description, exp.position, exp.company)}
+                                disabled={!exp.description.trim() || (isBusy && activeExpId === exp.id)}
+                                style={{ backgroundColor: 'var(--accent-color)' }}
+                                className="group relative w-full overflow-hidden rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg hover:opacity-90 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-md"
                               >
-                                <textarea
-                                  value={exp.description}
-                                  onChange={(e) => updateExperience(exp.id, { description: e.target.value })}
-                                  disabled={isBusy && activeExpId === exp.id}
-                                  className="w-full min-h-[150px] rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                                  placeholder="- Developed new features...&#10;- Improved performance by..."
-                                />
-                                {isStreaming && activeExpId === exp.id && (
-                                  <span className="absolute bottom-2 right-2 w-1.5 h-4 bg-indigo-500 rounded-sm animate-pulse" />
-                                )}
-                                {canRevert && activeExpId === exp.id && !isStreaming && (
-                                  <button
-                                    onClick={handleRevert}
-                                    className="absolute top-3 right-3 rounded-full bg-white border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700 shadow-sm hover:bg-amber-50 transition-colors"
-                                  >
-                                    Undo AI Changes
-                                  </button>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-500 mt-1">Separate bullets with a new line.</p>
-                              <BulletWeaknessPanel description={exp.description} />
+                                <span className="relative flex items-center justify-center gap-2">
+                                  {isBusy && activeExpId === exp.id ? (
+                                    <>
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                      {isLoading ? 'Generating…' : 'Streaming…'}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Sparkles className="w-4 h-4" />
+                                      Enhance bullets with AI
+                                    </>
+                                  )}
+                                </span>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -386,9 +384,12 @@ export default function ExperienceStep({ headless = false }: { headless?: boolea
         </Droppable>
       </DragDropContext>
 
+      {experience.length === 0 && (
+        <p className="text-[13px] text-gray-400 italic text-center py-4">No entries yet.</p>
+      )}
       <button
         onClick={() => addExperience()}
-        className="flex items-center gap-2 text-sm font-semibold text-indigo-600 bg-indigo-50 px-4 py-2.5 rounded-xl hover:bg-indigo-100 transition-colors w-full justify-center border border-indigo-100 mt-2"
+        className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-violet-700 border border-dashed border-violet-300 rounded-[10px] bg-transparent hover:bg-violet-50 transition-colors"
       >
         <Plus className="w-4 h-4" />
         Add Experience

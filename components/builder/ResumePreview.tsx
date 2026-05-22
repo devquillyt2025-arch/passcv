@@ -1,9 +1,9 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState, useMemo } from 'react';
-import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useLayoutEffect, useRef, useState, useMemo, memo } from 'react';
+import type { ResumeData, ResumeExperience, ResumeEducation, ResumeProject, ResumeCertification, ResumeLanguage, ResumePublication, ResumeCourse, ResumeAward, ResumeVolunteer } from '@/lib/types';
+import type { StoreState } from '@/lib/store/slices/types';
 import { DEFAULT_SECTION_ORDER } from '@/lib/store/slices/globalSlice';
-import type { ResumeData, ResumeExperience, ResumeEducation, ResumeProject, ResumeCertification, ResumeLanguage } from '@/lib/types';
 
 // ── Page geometry (preview scale: 680px wide = A4 at ~83dpi) ─────────────────
 const PAGE_W   = 680;
@@ -266,6 +266,110 @@ function LanguageBlock({ lang, isFirst, t }: { lang: ResumeLanguage; isFirst: bo
   );
 }
 
+function PublicationBlock({ pub, isFirst, t }: { pub: ResumePublication; isFirst: boolean; t: Theme }) {
+  return (
+    <div style={{ marginTop: isFirst ? 0 : Math.max(6, t.itemGap - 4) }}>
+      {isFirst && <SectionHeading title="Publications" t={t} />}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: t.bodyColor }}>
+          {pub.title || 'Publication Title'}
+        </span>
+        {(pub.publisher || pub.date) && (
+          <span style={{ fontSize: 10, color: t.mutedColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {[pub.publisher, fmtDate(pub.date)].filter(Boolean).join(', ')}
+          </span>
+        )}
+      </div>
+      {pub.coAuthors && (
+        <p style={{ margin: '2px 0 0 0', fontSize: 10, color: t.mutedColor }}>
+          with {pub.coAuthors}
+        </p>
+      )}
+      {pub.url && (
+        <p style={{ margin: '2px 0 0 0', fontSize: 10, color: t.mutedColor }}>{pub.url}</p>
+      )}
+    </div>
+  );
+}
+
+function CourseBlock({ course, isFirst, t }: { course: ResumeCourse; isFirst: boolean; t: Theme }) {
+  return (
+    <div style={{ marginTop: isFirst ? 0 : Math.max(6, t.itemGap - 4) }}>
+      {isFirst && <SectionHeading title="Courses & Training" t={t} />}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: t.bodyColor }}>
+          {course.name || 'Course Name'}
+        </span>
+        {(course.platform || course.completionDate) && (
+          <span style={{ fontSize: 10, color: t.mutedColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {[course.platform, fmtDate(course.completionDate)].filter(Boolean).join('  |  ')}
+          </span>
+        )}
+      </div>
+      {course.certificateUrl && (
+        <p style={{ margin: '2px 0 0 0', fontSize: 10, color: t.mutedColor }}>{course.certificateUrl}</p>
+      )}
+    </div>
+  );
+}
+
+function AwardBlock({ award, isFirst, t }: { award: ResumeAward; isFirst: boolean; t: Theme }) {
+  return (
+    <div style={{ marginTop: isFirst ? 0 : Math.max(6, t.itemGap - 4) }}>
+      {isFirst && <SectionHeading title="Awards & Honors" t={t} />}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: t.bodyColor }}>
+          {award.name || 'Award Name'}
+          {award.issuer && (
+            <span style={{ fontWeight: 400, fontStyle: 'italic', color: t.mutedColor }}> — {award.issuer}</span>
+          )}
+        </span>
+        {award.date && (
+          <span style={{ fontSize: 10, color: t.mutedColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {fmtDate(award.date)}
+          </span>
+        )}
+      </div>
+      {award.description && (
+        <p style={{ margin: '2px 0 0 0', fontSize: 11, color: t.bodyColor, lineHeight: t.lineHeight }}>
+          {award.description}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function VolunteerBlock({ vol, isFirst, t }: { vol: ResumeVolunteer; isFirst: boolean; t: Theme }) {
+  const bs = parseBullets(vol.description);
+  const dates = [fmtDate(vol.startDate), vol.currentlyVolunteering ? 'Present' : fmtDate(vol.endDate)]
+    .filter(Boolean).join(' – ');
+
+  return (
+    <div style={{ marginTop: isFirst ? 0 : t.itemGap }}>
+      {isFirst && <SectionHeading title="Volunteer Work" t={t} />}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: t.bodyColor }}>
+          {[vol.role, vol.organization].filter(Boolean).join(' — ') || (
+            <span style={{ color: '#D1D5DB', fontStyle: 'italic' }}>Role — Organization</span>
+          )}
+        </span>
+        {(vol.location || dates) && (
+          <span style={{ fontSize: 10, color: t.mutedColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {[vol.location, dates].filter(Boolean).join('  |  ')}
+          </span>
+        )}
+      </div>
+      {bs.length > 0 && (
+        <ul style={{ margin: '4px 0 0 0', paddingLeft: 16, listStyleType: 'disc' }}>
+          {bs.map((b, i) => (
+            <li key={i} style={{ fontSize: 11, color: t.bodyColor, lineHeight: t.lineHeight, marginBottom: 2 }}>{b}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function SummaryBlock({ data, t }: { data: ResumeData; t: Theme }) {
   if (!data.summary) return null;
   return (
@@ -296,16 +400,18 @@ function SkillsBlock({ data, t }: { data: ResumeData; t: Theme }) {
 
 type Block = { id: string; node: React.ReactNode };
 
-function buildBlocks(data: ResumeData, t: Theme, templateId: string, order: string[]): Block[] {
+function buildBlocks(data: ResumeData, t: Theme, templateId: string, order: string[], hidden: string[]): Block[] {
   const blocks: Block[] = [];
 
-  // Header is always the first block
-  blocks.push({
-    id: 'header',
-    node: <HeaderBlock data={data} t={t} templateId={templateId} />,
-  });
+  if (!hidden.includes('personal')) {
+    blocks.push({
+      id: 'header',
+      node: <HeaderBlock data={data} t={t} templateId={templateId} />,
+    });
+  }
 
   for (const sectionId of order) {
+    if (hidden.includes(sectionId)) continue;
     switch (sectionId) {
       case 'summary':
         if (data.summary) {
@@ -363,6 +469,42 @@ function buildBlocks(data: ResumeData, t: Theme, templateId: string, order: stri
           });
         });
         break;
+
+      case 'publications':
+        (data.publications || []).forEach((pub, i) => {
+          blocks.push({
+            id: `pub-${pub.id}`,
+            node: <PublicationBlock pub={pub} isFirst={i === 0} t={t} />,
+          });
+        });
+        break;
+
+      case 'courses':
+        (data.courses || []).forEach((course, i) => {
+          blocks.push({
+            id: `course-${course.id}`,
+            node: <CourseBlock course={course} isFirst={i === 0} t={t} />,
+          });
+        });
+        break;
+
+      case 'awards':
+        (data.awards || []).forEach((award, i) => {
+          blocks.push({
+            id: `award-${award.id}`,
+            node: <AwardBlock award={award} isFirst={i === 0} t={t} />,
+          });
+        });
+        break;
+
+      case 'volunteer':
+        (data.volunteer || []).forEach((vol, i) => {
+          blocks.push({
+            id: `vol-${vol.id}`,
+            node: <VolunteerBlock vol={vol} isFirst={i === 0} t={t} />,
+          });
+        });
+        break;
     }
   }
 
@@ -392,14 +534,26 @@ function packBlocks(heights: number[], usableH: number): number[][] {
   return pages;
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-export default function ResumePreview() {
-  const { data, templateId, sectionOrder, builderDesign } = useResumeStore();
+interface ResumePreviewProps {
+  data: ResumeData;
+  templateId: string;
+  sectionOrder: string[];
+  hiddenSections: string[];
+  builderDesign: StoreState['builderDesign'];
+}
+
+const ResumePreview = memo(function ResumePreview({ data, templateId, sectionOrder, hiddenSections, builderDesign }: ResumePreviewProps) {
   const t = useMemo(() => {
     const base = templateId === 'modern' ? MODERN : CLASSIC;
     const accent = builderDesign?.accentColor || base.headingColor;
     const fontByPair = {
       modern: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif',
+      arial: 'Arial, Helvetica, sans-serif',
+      helvetica: 'Helvetica, Arial, sans-serif',
+      verdana: 'Verdana, Geneva, sans-serif',
+      times: '"Times New Roman", Times, serif',
+      calibri: 'Calibri, Roboto, sans-serif',
+      courier: '"Courier New", Courier, monospace',
       editorial: '"Georgia", "Times New Roman", serif',
       classic: '"Times New Roman", Georgia, serif',
     };
@@ -413,7 +567,7 @@ export default function ResumePreview() {
     return {
       ...base,
       ...spacing,
-      font: fontByPair[builderDesign?.fontPair || 'modern'],
+      font: fontByPair[builderDesign?.fontPair || 'editorial'],
       nameColor: accent,
       headingColor: accent,
       headingStyle: {
@@ -427,9 +581,9 @@ export default function ResumePreview() {
 
   // Rebuild flat block list whenever data or template changes
   const blocks = useMemo(
-    () => buildBlocks(data, t, templateId, order),
+    () => buildBlocks(data, t, templateId, order, hiddenSections),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, templateId, sectionOrder, t]
+    [data, templateId, sectionOrder, hiddenSections, t]
   );
 
   // One ref per block in the hidden measurement container
@@ -447,11 +601,11 @@ export default function ResumePreview() {
 
   return (
     <>
-      {/* Print CSS: each page div starts a new physical page */}
       <style>{`
         @media print {
-          .resume-page { break-inside: avoid; page-break-inside: avoid; }
+          .resume-page { break-inside: avoid; page-break-inside: avoid; box-shadow: none !important; border: none !important; }
           .resume-page + .resume-page { break-before: page; page-break-before: always; }
+          .resume-page-fold { display: none !important; }
         }
       `}</style>
 
@@ -490,6 +644,9 @@ export default function ResumePreview() {
         {pages.map((blockIndices, pageIdx) => (
           <div
             key={pageIdx}
+            style={{ position: 'relative', flexShrink: 0 }}
+          >
+          <div
             className="resume-page"
             style={{
               width: PAGE_W,
@@ -498,8 +655,8 @@ export default function ResumePreview() {
               backgroundColor: 'white',
               boxSizing: 'border-box',
               padding: `${PAD_T}px ${PAD_SIDE}px ${PAD_B}px`,
-              boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
-              flexShrink: 0,
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.07), 0 10px 40px -4px rgba(0,0,0,0.10)',
+              border: '1px solid rgba(0,0,0,0.06)',
               fontFamily: t.font,
               overflow: 'hidden',
             }}
@@ -529,8 +686,44 @@ export default function ResumePreview() {
                 </div>
               ))}
           </div>
+
+          {/* ── Corner fold (first page only) ───────────────────────────────── */}
+          {pageIdx === 0 && (
+            <svg
+              className="resume-page-fold"
+              aria-hidden
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                width: 32,
+                height: 32,
+                pointerEvents: 'none',
+                zIndex: 2,
+                display: 'block',
+              }}
+              viewBox="0 0 32 32"
+              fill="none"
+            >
+              <defs>
+                <linearGradient id="pcf-sh" x1="32" y1="0" x2="4" y2="28" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%"   stopColor="rgba(0,0,0,0.22)" />
+                  <stop offset="55%"  stopColor="rgba(0,0,0,0.07)" />
+                  <stop offset="100%" stopColor="rgba(0,0,0,0)"    />
+                </linearGradient>
+              </defs>
+              {/* Canvas-color triangle — the "cut corner" */}
+              <polygon points="32,0 32,32 0,32" fill="#E8E8E8" />
+              {/* Depth shadow cast by the folded flap */}
+              <polygon points="32,0 32,32 0,32" fill="url(#pcf-sh)" />
+            </svg>
+          )}
+
+          </div>
         ))}
       </div>
     </>
   );
-}
+});
+
+export default ResumePreview;

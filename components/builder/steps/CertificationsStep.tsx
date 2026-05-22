@@ -183,11 +183,14 @@ export default function CertificationsStep({ headless = false }: { headless?: bo
         </Droppable>
       </DragDropContext>
 
+      {certifications.length === 0 && (
+        <p className="text-[13px] text-gray-400 italic text-center py-4">No entries yet.</p>
+      )}
       <button
         onClick={() => {
           addCertification();
         }}
-        className="flex items-center gap-2 text-sm font-semibold text-indigo-600 bg-indigo-50 px-4 py-2.5 rounded-xl hover:bg-indigo-100 transition-colors w-full justify-center border border-indigo-100 mt-2"
+        className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-violet-700 border border-dashed border-violet-300 rounded-[10px] bg-transparent hover:bg-violet-50 transition-colors mt-2"
       >
         <Plus className="w-4 h-4" />
         Add Certification

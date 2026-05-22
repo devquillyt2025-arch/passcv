@@ -164,7 +164,7 @@ interface ModernTemplateProps {
 
 export default function ModernTemplate({ data, sectionOrder }: ModernTemplateProps) {
   const { contact, summary, experience, education, skills, projects, certifications, languages } = data;
-  const order = (sectionOrder || SECTION_KEYS).filter(id => SECTION_KEYS.includes(id));
+  const order = (sectionOrder || SECTION_KEYS).filter(id => SECTION_KEYS.includes(id) || id.startsWith('custom-'));
 
   const fullName = [contact.firstName, contact.lastName].filter(Boolean).join(' ');
   const contactParts = [
@@ -386,6 +386,32 @@ export default function ModernTemplate({ data, sectionOrder }: ModernTemplatePro
                     </View>
                   );
                 })}
+              </>
+            );
+          }
+
+          // ── Custom Sections ────────────────────────────────────────────
+          if (sectionId.startsWith('custom-')) {
+            const customSection = data.customSections?.find((s) => s.id === sectionId);
+            if (!customSection || !customSection.items || customSection.items.length === 0) return null;
+            return (
+              // eslint-disable-next-line react/jsx-no-useless-fragment
+              <>
+                {customSection.items.map((item, idx) => (
+                  <View key={`${sectionId}-${idx}`} wrap={false}>
+                    {idx === 0 && <Text style={styles.sectionTitle}>{sanitize(customSection.title || 'Custom Section')}</Text>}
+                    <View style={styles.entry}>
+                      <View style={styles.itemHeader}>
+                        <View style={styles.titleWrapper}>
+                          <Text style={styles.title}>{sanitize(item.name)}</Text>
+                        </View>
+                      </View>
+                      {item.description ? (
+                        <Text style={styles.summary}>{sanitize(item.description)}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+                ))}
               </>
             );
           }

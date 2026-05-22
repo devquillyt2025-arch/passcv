@@ -7,43 +7,42 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import MonthYearPicker from '@/components/builder/MonthYearPicker';
 
 function GroupLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">{children}</p>;
+  return <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{children}</p>;
 }
 
-export default function ProjectsStep({ headless = false }: { headless?: boolean }) {
-  const projects = useResumeStore((state) => state.data.projects || []);
-  const { addProject, updateProject, removeProject, reorderProjects } = useResumeStore();
-  const [expandedId, setExpandedId] = useState<string | null>(projects[0]?.id || null);
+const inputCls =
+  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none';
+
+export default function VolunteerStep({ headless = false }: { headless?: boolean }) {
+  const volunteer = useResumeStore((state) => state.data.volunteer || []);
+  const { addVolunteer, updateVolunteer, removeVolunteer, reorderVolunteer } = useResumeStore();
+  const [expandedId, setExpandedId] = useState<string | null>(volunteer[0]?.id || null);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    reorderProjects(result.source.index, result.destination.index);
+    reorderVolunteer(result.source.index, result.destination.index);
   };
-
-  const inputCls =
-    'w-full rounded-[8px] border border-[#E2E8F0] bg-white px-[14px] py-[10px] text-[14px] text-slate-900 transition-colors duration-150 placeholder:text-slate-400 focus:border-[var(--accent-color)] focus:ring-[3px] focus:ring-[var(--accent-ring)] focus:outline-none';
 
   return (
     <div className="space-y-5">
       {!headless && (
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Highlight personal or professional projects that showcase your skills.
-            </p>
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Volunteer Work</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Highlight volunteer and community involvement.
+          </p>
         </div>
       )}
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="projects-list">
+        <Droppable droppableId="volunteer-list">
           {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-              {projects.map((project, index) => {
-                const isExpanded = expandedId === project.id;
+              {volunteer.map((vol, index) => {
+                const isExpanded = expandedId === vol.id;
+                const draggableId = vol.id || `vol-${index}`;
                 return (
-                  <Draggable key={project.id} draggableId={project.id} index={index}>
+                  <Draggable key={draggableId} draggableId={draggableId} index={index}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
@@ -52,9 +51,10 @@ export default function ProjectsStep({ headless = false }: { headless?: boolean 
                           snapshot.isDragging ? 'shadow-lg border-indigo-300' : 'border-gray-200 shadow-sm'
                         }`}
                       >
+                        {/* Row header */}
                         <div
                           className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-gray-50 border-b border-gray-200' : 'bg-white'}`}
-                          onClick={() => setExpandedId(isExpanded ? null : project.id)}
+                          onClick={() => setExpandedId(isExpanded ? null : vol.id)}
                         >
                           <div
                             {...provided.dragHandleProps}
@@ -65,14 +65,15 @@ export default function ProjectsStep({ headless = false }: { headless?: boolean 
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-semibold text-gray-900 truncate">
-                              {project.name || '(Project not specified)'}
+                              {vol.role || vol.organization || '(Entry not specified)'}
                             </h3>
                             <p className="text-xs text-gray-400 truncate mt-0.5">
-                              {project.startDate || 'Start'} – {project.endDate || 'End'}
+                              {vol.organization || ''}
+                              {vol.startDate ? ` · ${vol.startDate}` : ''}
                             </p>
                           </div>
                           <button
-                            onClick={(e) => { e.stopPropagation(); removeProject(project.id); }}
+                            onClick={(e) => { e.stopPropagation(); removeVolunteer(vol.id); }}
                             className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors mr-1"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -84,64 +85,84 @@ export default function ProjectsStep({ headless = false }: { headless?: boolean 
 
                         {isExpanded && (
                           <div className="divide-y divide-slate-100 bg-white">
-                            {/* ─ Project Details ─ */}
+                            {/* Role Details */}
                             <div className="px-4 py-4 space-y-3">
-                              <GroupLabel>Project Details</GroupLabel>
+                              <GroupLabel>Role Details</GroupLabel>
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Project Name</label>
+                                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Organization</label>
                                   <input
                                     type="text"
-                                    value={project.name}
-                                    onChange={(e) => updateProject(project.id, { name: e.target.value })}
+                                    value={vol.organization}
+                                    onChange={(e) => updateVolunteer(vol.id, { organization: e.target.value })}
                                     className={inputCls}
-                                    placeholder="e.g. E-Commerce Dashboard"
+                                    placeholder="e.g. Red Cross"
                                   />
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Project Link / URL</label>
+                                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Role / Title</label>
                                   <input
                                     type="text"
-                                    value={project.url}
-                                    onChange={(e) => updateProject(project.id, { url: e.target.value })}
+                                    value={vol.role}
+                                    onChange={(e) => updateVolunteer(vol.id, { role: e.target.value })}
                                     className={inputCls}
-                                    placeholder="e.g. github.com/my-project"
+                                    placeholder="e.g. Community Coordinator"
                                   />
                                 </div>
                               </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1.5">Location (optional)</label>
+                                <input
+                                  type="text"
+                                  value={vol.location}
+                                  onChange={(e) => updateVolunteer(vol.id, { location: e.target.value })}
+                                  className={inputCls}
+                                  placeholder="e.g. New York, NY"
+                                />
+                              </div>
                             </div>
 
-                            {/* ─ Duration ─ */}
+                            {/* Duration */}
                             <div className="px-4 py-4 space-y-3">
                               <GroupLabel>Duration</GroupLabel>
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
                                   <label className="block text-xs font-medium text-gray-600 mb-1.5">Start Date</label>
                                   <MonthYearPicker
-                                    value={project.startDate}
-                                    onChange={(v) => updateProject(project.id, { startDate: v })}
+                                    value={vol.startDate}
+                                    onChange={(v) => updateVolunteer(vol.id, { startDate: v })}
                                     placeholder="Start date"
                                   />
                                 </div>
                                 <div>
                                   <label className="block text-xs font-medium text-gray-600 mb-1.5">End Date</label>
                                   <MonthYearPicker
-                                    value={project.endDate}
-                                    onChange={(v) => updateProject(project.id, { endDate: v })}
+                                    value={vol.currentlyVolunteering ? '' : vol.endDate}
+                                    onChange={(v) => updateVolunteer(vol.id, { endDate: v })}
                                     placeholder="End date"
+                                    disabled={vol.currentlyVolunteering}
                                   />
                                 </div>
                               </div>
+                              <label className="flex items-center gap-2 cursor-pointer w-fit">
+                                <input
+                                  type="checkbox"
+                                  checked={vol.currentlyVolunteering}
+                                  onChange={(e) => updateVolunteer(vol.id, { currentlyVolunteering: e.target.checked })}
+                                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="text-xs text-gray-600">Currently volunteering here</span>
+                              </label>
                             </div>
 
-                            {/* ─ Description ─ */}
+                            {/* Description */}
                             <div className="px-4 py-4 space-y-3">
                               <GroupLabel>Description</GroupLabel>
                               <textarea
-                                value={project.description}
-                                onChange={(e) => updateProject(project.id, { description: e.target.value })}
-                                className="w-full min-h-[120px] rounded-[8px] border border-[#E2E8F0] bg-white px-[14px] py-[10px] text-[14px] text-slate-900 transition-colors duration-150 placeholder:text-slate-400 focus:border-[var(--accent-color)] focus:ring-[3px] focus:ring-[var(--accent-ring)] focus:outline-none resize-none"
-                                placeholder={"• Built with React and Node.js...\n• Achieved 10k daily active users..."}
+                                value={vol.description}
+                                onChange={(e) => updateVolunteer(vol.id, { description: e.target.value })}
+                                className="w-full min-h-[100px] rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none resize-none transition"
+                                placeholder={"• Organised weekly food drives serving 300+ families\n• Trained 20 new volunteers on safety protocols"}
                               />
                               <p className="text-[11px] text-gray-400">One bullet per line. Quantify impact where possible.</p>
                             </div>
@@ -158,15 +179,23 @@ export default function ProjectsStep({ headless = false }: { headless?: boolean 
         </Droppable>
       </DragDropContext>
 
-      {projects.length === 0 && (
+      {volunteer.length === 0 && (
         <p className="text-[13px] text-gray-400 italic text-center py-4">No entries yet.</p>
       )}
       <button
-        onClick={() => addProject()}
+        onClick={() => {
+          addVolunteer();
+          // expand the new entry on next tick
+          setTimeout(() => {
+            const store = useResumeStore.getState();
+            const list = store.data.volunteer || [];
+            if (list.length > 0) setExpandedId(list[list.length - 1].id);
+          }, 0);
+        }}
         className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-violet-700 border border-dashed border-violet-300 rounded-[10px] bg-transparent hover:bg-violet-50 transition-colors"
       >
         <Plus className="w-4 h-4" />
-        Add Project
+        Add Volunteer Entry
       </button>
     </div>
   );

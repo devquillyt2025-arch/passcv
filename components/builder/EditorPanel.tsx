@@ -1,19 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { useUIStore } from '@/lib/store/useUIStore';
-import { useAiRewrite } from '@/hooks/useAiRewrite';
-import PersonalInfo from './steps/PersonalInfo';
-import SummaryStep from './steps/SummaryStep';
-import SkillsStep from './steps/SkillsStep';
-import ExperienceStep from './steps/ExperienceStep';
-import EducationStep from './steps/EducationStep';
-import ProjectsStep from './steps/ProjectsStep';
-import CertificationsStep from './steps/CertificationsStep';
-import LanguagesStep from './steps/LanguagesStep';
+
+const PersonalInfo = lazy(() => import('./steps/PersonalInfo'));
+const SummaryStep = lazy(() => import('./steps/SummaryStep'));
+const SkillsStep = lazy(() => import('./steps/SkillsStep'));
+const ExperienceStep = lazy(() => import('./steps/ExperienceStep'));
+const EducationStep = lazy(() => import('./steps/EducationStep'));
+const ProjectsStep = lazy(() => import('./steps/ProjectsStep'));
+const CertificationsStep = lazy(() => import('./steps/CertificationsStep'));
+const LanguagesStep = lazy(() => import('./steps/LanguagesStep'));
+const CustomSectionStep = lazy(() => import('./steps/CustomSectionStep'));
+const VolunteerStep = lazy(() => import('./steps/VolunteerStep'));
+const AwardsStep = lazy(() => import('./steps/AwardsStep'));
+const PublicationsStep = lazy(() => import('./steps/PublicationsStep'));
+const CoursesStep = lazy(() => import('./steps/CoursesStep'));
 import {
   User,
   FileText,
@@ -27,9 +32,14 @@ import {
   ArrowUp,
   ArrowDown,
   GripVertical,
-  Loader2,
-  RotateCcw,
-  Sparkles,
+  PlusSquare,
+  Trash2,
+  LayoutList,
+  Plus,
+  BookOpen,
+  BookMarked,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 const SECTION_META: Record<string, { label: string; icon: React.ElementType }> = {
@@ -40,7 +50,19 @@ const SECTION_META: Record<string, { label: string; icon: React.ElementType }> =
   certifications:   { label: 'Certifications',       icon: Award },
   languages:        { label: 'Languages',            icon: Languages },
   projects:         { label: 'Projects',             icon: FolderGit2 },
+  volunteer:        { label: 'Volunteer Work',        icon: LayoutList },
+  awards:           { label: 'Awards & Honors',       icon: Award },
+  publications:     { label: 'Publications',          icon: BookOpen },
+  courses:          { label: 'Courses & Training',    icon: BookMarked },
 };
+
+const SectionSkeleton = () => (
+  <div className="animate-pulse space-y-4 py-2">
+    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+    <div className="h-10 bg-gray-200 rounded w-full"></div>
+    <div className="h-10 bg-gray-200 rounded w-full"></div>
+  </div>
+);
 
 interface SectionCardProps {
   id?: string;
@@ -49,6 +71,8 @@ interface SectionCardProps {
   count?: number;
   isOpen: boolean;
   onToggle: () => void;
+  isVisible?: boolean;
+  onToggleVisibility?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveUp?: () => void;
@@ -65,6 +89,8 @@ function SectionCard({
   count,
   isOpen,
   onToggle,
+  isVisible = true,
+  onToggleVisibility,
   canMoveUp,
   canMoveDown,
   onMoveUp,
@@ -77,72 +103,74 @@ function SectionCard({
     <motion.div
       layout
       id={id}
-      className="overflow-hidden rounded-lg border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60"
+      className={`overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-opacity duration-200 ${isVisible ? '' : 'opacity-50'}`}
     >
       {/* Card header */}
       <div
-        className="group flex cursor-pointer select-none items-center gap-3 pb-4 transition-colors hover:bg-white"
+        className="group flex cursor-pointer select-none items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-slate-50/60"
         onClick={onToggle}
       >
         {dragHandleProps && (
           <button
             {...dragHandleProps}
             title="Drag to reorder"
-            className="rounded-lg p-1 text-slate-300 opacity-0 transition-all group-hover:opacity-100 hover:bg-white hover:text-slate-600"
+            className="shrink-0 rounded-md p-0.5 text-slate-300 opacity-0 transition-all group-hover:opacity-100 hover:text-slate-500"
             onClick={(e) => e.stopPropagation()}
           >
             <GripVertical className="h-4 w-4" />
           </button>
         )}
-        <span
-          className="shrink-0 rounded-lg bg-gray-100 p-1.5 text-gray-500 transition-colors"
-        >
+        <span className="shrink-0 rounded-lg bg-[#ede9fe] p-1.5 text-indigo-600 transition-colors">
           <Icon className="w-3.5 h-3.5" />
         </span>
 
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold text-gray-900">{title}</span>
+        <div className="min-w-0 flex-1 flex items-center gap-2">
+          <span className="truncate text-[15px] font-semibold leading-tight text-gray-800">{title}</span>
           {count !== undefined && count > 0 && (
-            <span className="ml-2 text-xs text-gray-400 tabular-nums">{count}</span>
+            <span className="shrink-0 text-xs text-gray-400 bg-gray-100 rounded-full px-1.5 py-0.5 tabular-nums">{count}</span>
           )}
-        </span>
+        </div>
 
-        {headerAction && (
-          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-            {headerAction}
-          </div>
-        )}
-
-        {/* Reorder buttons */}
-        {(canMoveUp !== undefined || canMoveDown !== undefined) && (
-          <div
-            className="flex gap-0.5"
-            onClick={(e) => e.stopPropagation()}
-          >
+        {/* Utility pill: delete + reorder + eye + chevron */}
+        <div className="flex items-center gap-0.5 rounded-full bg-[#f9fafb] border border-[#e5e7eb] px-1.5 py-[3px] shrink-0">
+          {headerAction && (
+            <div onClick={(e) => e.stopPropagation()}>
+              {headerAction}
+            </div>
+          )}
+          {canMoveUp !== undefined && (
             <button
-              onClick={onMoveUp}
+              onClick={(e) => { e.stopPropagation(); onMoveUp?.(); }}
               disabled={!canMoveUp}
               title="Move section up"
-              className="p-1 rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-0 disabled:pointer-events-none transition-all"
+              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-[#f0f0f0] hover:text-gray-600 disabled:opacity-0 disabled:pointer-events-none transition-all"
             >
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
+          )}
+          {canMoveDown !== undefined && (
             <button
-              onClick={onMoveDown}
+              onClick={(e) => { e.stopPropagation(); onMoveDown?.(); }}
               disabled={!canMoveDown}
               title="Move section down"
-              className="p-1 rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-0 disabled:pointer-events-none transition-all"
+              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-[#f0f0f0] hover:text-gray-600 disabled:opacity-0 disabled:pointer-events-none transition-all"
             >
               <ArrowDown className="w-3.5 h-3.5" />
             </button>
+          )}
+          {onToggleVisibility && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleVisibility(); }}
+              title={isVisible ? 'Hide from resume' : 'Show in resume'}
+              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-[#f0f0f0] hover:text-gray-600 transition-all"
+            >
+              {isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            </button>
+          )}
+          <div className="w-7 h-7 flex items-center justify-center pointer-events-none">
+            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </div>
-        )}
-
-        <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform shrink-0 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
-        />
+        </div>
       </div>
 
       {/* Collapsible content */}
@@ -153,10 +181,12 @@ function SectionCard({
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="overflow-hidden border-t border-gray-100"
+            className="overflow-hidden border-t border-[#f0f0f0]"
           >
-            <div className="pt-5">
-              {children}
+            <div className="px-4 pt-4 pb-5">
+              <Suspense fallback={<SectionSkeleton />}>
+                {children}
+              </Suspense>
             </div>
           </motion.div>
         )}
@@ -168,10 +198,12 @@ function SectionCard({
 const ALL_SECTIONS = new Set(['personal', 'summary', 'skills', 'experience', 'education', 'certifications', 'languages', 'projects']);
 
 export default function EditorPanel() {
-  const { data, sectionOrder, setSectionOrder, updateSummary } = useResumeStore();
-  const { pendingSectionFocus, clearSectionFocus, jdText } = useUIStore();
-  const summaryRewrite = useAiRewrite();
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set(ALL_SECTIONS));
+  const { data, sectionOrder, setSectionOrder, hiddenSections, toggleSectionVisibility, addCustomSection, removeCustomSection } = useResumeStore();
+  const { pendingSectionFocus, clearSectionFocus } = useUIStore();
+  // Open sections can include custom ones too, start by grabbing all current custom sections.
+  const [openSections, setOpenSections] = useState<Set<string>>(
+    new Set([...ALL_SECTIONS, ...(data.customSections?.map(s => s.id) || [])])
+  );
 
   // Respond to external navigation requests (from dashboard cards)
   useEffect(() => {
@@ -212,58 +244,61 @@ export default function EditorPanel() {
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    const order = [...sectionOrder];
-    const [moved] = order.splice(result.source.index, 1);
-    order.splice(result.destination.index, 0, moved);
-    setSectionOrder(order);
+    
+    if (result.type === 'section' || result.source.droppableId === 'resume-sections') {
+      const order = [...sectionOrder];
+      const [moved] = order.splice(result.source.index, 1);
+      order.splice(result.destination.index, 0, moved);
+      setSectionOrder(order);
+      return;
+    }
+
+    const { source, destination } = result;
+    const store = useResumeStore.getState();
+
+    switch (source.droppableId) {
+      case 'experience-list': return store.reorderExperience(source.index, destination.index);
+      case 'education-list': return store.reorderEducation(source.index, destination.index);
+      case 'skills-list': return store.reorderSkills(source.index, destination.index);
+      case 'projects-list': return store.reorderProjects(source.index, destination.index);
+      case 'certifications-list': return store.reorderCertifications(source.index, destination.index);
+      case 'languages-list': return store.reorderLanguages(source.index, destination.index);
+      case 'publications-list': return store.reorderPublications(source.index, destination.index);
+      case 'courses-list': return store.reorderCourses(source.index, destination.index);
+      case 'awards-list': return store.reorderAwards(source.index, destination.index);
+      case 'volunteer-list': return store.reorderVolunteer(source.index, destination.index);
+      default:
+        if (source.droppableId.startsWith('custom-list-')) {
+          const sectionId = source.droppableId.replace('custom-list-', '');
+          store.reorderCustomItems(sectionId, source.index, destination.index);
+        }
+        break;
+    }
   };
 
-  const handleSummaryRewrite = () => {
-    summaryRewrite.rewrite(
-      data.summary,
-      jdText,
-      'summary',
-      updateSummary,
-      `${data.contact.jobTitle || 'Candidate'} resume summary`,
-    );
+  const handleAddCustomSection = () => {
+    const title = window.prompt("Enter a title for the new section (e.g., 'Hobbies', 'Open Source'):");
+    if (title && title.trim()) {
+      addCustomSection(title.trim());
+      // The new section id will be generated by the store, but it takes effect next render.
+      // Easiest way to open it is to just ensure it's added.
+      // Because we can't get the ID synchronously here without refactoring the store, 
+      // we'll let it be initially closed or opened next time. 
+    }
   };
-
-  const summaryHeaderAction = (
-    <div className="flex items-center gap-1.5">
-      {summaryRewrite.canRevert && (
-        <button
-          type="button"
-          onClick={summaryRewrite.revert}
-          className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-white px-2 py-1 text-[11px] font-semibold text-amber-700 transition hover:bg-amber-50"
-        >
-          <RotateCcw className="h-3 w-3" />
-          Revert
-        </button>
-      )}
-      <button
-        type="button"
-        onClick={handleSummaryRewrite}
-        disabled={!data.summary || summaryRewrite.isLoading || summaryRewrite.isStreaming}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {summaryRewrite.isLoading || summaryRewrite.isStreaming
-          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          : <Sparkles className="h-3.5 w-3.5" />}
-        AI rewrite
-      </button>
-    </div>
-  );
 
   return (
-    <div className="p-6 pb-16">
+    <div className="p-5 pb-16 bg-[#f5f6fa]">
       {/* Personal Info — always first, not reorderable */}
-      <div className="mb-5">
+      <div className="mb-3">
       <SectionCard
         id="editor-section-personal"
         title="Personal Info"
         icon={User}
         isOpen={openSections.has('personal')}
         onToggle={() => toggleSection('personal')}
+        isVisible={!hiddenSections.includes('personal')}
+        onToggleVisibility={() => toggleSectionVisibility('personal')}
       >
         <PersonalInfo headless />
       </SectionCard>
@@ -271,15 +306,25 @@ export default function EditorPanel() {
 
       {/* Reorderable sections */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="resume-sections">
+        <Droppable droppableId="resume-sections" type="section">
           {(dropProvided) => (
             <div
               ref={dropProvided.innerRef}
               {...dropProvided.droppableProps}
-              className="space-y-2.5"
+              className="space-y-2"
             >
               {sectionOrder.map((sectionId, idx) => {
-                const meta = SECTION_META[sectionId];
+                let meta = SECTION_META[sectionId];
+                
+                // If it's a custom section, build the meta dynamically
+                const isCustom = sectionId.startsWith('custom-');
+                if (isCustom) {
+                  const cSec = data.customSections?.find(s => s.id === sectionId);
+                  if (cSec) {
+                    meta = { label: cSec.title || 'Custom Section', icon: PlusSquare };
+                  }
+                }
+
                 if (!meta) return null;
 
                 const countMap: Record<string, number | undefined> = {
@@ -289,7 +334,16 @@ export default function EditorPanel() {
                   projects:       data.projects.length,
                   certifications: (data.certifications || []).length,
                   languages:      (data.languages || []).length,
+                  volunteer:      (data.volunteer || []).length,
+                  awards:         (data.awards || []).length,
+                  publications:   (data.publications || []).length,
+                  courses:        (data.courses || []).length,
                 };
+                
+                if (isCustom) {
+                  const cSec = data.customSections?.find(s => s.id === sectionId);
+                  countMap[sectionId] = cSec?.items?.length || 0;
+                }
 
                 return (
                   <Draggable key={sectionId} draggableId={sectionId} index={idx}>
@@ -306,18 +360,30 @@ export default function EditorPanel() {
                           count={countMap[sectionId]}
                           isOpen={openSections.has(sectionId)}
                           onToggle={() => toggleSection(sectionId)}
+                          isVisible={!hiddenSections.includes(sectionId)}
+                          onToggleVisibility={() => toggleSectionVisibility(sectionId)}
                           canMoveUp={idx > 0}
                           canMoveDown={idx < sectionOrder.length - 1}
                           onMoveUp={() => moveSection(sectionId, -1)}
                           onMoveDown={() => moveSection(sectionId, 1)}
                           dragHandleProps={dragProvided.dragHandleProps}
-                          headerAction={sectionId === 'summary' ? summaryHeaderAction : undefined}
+                          headerAction={
+                            isCustom ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm('Are you sure you want to delete this custom section?')) {
+                                    removeCustomSection(sectionId);
+                                  }
+                                }}
+                                className="w-7 h-7 flex items-center justify-center rounded-full text-red-400 hover:bg-red-50 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+                                title="Delete Section"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            ) : undefined
+                          }
                         >
-                          {sectionId === 'summary' && summaryRewrite.error && (
-                            <p className="mb-3 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-500">
-                              {summaryRewrite.error}
-                            </p>
-                          )}
                           {sectionId === 'summary'        && <SummaryStep headless />}
                           {sectionId === 'skills'         && <SkillsStep headless />}
                           {sectionId === 'experience'     && <ExperienceStep headless />}
@@ -325,6 +391,11 @@ export default function EditorPanel() {
                           {sectionId === 'certifications' && <CertificationsStep headless />}
                           {sectionId === 'languages'      && <LanguagesStep headless />}
                           {sectionId === 'projects'       && <ProjectsStep headless />}
+                          {sectionId === 'volunteer'      && <VolunteerStep headless />}
+                          {sectionId === 'awards'         && <AwardsStep headless />}
+                          {sectionId === 'publications'   && <PublicationsStep headless />}
+                          {sectionId === 'courses'        && <CoursesStep headless />}
+                          {isCustom                       && <CustomSectionStep headless sectionId={sectionId} />}
                         </SectionCard>
                       </div>
                     )}
@@ -336,6 +407,16 @@ export default function EditorPanel() {
           )}
         </Droppable>
       </DragDropContext>
+
+      <div className="mt-8">
+        <button
+          onClick={handleAddCustomSection}
+          className="flex items-center justify-center gap-2 w-full py-[14px] text-sm font-semibold text-white bg-[#7c3aed] rounded-xl hover:bg-violet-700 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add Custom Section
+        </button>
+      </div>
     </div>
   );
 }
