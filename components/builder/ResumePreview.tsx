@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState, useMemo } from 'react';
+import { useLayoutEffect, useRef, useState, useMemo, type CSSProperties } from 'react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { DEFAULT_SECTION_ORDER } from '@/lib/store/slices/globalSlice';
 import type { ResumeData, ResumeExperience, ResumeEducation, ResumeProject, ResumeCertification, ResumeLanguage } from '@/lib/types';
@@ -56,6 +56,52 @@ const MODERN = {
     borderBottom: 'none',
     borderLeft: '3px solid #4F46E5',
     paddingLeft: 8,
+    paddingBottom: 0,
+  },
+  showDivider: false,
+};
+
+const MINIMAL = {
+  font: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif',
+  nameColor: '#111827',
+  titleColor: '#4B5563',
+  contactColor: '#9CA3AF',
+  headingColor: '#6B7280',
+  bodyColor: '#1F2937',
+  mutedColor: '#9CA3AF',
+  nameAlign: 'left' as const,
+  nameSize: 21,
+  lineHeight: 1.6,
+  sectionTop: 14,
+  sectionBottom: 5,
+  itemGap: 10,
+  headingStyle: {
+    borderBottom: '0.5px solid #E5E7EB',
+    borderLeft: 'none',
+    paddingLeft: 0,
+    paddingBottom: 3,
+  },
+  showDivider: true,
+};
+
+const EXECUTIVE = {
+  font: 'Georgia, "Times New Roman", serif',
+  nameColor: '#FFFFFF',
+  titleColor: '#94A3B8',
+  contactColor: '#64748B',
+  headingColor: '#1E3A8A',
+  bodyColor: '#1E293B',
+  mutedColor: '#64748B',
+  nameAlign: 'left' as const,
+  nameSize: 24,
+  lineHeight: 1.5,
+  sectionTop: 16,
+  sectionBottom: 6,
+  itemGap: 12,
+  headingStyle: {
+    borderBottom: 'none',
+    borderLeft: '4px solid #1E3A8A',
+    paddingLeft: 10,
     paddingBottom: 0,
   },
   showDivider: false,
@@ -123,6 +169,34 @@ function HeaderBlock({ data, t, templateId }: { data: ResumeData; t: Theme; temp
     contact.github || contact.website,
   ].filter(Boolean);
 
+  const isExecutive = templateId === 'executive';
+  const isMinimal = templateId === 'minimal';
+
+  if (isExecutive) {
+    return (
+      <div style={{
+        backgroundColor: '#0F172A',
+        margin: `0 -${PAD_SIDE}px`,
+        padding: `22px ${PAD_SIDE}px 18px`,
+        marginBottom: 0,
+      }}>
+        <h1 style={{ margin: 0, fontSize: t.nameSize, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          {fullName || <span style={{ color: '#475569', fontStyle: 'italic', fontSize: 18 }}>Your Name</span>}
+        </h1>
+        {contact.jobTitle && (
+          <p style={{ margin: '5px 0 0 0', fontSize: 11, color: '#94A3B8', fontWeight: 400 }}>
+            {contact.jobTitle}
+          </p>
+        )}
+        {contactParts.length > 0 && (
+          <p style={{ margin: '6px 0 0 0', fontSize: 9, color: '#64748B', lineHeight: 1.4 }}>
+            {contactParts.join('  |  ')}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <>
       <div style={{ textAlign: t.nameAlign }}>
@@ -140,7 +214,12 @@ function HeaderBlock({ data, t, templateId }: { data: ResumeData; t: Theme; temp
           </p>
         )}
       </div>
-      {t.showDivider && <div style={{ borderTop: '1.5px solid #1E3A8A', marginTop: 12 }} />}
+      {t.showDivider && (
+        <div style={{
+          borderTop: isMinimal ? '0.5px solid #E5E7EB' : '1.5px solid #1E3A8A',
+          marginTop: 12,
+        }} />
+      )}
     </>
   );
 }
@@ -392,11 +471,221 @@ function packBlocks(heights: number[], usableH: number): number[][] {
   return pages;
 }
 
+// ── Sidebar preview (two-column layout, bypasses block system) ────────────────
+const SIDEBAR_MAIN_SECTIONS = new Set(['summary', 'experience', 'education', 'certifications', 'projects']);
+
+function SidebarPreview({ data, builderDesign, order }: { data: ResumeData; builderDesign: { accentColor: string; fontPair: string; spacing: string }; order: string[] }) {
+  const accent = builderDesign.accentColor || '#4F46E5';
+  const fontByPair: Record<string, string> = {
+    modern: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif',
+    editorial: '"Georgia", "Times New Roman", serif',
+    classic: '"Times New Roman", Georgia, serif',
+  };
+  const font = fontByPair[builderDesign.fontPair] || fontByPair.modern;
+
+  const contact = data.contact || {};
+  const fullName = [contact.firstName, contact.lastName].filter(Boolean).join(' ');
+  const contactLines = [
+    contact.email,
+    contact.phone,
+    [contact.city, contact.country].filter(Boolean).join(', '),
+    contact.linkedin,
+    contact.github || contact.website,
+  ].filter(Boolean);
+
+  const sidebarLabel = (text: string) => (
+    <p style={{ margin: '16px 0 6px', fontSize: 7.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.55)', borderTop: '0.5px solid rgba(255,255,255,0.2)', paddingTop: 10 }}>
+      {text}
+    </p>
+  );
+
+  const mainOrder = order.filter(s => SIDEBAR_MAIN_SECTIONS.has(s));
+
+  return (
+    <div style={{ width: PAGE_W, minHeight: PAGE_H, display: 'flex', fontFamily: font, backgroundColor: 'white', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}>
+
+      {/* Left sidebar */}
+      <div style={{ width: 220, backgroundColor: accent, padding: '32px 18px', flexShrink: 0, minHeight: PAGE_H, boxSizing: 'border-box' }}>
+        <h1 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#fff', lineHeight: 1.2, marginBottom: 4 }}>
+          {fullName || <span style={{ opacity: 0.4, fontStyle: 'italic' }}>Your Name</span>}
+        </h1>
+        {contact.jobTitle && (
+          <p style={{ margin: '3px 0 14px', fontSize: 10, color: 'rgba(255,255,255,0.7)', fontWeight: 400 }}>{contact.jobTitle}</p>
+        )}
+
+        {contactLines.length > 0 && (
+          <div>
+            {sidebarLabel('Contact')}
+            {contactLines.map((line, i) => (
+              <p key={i} style={{ margin: '0 0 3px', fontSize: 8.5, color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>{line}</p>
+            ))}
+          </div>
+        )}
+
+        {data.skills && data.skills.length > 0 && (
+          <div>
+            {sidebarLabel('Skills')}
+            {data.skills.map((s, i) => (
+              <p key={i} style={{ margin: '0 0 4px', fontSize: 9, color: '#fff', lineHeight: 1.3 }}>{s.name}</p>
+            ))}
+          </div>
+        )}
+
+        {data.languages && data.languages.length > 0 && (
+          <div>
+            {sidebarLabel('Languages')}
+            {data.languages.map((lang, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 9, color: '#fff' }}>{lang.name}</span>
+                <span style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.6)' }}>{lang.proficiency}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Main content */}
+      <div style={{ flex: 1, padding: '32px 28px 32px 24px', overflow: 'hidden' }}>
+        {mainOrder.map((sectionId) => {
+          const headingStyle: CSSProperties = {
+            margin: '16px 0 6px',
+            fontSize: 9,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.09em',
+            color: accent,
+            borderBottom: `1px solid ${accent}30`,
+            paddingBottom: 3,
+          };
+
+          if (sectionId === 'summary' && data.summary) {
+            return (
+              <div key="summary">
+                <p style={headingStyle}>Summary</p>
+                <p style={{ margin: 0, fontSize: 11, color: '#374151', lineHeight: 1.6 }}>{data.summary}</p>
+              </div>
+            );
+          }
+
+          if (sectionId === 'experience' && data.experience?.length) {
+            return (
+              <div key="experience">
+                <p style={headingStyle}>Experience</p>
+                {data.experience.map((job, i) => {
+                  const dates = [fmtDate(job.startDate), job.currentlyWorking ? 'Present' : fmtDate(job.endDate)].filter(Boolean).join(' – ');
+                  const bullets = parseBullets(job.description);
+                  return (
+                    <div key={i} style={{ marginBottom: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#111827' }}>
+                          {[job.position, job.company].filter(Boolean).join(' — ')}
+                        </span>
+                        {(job.location || dates) && (
+                          <span style={{ fontSize: 9.5, color: '#9CA3AF', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8 }}>
+                            {[job.location, dates].filter(Boolean).join('  |  ')}
+                          </span>
+                        )}
+                      </div>
+                      {bullets.length > 0 && (
+                        <ul style={{ margin: '3px 0 0', paddingLeft: 15, listStyleType: 'disc' }}>
+                          {bullets.map((b, bi) => (
+                            <li key={bi} style={{ fontSize: 10.5, color: '#374151', lineHeight: 1.5, marginBottom: 1 }}>{b}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          if (sectionId === 'education' && data.education?.length) {
+            return (
+              <div key="education">
+                <p style={headingStyle}>Education</p>
+                {data.education.map((edu, i) => {
+                  const deg = [edu.degree, edu.field ? `in ${edu.field}` : ''].filter(Boolean).join(' ');
+                  const dates = [fmtDate(edu.startDate), edu.currentlyStudying ? 'Present' : fmtDate(edu.endDate)].filter(Boolean).join(' – ');
+                  return (
+                    <div key={i} style={{ marginBottom: 8 }}>
+                      {deg && <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#111827' }}>{deg}</p>}
+                      <p style={{ margin: '2px 0 0', fontSize: 10, color: '#6B7280' }}>
+                        {[edu.institution, edu.location, dates ? `(${dates})` : ''].filter(Boolean).join('  ')}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          if (sectionId === 'certifications' && data.certifications?.length) {
+            return (
+              <div key="certifications">
+                <p style={headingStyle}>Certifications</p>
+                {data.certifications.map((cert, i) => {
+                  const dateStr = [fmtDate(cert.issueDate), cert.doesNotExpire ? 'No Expiry' : fmtDate(cert.expiryDate)].filter(Boolean).join(' – ');
+                  return (
+                    <div key={i} style={{ marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: '#111827' }}>
+                        {cert.name}{cert.issuer ? <span style={{ fontWeight: 400, fontStyle: 'italic', color: '#6B7280' }}> — {cert.issuer}</span> : null}
+                      </span>
+                      {dateStr && <span style={{ fontSize: 9.5, color: '#9CA3AF', flexShrink: 0, marginLeft: 8 }}>{dateStr}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          if (sectionId === 'projects' && data.projects?.length) {
+            return (
+              <div key="projects">
+                <p style={headingStyle}>Projects</p>
+                {data.projects.map((proj, i) => {
+                  const bullets = parseBullets(proj.description);
+                  const dates = [fmtDate(proj.startDate), fmtDate(proj.endDate)].filter(Boolean).join(' – ');
+                  return (
+                    <div key={i} style={{ marginBottom: 9 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#111827' }}>
+                          {proj.name}{proj.url ? <span style={{ fontWeight: 400, color: '#6B7280', fontSize: 10 }}> — {proj.url}</span> : null}
+                        </span>
+                        {dates && <span style={{ fontSize: 9.5, color: '#9CA3AF', flexShrink: 0, marginLeft: 8 }}>{dates}</span>}
+                      </div>
+                      {bullets.length > 0 && (
+                        <ul style={{ margin: '3px 0 0', paddingLeft: 15, listStyleType: 'disc' }}>
+                          {bullets.map((b, bi) => (
+                            <li key={bi} style={{ fontSize: 10.5, color: '#374151', lineHeight: 1.5, marginBottom: 1 }}>{b}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          return null;
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ResumePreview() {
   const { data, templateId, sectionOrder, builderDesign } = useResumeStore();
   const t = useMemo(() => {
-    const base = templateId === 'modern' ? MODERN : CLASSIC;
+    const baseMap: Record<string, typeof CLASSIC> = {
+      classic: CLASSIC,
+      modern: MODERN,
+      minimal: MINIMAL,
+      executive: EXECUTIVE,
+    };
+    const base = baseMap[templateId] ?? CLASSIC;
     const accent = builderDesign?.accentColor || base.headingColor;
     const fontByPair = {
       modern: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif',
@@ -414,36 +703,43 @@ export default function ResumePreview() {
       ...base,
       ...spacing,
       font: fontByPair[builderDesign?.fontPair || 'modern'],
-      nameColor: accent,
+      nameColor: templateId === 'executive' ? '#FFFFFF' : accent,
       headingColor: accent,
       headingStyle: {
         ...base.headingStyle,
         borderBottom: base.headingStyle.borderBottom === 'none' ? 'none' : `1.5px solid ${accent}`,
-        borderLeft: base.headingStyle.borderLeft === 'none' ? 'none' : `3px solid ${accent}`,
+        borderLeft: base.headingStyle.borderLeft === 'none' ? 'none' : `${templateId === 'executive' ? '4px' : '3px'} solid ${accent}`,
       },
     };
   }, [templateId, builderDesign]);
   const order = sectionOrder?.length ? sectionOrder : DEFAULT_SECTION_ORDER;
+  const isSidebar = templateId === 'sidebar';
 
-  // Rebuild flat block list whenever data or template changes
+  // All hooks must be called unconditionally (Rules of Hooks).
+  // For sidebar, blocks and measurements are skipped via guards inside each hook.
   const blocks = useMemo(
-    () => buildBlocks(data, t, templateId, order),
+    () => isSidebar ? [] : buildBlocks(data, t, templateId, order),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, templateId, sectionOrder, t]
+    [data, templateId, sectionOrder, t, isSidebar]
   );
 
-  // One ref per block in the hidden measurement container
   const measureRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  // Page layout: array of pages, each page is an array of block indices
   const [pages, setPages] = useState<number[][]>([[0]]);
 
-  // After every render, measure block heights from the hidden div and repaginate.
-  // useLayoutEffect runs before browser paint, so the user never sees an intermediate state.
   useLayoutEffect(() => {
+    if (isSidebar) return;
     const heights = blocks.map((_, i) => measureRefs.current[i]?.offsetHeight ?? 0);
     setPages(packBlocks(heights, USABLE_H));
-  }, [blocks]);
+  }, [blocks, isSidebar]);
+
+  // Sidebar has a fundamentally different two-column layout — render after all hooks.
+  if (isSidebar) {
+    return (
+      <div style={{ position: 'relative' }}>
+        <SidebarPreview data={data} builderDesign={builderDesign} order={order} />
+      </div>
+    );
+  }
 
   return (
     <>

@@ -3,7 +3,7 @@ import { ResumeData, ResumeExperience, ResumeEducation, ResumeSkill, ResumeProje
 
 export interface GlobalSlice {
   resumeId: string | null;
-  templateId: 'classic' | 'modern';
+  templateId: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar';
   builderDesign: {
     accentColor: string;
     fontPair: 'editorial' | 'modern' | 'classic';
@@ -15,7 +15,7 @@ export interface GlobalSlice {
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setResumeId: (id: string | null) => void;
-  setTemplateId: (templateId: 'classic' | 'modern') => void;
+  setTemplateId: (templateId: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar') => void;
   setBuilderDesign: (design: Partial<GlobalSlice['builderDesign']>) => void;
   setSectionOrder: (order: string[]) => void;
   loadResumeData: (data: ResumeData) => void;

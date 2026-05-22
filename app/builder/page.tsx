@@ -267,7 +267,13 @@ export default function BuilderPage() {
           </div>
           <Segmented
             value={templateId}
-            options={[{ id: 'classic', label: 'Classic' }, { id: 'modern', label: 'Modern' }]}
+            options={[
+              { id: 'classic',   label: 'Classic'   },
+              { id: 'modern',    label: 'Modern'    },
+              { id: 'minimal',   label: 'Minimal'   },
+              { id: 'executive', label: 'Executive' },
+              { id: 'sidebar',   label: 'Sidebar'   },
+            ]}
             onChange={setTemplateId}
           />
         </div>

@@ -3,6 +3,9 @@ import { pdf } from '@react-pdf/renderer';
 import { ResumeData, ParsedResume, RewrittenResume } from './types';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import ModernTemplate from '@/components/templates/ModernTemplate';
+import MinimalTemplate from '@/components/templates/MinimalTemplate';
+import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
+import SidebarTemplate from '@/components/templates/SidebarTemplate';
 
 export type ResumeInput = ParsedResume | RewrittenResume;
 
@@ -58,12 +61,20 @@ export async function generateResumePdfBlob(resume: ResumeInput): Promise<Blob> 
   return generateBuilderPdfBlob(data, 'classic');
 }
 
+const TEMPLATE_MAP = {
+  classic:   ClassicTemplate,
+  modern:    ModernTemplate,
+  minimal:   MinimalTemplate,
+  executive: ExecutiveTemplate,
+  sidebar:   SidebarTemplate,
+} as const;
+
 export async function generateBuilderPdfBlob(
   data: ResumeData,
-  templateId: 'classic' | 'modern' = 'classic',
+  templateId: keyof typeof TEMPLATE_MAP = 'classic',
   sectionOrder?: string[]
 ): Promise<Blob> {
-  const TemplateComponent = templateId === 'modern' ? ModernTemplate : ClassicTemplate;
+  const TemplateComponent = TEMPLATE_MAP[templateId] ?? ClassicTemplate;
   const doc = React.createElement(TemplateComponent, { data, sectionOrder });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const asPdf = pdf(doc as any);
