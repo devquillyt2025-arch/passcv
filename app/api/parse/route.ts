@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-haiku-3-5-20241022',
       max_tokens: 4096,
       messages: [{ role: 'user', content: claudeContent }],
     });
@@ -107,8 +107,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(resumeData);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error('parse error:', msg);
-    return NextResponse.json({ error: `Parse failed: ${msg}` }, { status: 500 });
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error('parse error:', msg, stack);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
