@@ -20,7 +20,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A0A0F] flex flex-col pb-20 transition-colors duration-200" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0A0A0F] flex flex-col pb-20 transition-colors duration-200 font-sans">
       {/* Nav */}
       <nav className="bg-white dark:bg-[#0A0A0F]/80 backdrop-blur border-b border-gray-200 dark:border-white/[0.06] px-6 h-16 flex items-center justify-between sticky top-0 z-30">
         <Link href="/" className="text-xl font-bold text-indigo-700 dark:text-indigo-400 tracking-tight">
@@ -135,7 +135,7 @@ export default function DashboardPage() {
       </main>
 
       <footer className="border-t border-gray-200 dark:border-white/[0.06] py-5 px-6 text-center text-xs text-gray-400 dark:text-gray-600 bg-white dark:bg-[#0A0A0F]">
-        TailorCV · Resumes are processed securely and never shared
+        TailorCV · Resumes are processed in-memory and never stored · No human review
       </footer>
     </div>
   );

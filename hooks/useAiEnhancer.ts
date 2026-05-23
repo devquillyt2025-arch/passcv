@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useUIStore } from '@/lib/store/useUIStore';
 
 export interface AiEnhancerPayload {
   rawText: string;
@@ -29,6 +30,7 @@ export function useAiEnhancer(
   validationErrors: string[],
   jobTitle: string,
 ): UseAiEnhancerResult {
+  const jdText = useUIStore(s => s.jdText);
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [canRevert, setCanRevert] = useState(false);
@@ -107,7 +109,7 @@ export function useAiEnhancer(
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             originalText: payload.rawText,
-            jdText: (payload.validationErrors || []).join('\n'),
+            jdText: jdText ?? '',
             sectionType: 'experience',
             context: payload.jobTitle,
           }),

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { refineBullets, detectRepetition } from '@/lib/bulletRefinement';
+import { refineBullets } from '@/lib/bulletRefinement';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -74,12 +74,6 @@ Format ONLY as a bullet list using '-'. No intro, no explanations, no markdown b
       .filter(Boolean);
 
     if (bullets.length > 0) {
-      // Check for repetition
-      const { hasRepetition, patterns } = detectRepetition(bullets);
-      if (hasRepetition) {
-        console.log('Repetition detected:', patterns);
-      }
-
       // Refine bullets for human-likeness
       const refinedBullets = refineBullets(bullets);
 

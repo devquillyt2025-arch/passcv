@@ -1,153 +1,81 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { FeatureCard } from '@/components/FeatureCard';
+
+const HOW_IT_WORKS = [
+  {
+    icon: '📄',
+    title: 'ATS Score (Free)',
+    body: 'We check keyword match, formatting, Naukri-specific fields, and content quality — 100-point breakdown.',
+  },
+  {
+    icon: '✏️',
+    title: 'AI Rewrite (₹49)',
+    body: 'Claude rewrites every section — summary, bullets, skills — using exact JD keywords. Never fabricates facts.',
+  },
+  {
+    icon: '⬇️',
+    title: 'DOCX Download',
+    body: 'Get a single-column ATS-safe DOCX ready to upload to Naukri. Plus a Naukri profile text block.',
+  },
+];
+
+const PLATFORMS = ['Naukri', 'LinkedIn', 'Taleo', 'Darwinbox', 'Keka', 'Workday'];
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div className="min-h-screen flex flex-col bg-[#0A0A0F] text-white font-sans">
 
-      {/* ── Radial glow behind hero ─────────────────────────────────────────── */}
+      {/* Radial glow — keep style only for the non-Tailwind radial-gradient */}
       <div
         aria-hidden="true"
-        style={{
-          position:  'fixed',
-          top:        0,
-          left:      '50%',
-          transform: 'translateX(-50%)',
-          width:     '900px',
-          height:    '500px',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.13) 0%, rgba(139,92,246,0.06) 45%, transparent 70%)',
-          filter:    'blur(40px)',
-          pointerEvents: 'none',
-          zIndex:    0,
-        }}
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full pointer-events-none z-0 blur-[40px]"
+        style={{ background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.13) 0%, rgba(139,92,246,0.06) 45%, transparent 70%)' }}
       />
 
-      {/* ── Nav ─────────────────────────────────────────────────────────────── */}
-      <nav
-        className="sticky top-0 z-30 flex items-center justify-between px-6 h-14"
-        style={{
-          background:   'rgba(10,10,15,0.6)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        <span style={{ fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>
-          TailorCV
-        </span>
+      {/* Nav */}
+      <nav className="sticky top-0 z-30 flex items-center justify-between px-6 h-14 bg-[#0A0A0F]/60 backdrop-blur-md border-b border-white/[0.06]">
+        <span className="text-xl font-bold tracking-tight">TailorCV</span>
         <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard"
-            style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', transition: 'color 0.2s ease' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
-          >
+          <Link href="/dashboard" className="text-[13px] text-white/60 hover:text-white transition-colors duration-200">
             Dashboard
           </Link>
-          <span
-            style={{
-              fontSize:   13,
-              color:      'rgba(255,255,255,0.45)',
-              background: 'rgba(255,255,255,0.05)',
-              border:     '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '999px',
-              padding:    '4px 14px',
-            }}
-          >
+          <span className="text-[13px] text-white/45 bg-white/5 border border-white/10 rounded-full px-3.5 py-1">
             Free ATS check · ₹49 rewrite
           </span>
           <ThemeToggle />
         </div>
       </nav>
 
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <section className="relative z-10 pt-24 pb-12 px-4 text-center flex-1 flex flex-col justify-center items-center">
         <div className="mx-auto max-w-3xl">
-          <h1
-            style={{
-              fontSize:   'clamp(36px, 6vw, 56px)',
-              fontWeight: 700,
-              lineHeight: 1.1,
-              letterSpacing: '-0.02em',
-              color: '#fff',
-              margin: 0,
-            }}
-          >
+          <h1 className="text-[clamp(36px,6vw,56px)] font-bold leading-[1.1] tracking-[-0.02em] m-0">
             Job-ready in{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #6366f1, #a78bfa)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span className="bg-gradient-to-br from-indigo-500 to-violet-400 bg-clip-text text-transparent">
               60 seconds
             </span>
           </h1>
 
-          <p
-            style={{
-              marginTop: 24,
-              fontSize:  20,
-              color:     'rgba(255,255,255,0.5)',
-              maxWidth:  520,
-              margin:    '24px auto 0',
-              lineHeight: 1.5,
-            }}
-          >
+          <p className="text-xl text-white/50 max-w-[520px] mx-auto mt-6 leading-relaxed">
             Upload your resume · paste the JD · get an ATS score and a Claude-rewritten
             version ready to upload to Naukri
           </p>
 
-          {/* Get Started CTA Button */}
           <div className="mt-8 flex justify-center">
             <Link
               href="/dashboard"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '14px 36px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                color: '#fff',
-                fontWeight: 600,
-                fontSize: 16,
-                boxShadow: '0 4px 20px rgba(99,102,241,0.25)',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 6px 24px rgba(99,102,241,0.4)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.25)';
-              }}
+              className="inline-flex items-center gap-2 px-9 py-3.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white font-semibold text-base shadow-[0_4px_20px_rgba(99,102,241,0.25)] hover:shadow-[0_6px_24px_rgba(99,102,241,0.4)] hover:-translate-y-px transition-all duration-200"
             >
               Get Started →
             </Link>
           </div>
 
-          {/* Platform badge chips */}
           <div className="flex flex-wrap justify-center gap-2 mt-8">
-            {['Naukri', 'LinkedIn', 'Taleo', 'Darwinbox', 'Keka', 'Workday'].map(name => (
-              <span
-                key={name}
-                style={{
-                  fontSize:     13,
-                  color:        'rgba(255,255,255,0.55)',
-                  background:   'rgba(255,255,255,0.05)',
-                  border:       '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '999px',
-                  padding:      '5px 14px',
-                }}
-              >
+            {PLATFORMS.map(name => (
+              <span key={name} className="text-[13px] text-white/55 bg-white/5 border border-white/10 rounded-full px-3.5 py-1.5">
                 {name}
               </span>
             ))}
@@ -155,95 +83,23 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── How it works ──────────────────────────────────────────────────── */}
+      {/* How it works */}
       <section className="relative z-10 mx-auto w-full max-w-5xl px-6 py-12 border-t border-white/[0.06]">
-        <p
-          style={{
-            fontSize:      13,
-            fontWeight:    600,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color:         'rgba(255,255,255,0.35)',
-            marginBottom:  32,
-          }}
-        >
+        <p className="text-[13px] font-semibold tracking-[0.08em] uppercase text-white/35 mb-8">
           How TailorCV works
         </p>
         <div className="grid gap-6 sm:grid-cols-3">
-          {[
-            {
-              icon: '📄',
-              title: 'ATS Score (Free)',
-              body:  'We check keyword match, formatting, Naukri-specific fields, and content quality — 100-point breakdown.',
-            },
-            {
-              icon: '✏️',
-              title: 'AI Rewrite (₹49)',
-              body:  'Claude rewrites every section — summary, bullets, skills — using exact JD keywords. Never fabricates facts.',
-            },
-            {
-              icon: '⬇️',
-              title: 'DOCX Download',
-              body:  'Get a single-column ATS-safe DOCX ready to upload to Naukri. Plus a Naukri profile text block.',
-            },
-          ].map(item => (
+          {HOW_IT_WORKS.map(item => (
             <FeatureCard key={item.title} icon={item.icon} title={item.title} body={item.body} />
           ))}
         </div>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────────────────────── */}
-      <footer
-        className="relative z-10 py-6 border-t border-white/[0.06] text-center text-xs text-slate-500 bg-[#0A0A0F]"
-      >
-        TailorCV · Resumes uploaded are auto-deleted after 24h · No human review
+      {/* Footer */}
+      <footer className="relative z-10 py-6 border-t border-white/[0.06] text-center text-xs text-slate-500 bg-[#0A0A0F]">
+        TailorCV · Resumes are processed in-memory and never stored · No human review
       </footer>
 
-    </div>
-  );
-}
-
-function FeatureCard({ icon, title, body }: { icon: string; title: string; body: string }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display:      'flex',
-        gap:          24,
-        background:   '#13131A',
-        border:       `1px solid ${hovered ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.07)'}`,
-        borderRadius: 16,
-        padding:      24,
-        transform:    hovered ? 'translateY(-2px)' : 'translateY(0)',
-        transition:   'all 0.2s ease',
-        cursor:       'default',
-      }}
-    >
-      <div
-        style={{
-          flexShrink:   0,
-          width:        40,
-          height:       40,
-          borderRadius: 10,
-          background:   'rgba(99,102,241,0.12)',
-          display:      'flex',
-          alignItems:   'center',
-          justifyContent: 'center',
-          fontSize:     20,
-        }}
-      >
-        {icon}
-      </div>
-      <div>
-        <p style={{ fontWeight: 600, fontSize: 15, color: 'rgba(255,255,255,0.9)', margin: 0 }}>
-          {title}
-        </p>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 6, lineHeight: 1.6 }}>
-          {body}
-        </p>
-      </div>
     </div>
   );
 }
