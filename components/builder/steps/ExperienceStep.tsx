@@ -3,27 +3,13 @@
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { useUIStore } from '@/lib/store/useUIStore';
 import { useAiEnhancer } from '@/hooks/useAiEnhancer';
+import { analyzeBullet } from '@/lib/bulletAnalyzer';
 import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Sparkles, AlertTriangle, Loader2, RotateCcw, Square } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import MonthYearPicker from '@/components/builder/MonthYearPicker';
 
 // ── Bullet weakness detection ─────────────────────────────────────────────────
-
-const WEAK_PATTERNS: { pattern: RegExp; label: string }[] = [
-  { pattern: /^helped\b/i,              label: 'weak verb "Helped"' },
-  { pattern: /^worked\s+(on|with)\b/i,  label: 'weak phrase "Worked on/with"' },
-  { pattern: /^worked\b/i,              label: 'weak verb "Worked"' },
-  { pattern: /^assisted\b/i,            label: 'weak verb "Assisted"' },
-  { pattern: /^supported\b/i,           label: 'weak verb "Supported"' },
-  { pattern: /^participated\b/i,        label: 'weak verb "Participated"' },
-  { pattern: /^involved\b/i,            label: 'weak verb "Involved"' },
-  { pattern: /^contributed\b/i,         label: 'weak verb "Contributed"' },
-  { pattern: /^responsible for\b/i,     label: 'weak phrase "Responsible for"' },
-  { pattern: /^handled\b/i,             label: 'weak verb "Handled"' },
-  { pattern: /^utilized\b/i,            label: 'weak verb "Utilized"' },
-  { pattern: /^made sure\b/i,           label: 'weak phrase "Made sure"' },
-];
 
 interface BulletIssue {
   index: number;
@@ -32,19 +18,22 @@ interface BulletIssue {
   message: string;
 }
 
-function analyzeBullets(description: string): BulletIssue[] {
-  const bullets = description
-    .split('\n')
-    .map((b) => b.replace(/^[-•*]\s*/, '').trim())
-    .filter((b) => b.length > 15);
-
+function analyzeBullets(description: string, expId: string = '', expIndex: number = 0): BulletIssue[] {
+  const lines = description.split('\n');
   const issues: BulletIssue[] = [];
-  bullets.forEach((bullet, i) => {
-    const weakMatch = WEAK_PATTERNS.find(({ pattern }) => pattern.test(bullet));
-    if (weakMatch) {
-      issues.push({ index: i + 1, text: bullet.slice(0, 55) + (bullet.length > 55 ? '…' : ''), type: 'weak-verb', message: `Bullet ${i + 1}: ${weakMatch.label} — try Led, Built, Drove, Designed, Delivered` });
-    } else if (!/\d/.test(bullet)) {
-      issues.push({ index: i + 1, text: bullet.slice(0, 55) + (bullet.length > 55 ? '…' : ''), type: 'no-metric', message: `Bullet ${i + 1}: No metric — add a number, %, $, or time saved` });
+  let lineCount = 0;
+  lines.forEach((line, i) => {
+    const trimmed = line.replace(/^[-•*]\s*/, '').trim();
+    if (trimmed.length === 0) return;
+    lineCount++;
+    const issue = analyzeBullet(line, expId, expIndex, i);
+    if (issue) {
+      issues.push({
+        index: lineCount,
+        text: issue.text,
+        type: issue.type === 'weak-verb' ? 'weak-verb' : 'no-metric',
+        message: `Bullet ${lineCount}: ${issue.message}`,
+      });
     }
   });
   return issues;

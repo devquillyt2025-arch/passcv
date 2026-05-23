@@ -24,6 +24,19 @@ export const EducationSchema = z.object({
   cgpa: z.string().optional(),
 });
 
+export const ParsedProjectSchema = z.object({
+  name: z.string().default(''),
+  description: z.string().default(''),
+  url: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
+export const ParsedLanguageSchema = z.object({
+  name: z.string().default(''),
+  proficiency: z.string().optional(),
+});
+
 export const ParsedResumeSchema = z.object({
   contact: ContactSchema,
   summary: z.string().default(''),
@@ -37,6 +50,8 @@ export const ParsedResumeSchema = z.object({
   hasTables: z.boolean().default(false),
   hasImages: z.boolean().default(false),
   rawText: z.string().optional(),
+  projects: z.array(ParsedProjectSchema).optional(),
+  languages: z.array(ParsedLanguageSchema).optional(),
 });
 
 export const ParsedJDSchema = z.object({
@@ -144,6 +159,71 @@ export const ResumeProjectSchema = z.object({
   endDate: z.string().default(''),
 });
 
+export const ResumeCertificationSchema = z.object({
+  id: z.string().default(''),
+  name: z.string().default(''),
+  issuer: z.string().default(''),
+  issueDate: z.string().default(''),
+  expiryDate: z.string().default(''),
+  doesNotExpire: z.boolean().default(true),
+  credentialId: z.string().default(''),
+  credentialUrl: z.string().default(''),
+});
+
+export const ResumeLanguageSchema = z.object({
+  id: z.string().default(''),
+  name: z.string().default(''),
+  proficiency: z.string().default('Professional Working Proficiency'),
+});
+
+export const ResumeCustomItemSchema = z.object({
+  id: z.string().default(''),
+  name: z.string().default(''),
+  description: z.string().default(''),
+});
+
+export const ResumeCustomSectionSchema = z.object({
+  id: z.string().default(''),
+  title: z.string().default(''),
+  items: z.array(ResumeCustomItemSchema).default([]),
+});
+
+export const ResumePublicationSchema = z.object({
+  id: z.string().default(''),
+  title: z.string().default(''),
+  publisher: z.string().default(''),
+  date: z.string().default(''),
+  coAuthors: z.string().default(''),
+  url: z.string().default(''),
+});
+
+export const ResumeCourseSchema = z.object({
+  id: z.string().default(''),
+  name: z.string().default(''),
+  platform: z.string().default(''),
+  completionDate: z.string().default(''),
+  certificateUrl: z.string().default(''),
+});
+
+export const ResumeAwardSchema = z.object({
+  id: z.string().default(''),
+  name: z.string().default(''),
+  issuer: z.string().default(''),
+  date: z.string().default(''),
+  description: z.string().default(''),
+});
+
+export const ResumeVolunteerSchema = z.object({
+  id: z.string().default(''),
+  organization: z.string().default(''),
+  role: z.string().default(''),
+  location: z.string().default(''),
+  startDate: z.string().default(''),
+  endDate: z.string().default(''),
+  currentlyVolunteering: z.boolean().default(false),
+  description: z.string().default(''),
+});
+
 export const ResumeDataSchema = z.object({
   contact: ResumeContactSchema,
   summary: z.string().default(''),
@@ -151,4 +231,11 @@ export const ResumeDataSchema = z.object({
   education: z.array(ResumeEducationSchema).default([]),
   skills: z.array(ResumeSkillSchema).default([]),
   projects: z.array(ResumeProjectSchema).default([]),
+  certifications: z.array(ResumeCertificationSchema).default([]),
+  languages: z.array(ResumeLanguageSchema).default([]),
+  publications: z.array(ResumePublicationSchema).default([]),
+  courses: z.array(ResumeCourseSchema).default([]),
+  awards: z.array(ResumeAwardSchema).default([]),
+  volunteer: z.array(ResumeVolunteerSchema).default([]),
+  customSections: z.array(ResumeCustomSectionSchema).default([]),
 });

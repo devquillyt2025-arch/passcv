@@ -40,6 +40,21 @@ CRITICAL RULES:
   ],
   "skills": ["skill1", "skill2"],
   "certifications": ["cert1"],
+  "projects": [
+    {
+      "name": "project name",
+      "description": "brief description of project, responsibilities, or technologies used",
+      "url": "project URL or empty string",
+      "startDate": "Mon YYYY or empty string",
+      "endDate": "Mon YYYY or empty string"
+    }
+  ],
+  "languages": [
+    {
+      "name": "language name e.g. English, Spanish",
+      "proficiency": "one of: Native Speaker, Fluent, Professional Working Proficiency, Limited Working Proficiency, Elementary Proficiency"
+    }
+  ],
   "noticePeriod": "notice period if mentioned else empty string",
   "ctc": "current CTC if mentioned else empty string",
   "hasMultiColumn": false,

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ParsedResume, ResumeData } from '@/lib/types';
+import { ParsedResume, ResumeData, LanguageProficiency } from '@/lib/types';
 
 export function parsedToBuilderData(parsed: ParsedResume): ResumeData {
   const parts = (parsed.contact.name || '').trim().split(/\s+/);
@@ -50,8 +50,41 @@ export function parsedToBuilderData(parsed: ParsedResume): ResumeData {
       name: skill,
       level: 'Intermediate' as const,
     })),
-    projects: [],
-    certifications: [],
-    languages: [],
+    projects: (parsed.projects || []).map(proj => ({
+      id: uuidv4(),
+      name: proj.name || '',
+      description: proj.description || '',
+      url: proj.url || '',
+      startDate: proj.startDate || '',
+      endDate: proj.endDate || '',
+    })),
+    certifications: (parsed.certifications || []).map(cert => ({
+      id: uuidv4(),
+      name: cert || '',
+      issuer: '',
+      issueDate: '',
+      expiryDate: '',
+      doesNotExpire: true,
+      credentialId: '',
+      credentialUrl: '',
+    })),
+    languages: (parsed.languages || []).map(lang => {
+      const validProficiencies = [
+        'Native Speaker',
+        'Fluent',
+        'Professional Working Proficiency',
+        'Limited Working Proficiency',
+        'Elementary Proficiency'
+      ];
+      let prof = lang.proficiency || 'Professional Working Proficiency';
+      if (!validProficiencies.includes(prof)) {
+        prof = 'Professional Working Proficiency';
+      }
+      return {
+        id: uuidv4(),
+        name: lang.name || '',
+        proficiency: prof as LanguageProficiency,
+      };
+    }),
   };
 }

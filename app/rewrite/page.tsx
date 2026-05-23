@@ -17,7 +17,7 @@ export default function RewritePage() {
 
   useEffect(() => {
     if (_hasHydrated && (!original || !rewritten || !edited || !jd)) {
-      router.push('/');
+      router.push('/tailor');
     }
   }, [original, rewritten, edited, jd, router, _hasHydrated]);
 
@@ -88,7 +88,7 @@ export default function RewritePage() {
       {/* Nav */}
       <nav className="sticky top-0 z-30 bg-white/80 dark:bg-[#0A0A0F]/40 backdrop-blur-[12px] border-b border-gray-200 dark:border-white/[0.06]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition-colors">
+          <Link href="/tailor" className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>

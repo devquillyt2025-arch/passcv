@@ -41,7 +41,7 @@ export const useResumeStore = create<StoreState>()(
       version: 1,
       migrate: (persistedState: unknown, version: number) => {
         if (version === 0) {
-          return undefined; // Discard unversioned stale data
+          return {}; // Discard v0 data; empty object merges with initial state
         }
         return persistedState;
       },
