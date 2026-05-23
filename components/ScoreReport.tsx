@@ -3,6 +3,18 @@
 import { ATSScore } from '@/lib/types';
 import clsx from 'clsx';
 
+const NOISE_WORDS = new Set([
+  'develop', 'design', 'implement', 'utilize', 'leverage',
+  'contribute', 'about', 'role', 'gen', 'welcome',
+]);
+
+function filterMissingKeywords(keywords: string[]): string[] {
+  return keywords.filter(kw => {
+    const w = kw.toLowerCase().trim();
+    return w.length >= 5 && !NOISE_WORDS.has(w);
+  });
+}
+
 interface Props {
   score: ATSScore;
   onRewrite: () => void;
@@ -108,20 +120,24 @@ export default function ScoreReport({ score, onRewrite, rewriting }: Props) {
       )}
 
       {/* Missing keywords */}
-      {score.missingKeywords.length > 0 && (
-        <div className="border-t border-gray-100 px-6 py-4">
-          <h3 className="text-sm font-semibold text-gray-800 mb-2">
-            Missing keywords ({score.missingKeywords.length})
-          </h3>
-          <div className="flex flex-wrap gap-1.5">
-            {score.missingKeywords.map((kw, i) => (
-              <span key={i} className="rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 border border-red-100">
-                {kw}
-              </span>
-            ))}
+      {(() => {
+        const filtered = filterMissingKeywords(score.missingKeywords);
+        if (!filtered.length) return null;
+        return (
+          <div className="border-t border-gray-100 px-6 py-4">
+            <h3 className="text-sm font-semibold text-gray-800 mb-2">
+              Missing keywords ({filtered.length})
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {filtered.map((kw, i) => (
+                <span key={i} className="rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 border border-red-100">
+                  {kw}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Matched keywords */}
       {score.matchedKeywords.length > 0 && (
@@ -138,6 +154,23 @@ export default function ScoreReport({ score, onRewrite, rewriting }: Props) {
           </div>
         </div>
       )}
+
+      {/* Estimated post-rewrite score callout */}
+      {(() => {
+        const lo = Math.min(85, Math.max(65, score.total + 20));
+        const hi = Math.min(92, Math.max(72, score.total + 28));
+        return (
+          <div className="border-t border-gray-100 px-6 py-4">
+            <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 pl-4 pr-5 py-3 border-l-4 border-l-green-500">
+              <span className="text-green-600 text-lg">↑</span>
+              <p className="text-sm text-green-800">
+                <span className="font-semibold">After AI rewrite, your estimated score: {lo}–{hi}/100</span>
+                <span className="text-green-700 ml-2 font-normal">Claude rewrites every section using exact JD keywords.</span>
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* CTA */}
       <div className="border-t border-gray-100 bg-gray-50 px-6 py-5 flex flex-col sm:flex-row gap-3 items-center justify-between">

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import UploadZone from '@/components/UploadZone';
 import { useRewriteStore } from '@/lib/store/useRewriteStore';
 import WizardProgress from '@/components/WizardProgress';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function TailorPage() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function TailorPage() {
   const canAnalyze = resume && (jdText || '').trim().length > 100;
 
   return (
-    <div className="dark min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
 
       {/* Radial glow background */}
       <div
@@ -105,6 +106,7 @@ export default function TailorPage() {
           >
             Free ATS check · ₹49 rewrite
           </span>
+          <ThemeToggle />
         </div>
       </nav>
 

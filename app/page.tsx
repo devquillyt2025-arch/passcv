@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function Home() {
   return (
-    <div className="dark min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
 
       {/* ── Radial glow behind hero ─────────────────────────────────────────── */}
       <div
@@ -59,6 +60,7 @@ export default function Home() {
           >
             Free ATS check · ₹49 rewrite
           </span>
+          <ThemeToggle />
         </div>
       </nav>
 
