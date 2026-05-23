@@ -10,7 +10,7 @@ interface WizardProgressProps {
 
 export default function WizardProgress({ currentStep, canProceedToScore, canProceedToRewrite }: WizardProgressProps) {
   const steps = [
-    { n: 1, label: 'Upload & JD', active: true, href: '/' },
+    { n: 1, label: 'Upload & JD', active: true, href: '/tailor' },
     { n: 2, label: 'ATS Score', active: currentStep >= 2 || canProceedToScore, href: '/score', disabled: !canProceedToScore && currentStep < 2 },
     { n: 3, label: 'AI Rewrite', active: currentStep >= 3 || canProceedToRewrite, href: '/rewrite', disabled: !canProceedToRewrite && currentStep < 3 },
   ];

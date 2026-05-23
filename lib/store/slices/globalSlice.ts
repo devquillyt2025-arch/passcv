@@ -5,7 +5,7 @@ import { emptyResumeData, DEMO_RESUME_DATA } from './defaultData';
 export const DEFAULT_SECTION_ORDER = ['summary', 'skills', 'experience', 'education', 'certifications', 'courses', 'languages', 'projects', 'publications', 'volunteer', 'awards'];
 
 export const DEFAULT_BUILDER_DESIGN = {
-  accentColor: '#4F46E5',
+  accentColor: '#0D9488',
   fontPair: 'editorial' as const,
   spacing: 'balanced' as const,
   zoom: 0.9,
@@ -47,6 +47,7 @@ export const createGlobalSlice: StoreSlice<Pick<import('./types').StoreState, 'r
       courses: data.courses || [],
       awards: data.awards || [],
       volunteer: data.volunteer || [],
+      customSections: data.customSections || [],
       contact: { ...emptyResumeData.contact, ...(data.contact || {}) },
     },
   }),

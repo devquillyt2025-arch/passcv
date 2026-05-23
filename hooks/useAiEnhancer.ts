@@ -24,41 +24,6 @@ interface UseAiEnhancerResult {
 
 const REVERT_WINDOW_MS = 10_000;
 
-function sleep(ms: number) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
-function chunkString(value: string, size: number) {
-  const chunks: string[] = [];
-  for (let i = 0; i < value.length; i += size) {
-    chunks.push(value.slice(i, i + size));
-  }
-  return chunks;
-}
-
-function createMockEnhancedText(rawText: string): string {
-  const bullets = rawText
-    .split('\n')
-    .map((line) => line.replace(/^[-•*]\s*/, '').trim())
-    .filter(Boolean);
-
-  if (bullets.length === 0) {
-    return rawText;
-  }
-
-  const strongVerbs = ['Led', 'Designed', 'Delivered', 'Drove', 'Spearheaded', 'Optimized'];
-  return bullets
-    .map((bullet, index) => {
-      const verb = strongVerbs[index % strongVerbs.length];
-      const cleaned = bullet.replace(/^(helped|worked\s+(on|with)|worked|assisted|supported|participated|involved|contributed|responsible for|handled|utilized|made sure)\b/i, '').trim();
-      const textWithMetric = /\d/.test(cleaned)
-        ? cleaned
-        : `${cleaned} with a ${15 + index * 10}% improvement in efficiency`;
-      return `- ${verb} ${textWithMetric}`;
-    })
-    .join('\n');
-}
-
 export function useAiEnhancer(
   currentText: string,
   validationErrors: string[],
@@ -71,7 +36,7 @@ export function useAiEnhancer(
 
   const originalTextRef = useRef(currentText);
   const onUpdateRef = useRef<(text: string) => void>(() => {});
-  const abortingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const revertTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -81,7 +46,7 @@ export function useAiEnhancer(
   useEffect(() => {
     return () => {
       if (revertTimerRef.current) window.clearTimeout(revertTimerRef.current);
-      abortingRef.current = true;
+      abortControllerRef.current?.abort();
     };
   }, []);
 
@@ -103,7 +68,7 @@ export function useAiEnhancer(
   }, []);
 
   const abort = useCallback(() => {
-    abortingRef.current = true;
+    abortControllerRef.current?.abort();
     setIsLoading(false);
     setIsStreaming(false);
   }, []);
@@ -123,30 +88,70 @@ export function useAiEnhancer(
 
       originalTextRef.current = payload.rawText;
       onUpdateRef.current = onUpdate;
-      abortingRef.current = false;
       setError(null);
       setIsLoading(true);
       setIsStreaming(false);
       setCanRevert(false);
 
-      try {
-        // Mock network delay and payload preparation.
-        await sleep(500);
-        if (abortingRef.current) throw new Error('Aborted');
+      if (revertTimerRef.current) {
+        window.clearTimeout(revertTimerRef.current);
+        revertTimerRef.current = null;
+      }
 
-        const enhancedText = createMockEnhancedText(payload.rawText);
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      try {
+        const res = await fetch('/api/builder/rewrite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            originalText: payload.rawText,
+            jdText: (payload.validationErrors || []).join('\n'),
+            sectionType: 'experience',
+            context: payload.jobTitle,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({})) as { error?: string };
+          throw new Error(body.error ?? `Server error ${res.status}`);
+        }
+
+        if (!res.body) throw new Error('Empty response body');
 
         setIsLoading(false);
         setIsStreaming(true);
 
-        const chunks = chunkString(enhancedText, 12);
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
         let accumulated = '';
 
-        for (const chunk of chunks) {
-          await sleep(50);
-          if (abortingRef.current) throw new Error('Aborted');
-          accumulated += chunk;
-          onUpdateRef.current(accumulated);
+        try {
+          outer: while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const jsonPayload = line.slice(6).trim();
+              if (jsonPayload === '[DONE]') break outer;
+              try {
+                const token = JSON.parse(jsonPayload) as string;
+                accumulated += token;
+                onUpdateRef.current(accumulated);
+              } catch { /* skip malformed chunk */ }
+            }
+          }
+        } finally {
+          reader.releaseLock();
         }
 
         setIsStreaming(false);
@@ -156,7 +161,7 @@ export function useAiEnhancer(
         }, REVERT_WINDOW_MS);
 
       } catch (err) {
-        if ((err as Error).message === 'Aborted') {
+        if ((err as Error).name === 'AbortError') {
           setIsLoading(false);
           setIsStreaming(false);
           return;

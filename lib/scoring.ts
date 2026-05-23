@@ -293,6 +293,8 @@ function buildResumeText(resume: ParsedResume): string {
     ...resume.experience.map(e => `${e.title} ${e.company} ${e.bullets.join(' ')}`),
     ...resume.education.map(e => `${e.degree} ${e.field} ${e.institution}`),
     resume.certifications.join(' '),
+    ...(resume.projects || []).map(p => `${p.name} ${p.description}`),
+    ...(resume.languages || []).map(l => `${l.name} ${l.proficiency || ''}`),
     resume.rawText || '',
   ].join(' ').toLowerCase();
 }
@@ -324,7 +326,18 @@ export function mapResumeDataToParsedResume(data: ResumeData): ParsedResume {
       cgpa: e.score,
     })),
     skills: data.skills.map(s => s.name),
-    certifications: [],
+    certifications: (data.certifications || []).map(c => c.name),
+    projects: (data.projects || []).map(p => ({
+      name: p.name,
+      description: p.description,
+      url: p.url,
+      startDate: p.startDate,
+      endDate: p.endDate,
+    })),
+    languages: (data.languages || []).map(l => ({
+      name: l.name,
+      proficiency: l.proficiency,
+    })),
     hasMultiColumn: false,
     hasTables: false,
     hasImages: false,

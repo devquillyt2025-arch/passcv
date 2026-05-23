@@ -10,7 +10,7 @@ const SAVED_RESET_MS = 3000; // how long to show "Saved ✓" before going back t
 export function useAutosaveSync(resumeId: string | null, data: ResumeData) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
-  // Stable Supabase client — createClient() once per hook instance, not per render.
+  // Stable Supabase client — null when env vars aren't configured (autosave disabled).
   const supabaseRef = useRef(createClient());
 
   // Refs that track debounce state without putting them in effect deps.
@@ -21,9 +21,10 @@ export function useAutosaveSync(resumeId: string | null, data: ResumeData) {
 
   // Stable save function — captured in useEffect without needing to be in deps.
   const persist = useCallback(async (snapshot: ResumeData, snapshotJson: string) => {
-    if (!resumeId) return;
+    const client = supabaseRef.current;
+    if (!resumeId || !client) return;
     try {
-      const { error } = await supabaseRef.current
+      const { error } = await client
         .from('resumes')
         .update({
           data: snapshot,

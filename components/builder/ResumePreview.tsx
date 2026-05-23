@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState, useMemo, memo, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, useMemo, memo, type CSSProperties } from 'react';
 import type { ResumeData, ResumeExperience, ResumeEducation, ResumeProject, ResumeCertification, ResumeLanguage, ResumePublication, ResumeCourse, ResumeAward, ResumeVolunteer } from '@/lib/types';
 import type { StoreState } from '@/lib/store/slices/types';
 import { DEFAULT_SECTION_ORDER } from '@/lib/store/slices/globalSlice';
@@ -880,11 +880,24 @@ const ResumePreview = memo(function ResumePreview({ data, templateId, sectionOrd
 
   const measureRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [pages, setPages] = useState<number[][]>([[0]]);
+  const isFirstMountRef = useRef(true);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isSidebar) return;
-    const heights = blocks.map((_, i) => measureRefs.current[i]?.offsetHeight ?? 0);
-    setPages(packBlocks(heights, USABLE_H));
+
+    const measure = () => {
+      const heights = blocks.map((_, i) => measureRefs.current[i]?.offsetHeight ?? 0);
+      setPages(packBlocks(heights, USABLE_H));
+    };
+
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      measure();
+      return;
+    }
+
+    const timer = setTimeout(measure, 200);
+    return () => clearTimeout(timer);
   }, [blocks, isSidebar]);
 
   // Sidebar has a fundamentally different two-column layout — render after all hooks.

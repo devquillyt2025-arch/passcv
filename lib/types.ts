@@ -35,6 +35,17 @@ export interface ParsedResume {
   hasTables: boolean;
   hasImages: boolean;
   rawText?: string;
+  projects?: {
+    name: string;
+    description: string;
+    url?: string;
+    startDate?: string;
+    endDate?: string;
+  }[];
+  languages?: {
+    name: string;
+    proficiency?: string;
+  }[];
 }
 
 export interface ParsedJD {

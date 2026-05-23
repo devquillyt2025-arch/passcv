@@ -1,54 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import UploadZone from '@/components/UploadZone';
-import { useRewriteStore } from '@/lib/store/useRewriteStore';
-import WizardProgress from '@/components/WizardProgress';
 
 export default function Home() {
-  const router = useRouter();
-  const store = useRewriteStore();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
-
-  const resume   = mounted ? store.original : null;
-  const jdText   = mounted ? store.jdText   : null;
-  const setResume   = store.setOriginal;
-  const setJdText   = store.setJdText;
-  const setScoreData = store.setScoreData;
-
-  const [scoring,    setScoring]    = useState(false);
-  const [parseError, setParseError] = useState('');
-  const [scoreError, setScoreError] = useState('');
-
-  const handleAnalyze = async () => {
-    if (!resume || !(jdText || '').trim()) return;
-    setScoring(true);
-    setScoreError('');
-    try {
-      const res  = await fetch('/api/score', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ resume, jdText }),
-      });
-      const data = await res.json();
-      setScoreData({ original: resume, jdText: jdText || '', score: data.score, jd: data.jd });
-      router.push('/score');
-    } catch (e) {
-      setScoreError(e instanceof Error ? e.message : 'Analysis failed. Please try again.');
-    } finally {
-      setScoring(false);
-    }
-  };
-
-  const canAnalyze = resume && (jdText || '').trim().length > 100;
-
   return (
-    // "dark" class enables Tailwind dark: variants in child components (UploadZone, WizardProgress)
-    <div className="dark min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
+    <div className="dark min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
 
       {/* ── Radial glow behind hero ─────────────────────────────────────────── */}
       <div
@@ -83,12 +40,12 @@ export default function Home() {
         </span>
         <div className="flex items-center gap-3">
           <Link
-            href="/builder"
+            href="/dashboard"
             style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', transition: 'color 0.2s ease' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
             onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
           >
-            Build Resume →
+            Dashboard
           </Link>
           <span
             style={{
@@ -106,7 +63,7 @@ export default function Home() {
       </nav>
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
-      <section className="relative z-10 pt-16 pb-0 px-4 text-center">
+      <section className="relative z-10 pt-24 pb-12 px-4 text-center flex-1 flex flex-col justify-center items-center">
         <div className="mx-auto max-w-3xl">
           <h1
             style={{
@@ -145,8 +102,38 @@ export default function Home() {
             version ready to upload to Naukri
           </p>
 
+          {/* Get Started CTA Button */}
+          <div className="mt-8 flex justify-center">
+            <Link
+              href="/dashboard"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '14px 36px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: 16,
+                boxShadow: '0 4px 20px rgba(99,102,241,0.25)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 24px rgba(99,102,241,0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.25)';
+              }}
+            >
+              Get Started →
+            </Link>
+          </div>
+
           {/* Platform badge chips */}
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
+          <div className="flex flex-wrap justify-center gap-2 mt-8">
             {['Naukri', 'LinkedIn', 'Taleo', 'Darwinbox', 'Keka', 'Workday'].map(name => (
               <span
                 key={name}
@@ -166,254 +153,54 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Main tool ───────────────────────────────────────────────────────── */}
-      <main
-        className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6"
-        style={{ paddingTop: 48, paddingBottom: 48 }}
-      >
-        {/* Step indicators */}
-        <WizardProgress
-          currentStep={1}
-          canProceedToScore={!!resume && (jdText || '').trim().length > 100}
-          canProceedToRewrite={mounted ? !!useRewriteStore.getState().score : false}
-        />
-
-        {/* Upload + JD two-column */}
-        <div className="grid gap-6 md:grid-cols-2 items-stretch">
-
-          {/* Step 1 — Upload */}
-          <div className="flex flex-col">
-            <label
-              style={{
-                display:       'block',
-                marginBottom:  12,
-                fontSize:      11,
-                fontWeight:    600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color:         'rgba(255,255,255,0.4)',
-              }}
-            >
-              Step 1 — Your resume
-            </label>
-            <div className="flex-1">
-              <UploadZone onParsed={setResume} onError={setParseError} />
-            </div>
-            {parseError && (
-              <p style={{ marginTop: 8, fontSize: 13, color: '#f87171' }}>{parseError}</p>
-            )}
-            {resume && (
-              <p style={{ marginTop: 8, fontSize: 13, color: '#34d399', fontWeight: 500 }}>
-                ✓ Parsed: {resume.contact.name || 'Resume'} · {resume.experience.length} jobs · {resume.skills.length} skills
-              </p>
-            )}
-          </div>
-
-          {/* Step 2 — JD */}
-          <div className="flex flex-col">
-            <label
-              style={{
-                display:       'block',
-                marginBottom:  12,
-                fontSize:      11,
-                fontWeight:    600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color:         'rgba(255,255,255,0.4)',
-              }}
-            >
-              Step 2 — Job description
-            </label>
-            <div
-              className="flex-1 flex overflow-hidden"
-              style={{
-                background:   '#13131A',
-                border:       '2px dashed rgba(99,102,241,0.35)',
-                borderRadius: 16,
-                minHeight:    320,
-                maxHeight:    320,
-                transition:   'border-color 0.2s ease, box-shadow 0.2s ease',
-              }}
-              onFocusCapture={e => {
-                const el = e.currentTarget as HTMLDivElement;
-                el.style.borderColor  = '#6366f1';
-                el.style.borderStyle  = 'solid';
-                el.style.boxShadow    = '0 0 0 3px rgba(99,102,241,0.15), inset 0 0 20px rgba(99,102,241,0.04)';
-              }}
-              onBlurCapture={e => {
-                const el = e.currentTarget as HTMLDivElement;
-                el.style.borderColor  = 'rgba(99,102,241,0.35)';
-                el.style.borderStyle  = 'dashed';
-                el.style.boxShadow    = 'none';
-              }}
-            >
-              <textarea
-                value={jdText || ''}
-                onChange={e => setJdText(e.target.value)}
-                placeholder="Paste the full job description from Naukri, LinkedIn or any portal…"
-                style={{
-                  flex:        1,
-                  width:       '100%',
-                  height:      '100%',
-                  background:  'transparent',
-                  border:      'none',
-                  outline:     'none',
-                  padding:     16,
-                  fontSize:    14,
-                  lineHeight:  1.6,
-                  color:       '#fff',
-                  resize:      'none',
-                  scrollbarWidth: 'none',
-                }}
-                className="[&::-webkit-scrollbar]:hidden placeholder:text-[rgba(255,255,255,0.28)]"
-              />
-            </div>
-            <p style={{ marginTop: 8, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
-              {(jdText || '').length} characters
-            </p>
-          </div>
+      {/* ── How it works ──────────────────────────────────────────────────── */}
+      <section className="relative z-10 mx-auto w-full max-w-5xl px-6 py-12 border-t border-white/[0.06]">
+        <p
+          style={{
+            fontSize:      13,
+            fontWeight:    600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color:         'rgba(255,255,255,0.35)',
+            marginBottom:  32,
+          }}
+        >
+          How TailorCV works
+        </p>
+        <div className="grid gap-6 sm:grid-cols-3">
+          {[
+            {
+              icon: '📄',
+              title: 'ATS Score (Free)',
+              body:  'We check keyword match, formatting, Naukri-specific fields, and content quality — 100-point breakdown.',
+            },
+            {
+              icon: '✏️',
+              title: 'AI Rewrite (₹49)',
+              body:  'Claude rewrites every section — summary, bullets, skills — using exact JD keywords. Never fabricates facts.',
+            },
+            {
+              icon: '⬇️',
+              title: 'DOCX Download',
+              body:  'Get a single-column ATS-safe DOCX ready to upload to Naukri. Plus a Naukri profile text block.',
+            },
+          ].map(item => (
+            <FeatureCard key={item.title} icon={item.icon} title={item.title} body={item.body} />
+          ))}
         </div>
-
-        {/* CTA + errors */}
-        <div className="flex flex-col items-center gap-6 mt-12">
-          {scoreError && (
-            <p
-              style={{
-                fontSize:     13,
-                color:        '#fca5a5',
-                background:   'rgba(239,68,68,0.1)',
-                border:       '1px solid rgba(239,68,68,0.2)',
-                borderRadius: 10,
-                padding:      '8px 16px',
-              }}
-            >
-              {scoreError}
-            </p>
-          )}
-
-          <button
-            onClick={handleAnalyze}
-            disabled={!canAnalyze || scoring}
-            className="w-full md:w-auto"
-            style={{
-              height:         56,
-              paddingLeft:    40,
-              paddingRight:   40,
-              borderRadius:   14,
-              background:     'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              color:          '#fff',
-              fontSize:       16,
-              fontWeight:     700,
-              border:         'none',
-              cursor:         (!canAnalyze || scoring) ? 'not-allowed' : 'pointer',
-              opacity:        (!canAnalyze || scoring) ? 0.3 : 1,
-              transition:     'all 0.2s ease',
-              display:        'flex',
-              alignItems:     'center',
-              justifyContent: 'center',
-              gap:            8,
-            }}
-            onMouseEnter={e => {
-              if (!canAnalyze || scoring) return;
-              const b = e.currentTarget as HTMLButtonElement;
-              b.style.boxShadow = '0 0 32px rgba(99,102,241,0.5)';
-              b.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={e => {
-              const b = e.currentTarget as HTMLButtonElement;
-              b.style.boxShadow = 'none';
-              b.style.transform = 'none';
-            }}
-          >
-            {scoring ? (
-              <>
-                <span
-                  style={{
-                    width: 16, height: 16,
-                    borderRadius: '50%',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                    borderTopColor: '#fff',
-                    animation: 'spin 0.7s linear infinite',
-                    display: 'inline-block',
-                  }}
-                />
-                Analysing…
-              </>
-            ) : 'Analyse my resume — free'}
-          </button>
-
-          {!resume && (
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
-              Upload a resume to get started
-            </p>
-          )}
-          {resume && !(jdText || '').trim() && (
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
-              Paste a job description to continue
-            </p>
-          )}
-        </div>
-
-        {/* ── How it works ──────────────────────────────────────────────────── */}
-        <section style={{ paddingTop: 64, borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 64 }}>
-          <p
-            style={{
-              fontSize:      13,
-              fontWeight:    600,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color:         'rgba(255,255,255,0.35)',
-              marginBottom:  32,
-            }}
-          >
-            How TailorCV works
-          </p>
-          <div className="grid gap-6 sm:grid-cols-3">
-            {[
-              {
-                icon: '📄',
-                title: 'ATS Score (Free)',
-                body:  'We check keyword match, formatting, Naukri-specific fields, and content quality — 100-point breakdown.',
-              },
-              {
-                icon: '✏️',
-                title: 'AI Rewrite (₹49)',
-                body:  'Claude rewrites every section — summary, bullets, skills — using exact JD keywords. Never fabricates facts.',
-              },
-              {
-                icon: '⬇️',
-                title: 'DOCX Download',
-                body:  'Get a single-column ATS-safe DOCX ready to upload to Naukri. Plus a Naukri profile text block.',
-              },
-            ].map(item => (
-              <FeatureCard key={item.title} icon={item.icon} title={item.title} body={item.body} />
-            ))}
-          </div>
-        </section>
-      </main>
+      </section>
 
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
       <footer
-        className="relative z-10"
-        style={{
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          marginTop: 48,
-          padding:   '24px 24px',
-          textAlign: 'center',
-          fontSize:  13,
-          color:     'rgba(255,255,255,0.3)',
-        }}
+        className="relative z-10 py-6 border-t border-white/[0.06] text-center text-xs text-slate-500 bg-[#0A0A0F]"
       >
         TailorCV · Resumes uploaded are auto-deleted after 24h · No human review
       </footer>
 
-      {/* Spinner keyframe */}
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
-// ── Feature card — lifted out to use hover state cleanly ─────────────────────
 function FeatureCard({ icon, title, body }: { icon: string; title: string; body: string }) {
   const [hovered, setHovered] = useState(false);
   return (
