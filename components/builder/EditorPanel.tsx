@@ -103,36 +103,36 @@ function SectionCard({
     <motion.div
       layout
       id={id}
-      className={`overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-opacity duration-200 ${isVisible ? '' : 'opacity-50'}`}
+      className={`overflow-hidden rounded-xl border border-[#e5e7eb] dark:border-gray-700 bg-white dark:bg-[#1e293b] shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-none transition-opacity duration-200 ${isVisible ? '' : 'opacity-50'}`}
     >
       {/* Card header */}
       <div
-        className="group flex cursor-pointer select-none items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-slate-50/60"
+        className="group flex cursor-pointer select-none items-center gap-2.5 px-4 py-3.5 transition-colors hover:bg-slate-50/60 dark:hover:bg-gray-700/40"
         onClick={onToggle}
       >
         {dragHandleProps && (
           <button
             {...dragHandleProps}
             title="Drag to reorder"
-            className="shrink-0 rounded-md p-0.5 text-slate-300 opacity-0 transition-all group-hover:opacity-100 hover:text-slate-500"
+            className="shrink-0 rounded-md p-0.5 text-slate-300 dark:text-gray-600 opacity-0 transition-all group-hover:opacity-100 hover:text-slate-500 dark:hover:text-gray-400"
             onClick={(e) => e.stopPropagation()}
           >
             <GripVertical className="h-4 w-4" />
           </button>
         )}
-        <span className="shrink-0 rounded-lg bg-[#ede9fe] p-1.5 text-indigo-600 transition-colors">
+        <span className="shrink-0 rounded-lg bg-[#ede9fe] dark:bg-indigo-900/30 p-1.5 text-indigo-600 dark:text-indigo-400 transition-colors">
           <Icon className="w-3.5 h-3.5" />
         </span>
 
         <div className="min-w-0 flex-1 flex items-center gap-2">
-          <span className="truncate text-[15px] font-semibold leading-tight text-gray-800">{title}</span>
+          <span className="truncate text-[15px] font-semibold leading-tight text-gray-800 dark:text-gray-100">{title}</span>
           {count !== undefined && count > 0 && (
-            <span className="shrink-0 text-xs text-gray-400 bg-gray-100 rounded-full px-1.5 py-0.5 tabular-nums">{count}</span>
+            <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded-full px-1.5 py-0.5 tabular-nums">{count}</span>
           )}
         </div>
 
         {/* Utility pill: delete + reorder + eye + chevron */}
-        <div className="flex items-center gap-0.5 rounded-full bg-[#f9fafb] border border-[#e5e7eb] px-1.5 py-[3px] shrink-0">
+        <div className="flex items-center gap-0.5 rounded-full bg-[#f9fafb] dark:bg-gray-700 border border-[#e5e7eb] dark:border-gray-600 px-1.5 py-[3px] shrink-0">
           {headerAction && (
             <div onClick={(e) => e.stopPropagation()}>
               {headerAction}
@@ -143,7 +143,7 @@ function SectionCard({
               onClick={(e) => { e.stopPropagation(); onMoveUp?.(); }}
               disabled={!canMoveUp}
               title="Move section up"
-              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-[#f0f0f0] hover:text-gray-600 disabled:opacity-0 disabled:pointer-events-none transition-all"
+              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-[#f0f0f0] dark:hover:bg-gray-600 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-0 disabled:pointer-events-none transition-all"
             >
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
@@ -153,7 +153,7 @@ function SectionCard({
               onClick={(e) => { e.stopPropagation(); onMoveDown?.(); }}
               disabled={!canMoveDown}
               title="Move section down"
-              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-[#f0f0f0] hover:text-gray-600 disabled:opacity-0 disabled:pointer-events-none transition-all"
+              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-[#f0f0f0] dark:hover:bg-gray-600 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-0 disabled:pointer-events-none transition-all"
             >
               <ArrowDown className="w-3.5 h-3.5" />
             </button>
@@ -162,13 +162,13 @@ function SectionCard({
             <button
               onClick={(e) => { e.stopPropagation(); onToggleVisibility(); }}
               title={isVisible ? 'Hide from resume' : 'Show in resume'}
-              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-[#f0f0f0] hover:text-gray-600 transition-all"
+              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-[#f0f0f0] dark:hover:bg-gray-600 hover:text-gray-600 dark:hover:text-gray-300 transition-all"
             >
               {isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
             </button>
           )}
           <div className="w-7 h-7 flex items-center justify-center pointer-events-none">
-            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </div>
         </div>
       </div>
@@ -181,7 +181,7 @@ function SectionCard({
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="overflow-hidden border-t border-[#f0f0f0]"
+            className="overflow-hidden border-t border-[#f0f0f0] dark:border-gray-700"
           >
             <div className="px-4 pt-4 pb-5">
               <Suspense fallback={<SectionSkeleton />}>
@@ -288,7 +288,7 @@ export default function EditorPanel() {
   };
 
   return (
-    <div className="p-5 pb-16 bg-[#f5f6fa]">
+    <div className="p-5 pb-16 bg-[#f5f6fa] dark:bg-[#0f172a]">
       {/* Personal Info — always first, not reorderable */}
       <div className="mb-3">
       <SectionCard
@@ -376,7 +376,7 @@ export default function EditorPanel() {
                                     removeCustomSection(sectionId);
                                   }
                                 }}
-                                className="w-7 h-7 flex items-center justify-center rounded-full text-red-400 hover:bg-red-50 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+                                className="w-7 h-7 flex items-center justify-center rounded-full text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
                                 title="Delete Section"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />

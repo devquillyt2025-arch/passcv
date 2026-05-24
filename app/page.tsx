@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const TAGLINES = [
   { before: 'Resumes that ', highlight: 'open doors.' },
@@ -9,6 +10,31 @@ const TAGLINES = [
   { before: 'Build it. Send it. ', highlight: 'Get hired.' },
   { before: 'From blank page to ', highlight: 'dream job.' },
 ];
+
+/* ── Theme-invariant brand tokens ──────────────────────────────────────────── */
+const GRAD      = 'linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)';
+const GLOW      = 'rgba(108,99,255,0.40)';
+const GLOW_H    = 'rgba(108,99,255,0.65)';
+const BORDER    = 'rgba(108,99,255,0.30)';
+
+/* ── FX SVG monogram ───────────────────────────────────────────────────────── */
+function FXMark({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={Math.round(size * 0.78)} viewBox="0 0 36 28" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="fxg" x1="0" y1="0" x2="36" y2="28" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#6C63FF" />
+          <stop offset="1" stopColor="#8B5CF6" />
+        </linearGradient>
+      </defs>
+      <line x1="3"  y1="3"  x2="3"  y2="25" stroke="url(#fxg)" strokeWidth="2.8" strokeLinecap="round" />
+      <line x1="3"  y1="3"  x2="14" y2="3"  stroke="url(#fxg)" strokeWidth="2.8" strokeLinecap="round" />
+      <line x1="3"  y1="14" x2="11" y2="14" stroke="url(#fxg)" strokeWidth="2.8" strokeLinecap="round" />
+      <line x1="19" y1="3"  x2="33" y2="25" stroke="url(#fxg)" strokeWidth="2.8" strokeLinecap="round" />
+      <line x1="33" y1="3"  x2="19" y2="25" stroke="url(#fxg)" strokeWidth="2.8" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default function Home() {
   const [idx, setIdx] = useState(0);
@@ -26,132 +52,195 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="dark min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: 'var(--lp-bg)', color: 'var(--lp-heading)', fontFamily: 'system-ui, -apple-system, sans-serif' }}
+    >
 
-      {/* Radial glow */}
+      {/* ── Background radial glow ───────────────────────────────────────────── */}
       <div
         aria-hidden="true"
         style={{
-          position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)',
-          width: '1000px', height: '600px', borderRadius: '50%',
-          background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.14) 0%, rgba(139,92,246,0.07) 45%, transparent 70%)',
-          filter: 'blur(40px)', pointerEvents: 'none', zIndex: 0,
+          position: 'fixed', top: '-10%', left: '50%', transform: 'translateX(-50%)',
+          width: '1400px', height: '800px',
+          background: 'radial-gradient(ellipse at center, var(--lp-glow) 0%, transparent 70%)',
+          pointerEvents: 'none', zIndex: 0,
         }}
       />
 
-      {/* Nav */}
+      {/* ── Nav ─────────────────────────────────────────────────────────────── */}
       <nav
-        className="sticky top-0 z-30 flex items-center justify-between px-6 h-14"
-        style={{ background: 'rgba(10,10,15,0.7)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        className="sticky top-0 z-50 flex items-center justify-between px-8 h-16"
+        style={{
+          background: 'var(--lp-nav-bg)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderBottom: '1px solid var(--lp-nav-border)',
+        }}
       >
-        <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em' }}>
-          <span style={{ background: 'linear-gradient(135deg, #6366f1, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Folio</span>
-          <span style={{ color: '#fff' }}>X</span>
-        </span>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          <FXMark size={34} />
+          <span style={{ width: 1, height: 20, background: 'var(--lp-nav-sep)', display: 'inline-block' }} />
+          <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--lp-heading)' }}>
+            Folio<span style={{ background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>X</span>
+          </span>
+        </Link>
+
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard"
-            style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', transition: 'color 0.2s ease' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+            href="/login"
+            style={{
+              fontSize: 14, fontWeight: 500, color: 'var(--lp-heading)',
+              background: 'transparent', border: '1px solid transparent',
+              borderRadius: '999px', padding: '6px 18px',
+              transition: 'border-color 0.2s ease', textDecoration: 'none',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = BORDER)}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
           >
-            Dashboard
+            Log in
           </Link>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '999px', padding: '4px 14px' }}>
-            Free ATS check · ₹49 rewrite
-          </span>
+
+          <ThemeToggle />
+
+          <Link
+            href="/dashboard"
+            style={{
+              fontSize: 13, fontWeight: 700, color: '#fff',
+              background: GRAD, borderRadius: '999px', padding: '7px 20px',
+              boxShadow: `0 0 18px ${GLOW}`,
+              transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+              textDecoration: 'none',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 28px ${GLOW_H}`; e.currentTarget.style.transform = 'scale(1.03)'; }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow = `0 0 18px ${GLOW}`;  e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            Get Started
+          </Link>
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* ── Hero ────────────────────────────────────────────────────────────── */}
       <section
-        className="relative z-10 px-4 text-center flex-1 flex flex-col justify-center items-center"
-        style={{ paddingTop: '80px', paddingBottom: '48px' }}
+        className="relative z-10 flex flex-col justify-center items-center text-center px-4"
+        style={{ minHeight: '100vh', paddingTop: '128px', paddingBottom: '128px' }}
       >
-        <div className="mx-auto" style={{ maxWidth: 760 }}>
+        <div className="mx-auto" style={{ maxWidth: 780 }}>
 
-          {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(167,139,250,0.9)', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.22)', borderRadius: '999px', padding: '5px 16px', marginBottom: 40 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#a78bfa', display: 'inline-block', boxShadow: '0 0 6px rgba(167,139,250,0.8)' }} />
+          {/* Badge pill */}
+          <div
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              fontSize: 11, fontWeight: 700,
+              letterSpacing: '0.15em', textTransform: 'uppercase',
+              color: 'var(--lp-accent-text)',
+              background: 'var(--lp-pill-bg)',
+              border: `1px solid ${BORDER}`,
+              borderRadius: '999px', padding: '6px 18px', marginBottom: 44,
+            }}
+          >
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#6C63FF', display: 'inline-block', boxShadow: '0 0 8px rgba(108,99,255,0.9)' }} />
             AI-Powered Resume Builder
           </div>
 
           {/* Animated tagline */}
-          <div style={{ minHeight: 'clamp(72px, 9vw, 120px)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <div style={{ minHeight: 'clamp(80px, 10vw, 140px)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28 }}>
             <h1
               style={{
-                fontSize: 'clamp(40px, 7vw, 72px)',
-                fontWeight: 800,
-                lineHeight: 1.05,
-                letterSpacing: '-0.03em',
-                margin: 0,
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 'clamp(36px, 6.5vw, 64px)', fontWeight: 600,
+                lineHeight: 1.05, letterSpacing: '-0.03em', margin: 0,
                 opacity: visible ? 1 : 0,
-                transform: visible ? 'translateY(0px)' : 'translateY(10px)',
+                transform: visible ? 'translateY(0px)' : 'translateY(12px)',
                 transition: 'opacity 0.35s ease, transform 0.35s ease',
               }}
             >
-              <span style={{ color: '#fff' }}>{TAGLINES[idx].before}</span>
-              <span style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a78bfa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              <span style={{ color: 'var(--lp-heading)' }}>{TAGLINES[idx].before}</span>
+              <span style={{ background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 {TAGLINES[idx].highlight}
               </span>
             </h1>
           </div>
 
-          {/* Progress dots — clickable */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 32 }}>
-            {TAGLINES.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { setVisible(false); setTimeout(() => { setIdx(i); setVisible(true); }, 200); }}
-                aria-label={`Tagline ${i + 1}`}
-                style={{ width: i === idx ? 24 : 6, height: 6, borderRadius: '999px', background: i === idx ? '#6366f1' : 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.3s ease' }}
-              />
-            ))}
-          </div>
-
-          <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.48)', maxWidth: 480, margin: '0 auto 36px', lineHeight: 1.6 }}>
+          {/* Subtext */}
+          <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: 18, color: 'var(--lp-body)', maxWidth: 512, margin: '0 auto 40px', lineHeight: 1.65 }}>
             Upload your resume · paste the JD · get an ATS score and a Claude-rewritten version ready to send
           </p>
 
           {/* CTA */}
           <Link
             href="/dashboard"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 36px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: '#fff', fontWeight: 700, fontSize: 15, boxShadow: '0 4px 24px rgba(99,102,241,0.28)', transition: 'all 0.2s ease', textDecoration: 'none' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(99,102,241,0.45)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(99,102,241,0.28)'; }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '16px 40px', borderRadius: '999px',
+              background: GRAD, color: '#fff', fontWeight: 700, fontSize: 16,
+              boxShadow: `0 0 30px ${GLOW}`, transition: 'all 0.22s ease', textDecoration: 'none',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = `0 0 44px ${GLOW_H}`; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)';    e.currentTarget.style.boxShadow = `0 0 30px ${GLOW}`; }}
           >
             Build Your Resume →
           </Link>
 
-          {/* Platform chips */}
-          <div className="flex flex-wrap justify-center gap-2" style={{ marginTop: 32 }}>
-            {['Naukri', 'LinkedIn', 'Taleo', 'Darwinbox', 'Keka', 'Workday'].map(name => (
-              <span key={name} style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '999px', padding: '4px 13px' }}>
-                {name}
-              </span>
-            ))}
+          {/* Value proposition */}
+          <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: 13, color: 'var(--lp-valueprop)', letterSpacing: '0.02em', marginTop: 20, marginBottom: 0 }}>
+            Upload once.&nbsp; Get your ATS score free.&nbsp; Rewrite with AI for ₹49.
+          </p>
+
+          {/* Platform pills */}
+          <div style={{ marginTop: 32 }}>
+            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--lp-muted)', marginBottom: 12 }}>
+              Works with every major ATS
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {['Naukri', 'LinkedIn', 'Taleo', 'Darwinbox', 'Keka', 'Workday'].map(name => (
+                <span
+                  key={name}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    fontSize: 12, fontWeight: 500,
+                    color: 'var(--lp-accent-text)',
+                    background: 'var(--lp-pill-bg)',
+                    border: `1px solid ${BORDER}`,
+                    borderRadius: '999px', padding: '5px 13px',
+                  }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                    <path d="M2 5.5L4 7.5L8 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {name}
+                </span>
+              ))}
+            </div>
           </div>
+
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="relative z-10 mx-auto w-full max-w-5xl px-6 py-12 border-t border-white/[0.06]">
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 28 }}>
+      {/* ── How it works ──────────────────────────────────────────────────── */}
+      <section
+        className="relative z-10 mx-auto w-full max-w-5xl px-6 pb-20"
+        style={{ borderTop: '1px solid var(--lp-section-border)', paddingTop: '56px' }}
+      >
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--lp-section-label)', marginBottom: 32 }}>
           How FolioX works
         </p>
         <div className="grid gap-5 sm:grid-cols-3">
           {[
-            { icon: '📄', title: 'ATS Score (Free)', body: 'We check keyword match, formatting, Naukri-specific fields, and content quality — 100-point breakdown.' },
-            { icon: '✏️', title: 'AI Rewrite (₹49)', body: 'Claude rewrites every section — summary, bullets, skills — using exact JD keywords. Never fabricates facts.' },
-            { icon: '⬇️', title: 'DOCX Download', body: 'Get a single-column ATS-safe DOCX ready to upload. Plus a Naukri profile text block.' },
+            { icon: '📊', title: "Know exactly why you're being ignored.",      body: "Free 100-point scan: keywords, formatting, and ATS field coverage — instant.", badge: 'FREE',         variant: 'free' as const },
+            { icon: '✨', title: '₹49 to rewrite. Nothing to stay rejected.',   body: "Claude rewrites every section using your JD's exact keywords. Never fabricates facts.", badge: 'MOST POPULAR', variant: 'paid' as const },
+            { icon: '📥', title: 'Download a recruiter-ready DOCX instantly.',  body: 'ATS-safe single-column format, plus a Naukri profile text block — included.',    badge: undefined,      variant: 'paid' as const },
           ].map(item => (
-            <FeatureCard key={item.title} icon={item.icon} title={item.title} body={item.body} />
+            <FeatureCard key={item.title} icon={item.icon} title={item.title} body={item.body} badge={item.badge} variant={item.variant} />
           ))}
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 py-6 border-t border-white/[0.06] text-center text-xs text-slate-500 bg-[#0A0A0F]">
+      {/* ── Footer ──────────────────────────────────────────────────────────── */}
+      <footer
+        className="relative z-10 py-6 text-center text-xs"
+        style={{ borderTop: '1px solid var(--lp-footer-border)', background: 'var(--lp-bg)', color: 'var(--lp-footer-text)' }}
+      >
         FolioX · Resumes uploaded are auto-deleted after 24h · No human review
       </footer>
 
@@ -159,29 +248,56 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ icon, title, body }: { icon: string; title: string; body: string }) {
+function FeatureCard({
+  icon, title, body, badge, variant = 'default',
+}: {
+  icon: string; title: string; body: string;
+  badge?: string; variant?: 'free' | 'paid' | 'default';
+}) {
   const [hovered, setHovered] = useState(false);
+
+  const isFree = variant === 'free';
+  const isPaid = variant === 'paid';
+
+  const badgeBg     = isFree ? 'rgba(16,185,129,0.12)' : 'rgba(108,99,255,0.15)';
+  const badgeColor  = isFree ? '#10b981' : '#a78bfa';
+  const badgeBorder = isFree ? 'rgba(16,185,129,0.30)' : 'rgba(108,99,255,0.35)';
+
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: 'flex', gap: 20,
-        background: '#13131A',
-        border: `1px solid ${hovered ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.06)'}`,
-        borderRadius: 16, padding: 22,
-        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
-        boxShadow: hovered ? '0 8px 32px rgba(99,102,241,0.1)' : 'none',
+        position: 'relative',
+        display: 'flex', flexDirection: 'column', gap: 16,
+        background: isFree ? 'var(--lp-free-card-bg)' : 'var(--lp-card-bg)',
+        border: `1px solid ${hovered
+          ? (isFree ? 'var(--lp-free-border-h)' : 'var(--lp-card-border-h)')
+          : (isFree ? 'var(--lp-free-border)'   : 'var(--lp-card-border)')}`,
+        borderRadius: 14, padding: 24,
+        transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
+        boxShadow: hovered && isPaid ? '0 0 28px rgba(108,99,255,0.12)' : 'none',
         transition: 'all 0.22s ease',
         cursor: 'default',
       }}
     >
-      <div style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 10, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+      {badge && (
+        <span style={{ position: 'absolute', top: 16, right: 16, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: badgeColor, background: badgeBg, border: `1px solid ${badgeBorder}`, borderRadius: '999px', padding: '3px 9px' }}>
+          {badge}
+        </span>
+      )}
+
+      <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 12, background: isFree ? 'var(--lp-free-icon-bg)' : 'var(--lp-icon-bg)', border: `1px solid ${isFree ? 'var(--lp-free-icon-border)' : 'var(--lp-icon-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
         {icon}
       </div>
+
       <div>
-        <p style={{ fontWeight: 600, fontSize: 14, color: 'rgba(255,255,255,0.88)', margin: 0 }}>{title}</p>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.42)', marginTop: 6, lineHeight: 1.6 }}>{body}</p>
+        <p style={{ fontWeight: 700, fontSize: 14, color: isFree ? 'var(--lp-free-title)' : 'var(--lp-card-title)', margin: 0, lineHeight: 1.4, paddingRight: badge ? 64 : 0 }}>
+          {title}
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--lp-card-body)', marginTop: 8, lineHeight: 1.65 }}>
+          {body}
+        </p>
       </div>
     </div>
   );

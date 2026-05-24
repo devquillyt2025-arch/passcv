@@ -81,7 +81,7 @@ function IconButton({
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm shadow-slate-200/60 transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-[#1e293b] text-slate-600 dark:text-gray-300 shadow-sm shadow-slate-200/60 dark:shadow-none transition hover:-translate-y-0.5 hover:border-slate-300 dark:hover:border-gray-600 hover:text-slate-950 dark:hover:text-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {children}
     </button>
@@ -98,7 +98,7 @@ function Segmented<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div className="inline-flex rounded-[8px] bg-slate-100 p-[3px]">
+    <div className="inline-flex rounded-[8px] bg-slate-100 dark:bg-gray-800 p-[3px]">
       {options.map((option) => (
         <button
           key={option.id}
@@ -106,8 +106,8 @@ function Segmented<T extends string>({
           onClick={() => onChange(option.id)}
           className={`rounded-[5px] px-3 py-[3px] text-[11px] font-semibold transition-all ${
             value === option.id
-              ? 'bg-[#1E293B] text-white shadow-sm'
-              : 'text-slate-400 hover:text-slate-700'
+              ? 'bg-[#1E293B] dark:bg-gray-700 text-white shadow-sm'
+              : 'text-slate-400 dark:text-gray-500 hover:text-slate-700 dark:hover:text-gray-300'
           }`}
         >
           {option.label}
@@ -133,7 +133,7 @@ function TemplateSwitch({
   onChange: (v: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar') => void;
 }) {
   return (
-    <div className="inline-flex rounded-[8px] bg-slate-100 p-[3px]">
+    <div className="inline-flex rounded-[8px] bg-slate-100 dark:bg-gray-800 p-[3px]">
       {TEMPLATE_OPTIONS.map(({ id, label }) => (
         <button
           key={id}
@@ -141,8 +141,8 @@ function TemplateSwitch({
           onClick={() => onChange(id)}
           className={`rounded-[5px] px-3 py-[3px] text-[11px] font-semibold transition-all ${
             value === id
-              ? 'bg-[#1E293B] text-white shadow-sm'
-              : 'text-slate-400 hover:text-slate-700'
+              ? 'bg-[#1E293B] dark:bg-gray-700 text-white shadow-sm'
+              : 'text-slate-400 dark:text-gray-500 hover:text-slate-700 dark:hover:text-gray-300'
           }`}
         >
           {label}
@@ -162,7 +162,7 @@ function ColorSwatchStrip({
   onChange: (color: string) => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-1 rounded-[8px] bg-slate-100 p-[3px]">
+    <div className="inline-flex items-center gap-1 rounded-[8px] bg-slate-100 dark:bg-gray-800 p-[3px]">
       {accents.map(({ color, name }) => {
         const isActive = value === color;
         return (
@@ -193,7 +193,7 @@ function ColorSwatchStrip({
 function ToolbarGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-start gap-[5px] px-4">
-      <span className="select-none text-[9px] font-bold uppercase leading-none tracking-[0.14em] text-slate-400">
+      <span className="select-none text-[9px] font-bold uppercase leading-none tracking-[0.14em] text-slate-400 dark:text-gray-500">
         {label}
       </span>
       {children}
@@ -202,7 +202,7 @@ function ToolbarGroup({ label, children }: { label: string; children: React.Reac
 }
 
 function ToolbarDivider() {
-  return <div className="h-9 w-px flex-shrink-0 self-center bg-slate-100" />;
+  return <div className="h-9 w-px flex-shrink-0 self-center bg-slate-100 dark:bg-gray-800" />;
 }
 
 function FontSelect<T extends string>({
@@ -225,17 +225,17 @@ function FontSelect<T extends string>({
         ref={ref}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex h-8 min-w-[148px] items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-900 shadow-sm transition hover:border-slate-300 hover:shadow focus:outline-none"
+        className="inline-flex h-8 min-w-[148px] items-center justify-between gap-2 rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-[#1e293b] px-3 text-xs font-medium text-slate-900 dark:text-gray-100 shadow-sm transition hover:border-slate-300 dark:hover:border-gray-600 hover:shadow focus:outline-none"
         style={{ fontFamily: FONT_CSS_MAP[value] ?? 'sans-serif' }}
       >
         <span className="truncate">{current.label}</span>
         <ChevronDown
-          className={`h-3.5 w-3.5 flex-shrink-0 text-slate-400 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          className={`h-3.5 w-3.5 flex-shrink-0 text-slate-400 dark:text-gray-500 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       <PortalPopover isOpen={open} onClose={() => setOpen(false)} anchorRef={ref}>
-        <div className="min-w-[220px] overflow-hidden rounded-xl border border-slate-100 bg-white py-1 shadow-2xl shadow-slate-300/40 ring-1 ring-slate-900/[0.06]">
+        <div className="min-w-[220px] overflow-hidden rounded-xl border border-slate-100 dark:border-gray-700 bg-white dark:bg-[#1e293b] py-1 shadow-2xl shadow-slate-300/40 dark:shadow-black/40 ring-1 ring-slate-900/[0.06] dark:ring-white/[0.06]">
           {options.map((option) => {
             const fontCss = FONT_CSS_MAP[option.id] ?? 'sans-serif';
             const isSelected = option.id === value;
@@ -246,12 +246,12 @@ function FontSelect<T extends string>({
                 onClick={() => { onChange(option.id); setOpen(false); }}
                 className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
                   isSelected
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-slate-700 hover:bg-slate-50/80'
+                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                    : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50/80 dark:hover:bg-gray-700'
                 }`}
               >
                 <span
-                  className="w-7 flex-shrink-0 text-[15px] leading-none text-slate-400"
+                  className="w-7 flex-shrink-0 text-[15px] leading-none text-slate-400 dark:text-gray-500"
                   style={{ fontFamily: fontCss }}
                   aria-hidden
                 >
@@ -382,7 +382,7 @@ export default function BuilderPage() {
 
   if (!_hasHydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#080d1a]">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
@@ -392,26 +392,26 @@ export default function BuilderPage() {
 
   return (
     <div
-      className="flex h-screen flex-col overflow-hidden bg-[#eef1f6] text-slate-950"
+      className="flex h-screen flex-col overflow-hidden bg-[#eef1f6] dark:bg-[#080d1a] text-slate-950 dark:text-slate-100"
       style={{
         ...(isDragging ? { cursor: 'col-resize', userSelect: 'none' } : {}),
         '--accent-color': accentColor,
         '--accent-ring': `${accentColor}26`,
       } as React.CSSProperties}
     >
-      <header className="relative z-20 border-b border-slate-200/80 bg-white/90 px-6 py-3.5 shadow-sm shadow-slate-200/40 backdrop-blur-xl">
+      <header className="relative z-20 border-b border-slate-200/80 dark:border-gray-800/80 bg-white/90 dark:bg-[#0a0a0f]/90 px-6 py-3.5 shadow-sm shadow-slate-200/40 dark:shadow-none backdrop-blur-xl">
         <div className="flex flex-wrap items-center gap-4">
           <Link
             href="/dashboard"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 dark:text-gray-400 transition hover:bg-slate-100 dark:hover:bg-gray-800 hover:text-slate-950 dark:hover:text-gray-100"
             title="Dashboard"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold leading-tight">{fullName}</p>
-            <p className="text-xs text-[#888]">
+            <p className="truncate text-sm font-semibold leading-tight dark:text-gray-100">{fullName}</p>
+            <p className="text-xs text-[#888] dark:text-gray-500">
               {stats.wordCount} words · {stats.pageCount} page estimate · {completion}% complete
             </p>
           </div>
@@ -420,13 +420,13 @@ export default function BuilderPage() {
             <button
               type="button"
               onClick={() => setShowImport(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-[#1e293b] px-3 py-2 text-xs font-semibold text-slate-700 dark:text-gray-300 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 dark:hover:border-gray-600"
             >
               <Upload className="h-3.5 w-3.5" />
               Import
             </button>
 
-            <div className="hidden items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 shadow-sm sm:flex">
+            <div className="hidden items-center gap-1 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-[#1e293b] px-3 py-2 text-xs font-medium text-slate-500 dark:text-gray-400 shadow-sm sm:flex">
               {saveStatus === 'saving' && <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />}
               {saveStatus === 'saved' && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />}
               {saveStatus === 'error' ? 'Save error' : saveStatus === 'saving' ? 'Saving' : 'Saved'}
@@ -436,13 +436,13 @@ export default function BuilderPage() {
               <Eye className="h-4 w-4" />
             </IconButton>
 
-            <div className="mx-1 hidden h-8 w-px bg-slate-200 sm:block" />
+            <div className="mx-1 hidden h-8 w-px bg-slate-200 dark:bg-gray-700 sm:block" />
 
             <button
               type="button"
               onClick={handleDownload}
               disabled={downloading}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-slate-300 transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-950 dark:bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-slate-300 dark:shadow-indigo-900/30 transition hover:-translate-y-0.5 hover:bg-slate-800 dark:hover:bg-indigo-500 disabled:opacity-60"
             >
               {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
               {downloading ? 'Generating' : 'Download'}
@@ -457,7 +457,7 @@ export default function BuilderPage() {
         </div>
       )}
 
-      <div className="sticky top-0 z-10 shrink-0 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
+      <div className="sticky top-0 z-10 shrink-0 border-b border-slate-200 dark:border-gray-800 bg-white/90 dark:bg-[#0a0a0f]/90 backdrop-blur-xl">
         <div className="flex items-center overflow-x-auto py-2">
 
           {/* ─ Template ─────────────────────────────── */}
@@ -500,23 +500,23 @@ export default function BuilderPage() {
                 options={SPACING}
                 onChange={(spacing) => setBuilderDesign({ spacing })}
               />
-              <div className="inline-flex items-center divide-x divide-slate-200 rounded-[8px] border border-slate-200 bg-white shadow-sm">
+              <div className="inline-flex items-center divide-x divide-slate-200 dark:divide-gray-700 rounded-[8px] border border-slate-200 dark:border-gray-700 bg-white dark:bg-[#1e293b] shadow-sm">
                 <button
                   type="button"
                   title="Zoom out"
                   onClick={() => setBuilderDesign({ zoom: Math.max(0.55, Number((builderDesign.zoom - 0.05).toFixed(2))) })}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-l-[7px] text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-l-[7px] text-slate-500 dark:text-gray-400 transition-colors hover:bg-slate-50 dark:hover:bg-gray-700 hover:text-slate-900 dark:hover:text-gray-100"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
-                <span className="w-10 py-1 text-center text-[11px] font-semibold tabular-nums text-slate-600">
+                <span className="w-10 py-1 text-center text-[11px] font-semibold tabular-nums text-slate-600 dark:text-gray-300">
                   {Math.round(builderDesign.zoom * 100)}%
                 </span>
                 <button
                   type="button"
                   title="Zoom in"
                   onClick={() => setBuilderDesign({ zoom: Math.min(1, Number((builderDesign.zoom + 0.05).toFixed(2))) })}
-                  className="inline-flex h-7 w-7 items-center justify-center text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                  className="inline-flex h-7 w-7 items-center justify-center text-slate-500 dark:text-gray-400 transition-colors hover:bg-slate-50 dark:hover:bg-gray-700 hover:text-slate-900 dark:hover:text-gray-100"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
@@ -524,7 +524,7 @@ export default function BuilderPage() {
                   type="button"
                   title="Fit preview"
                   onClick={() => setBuilderDesign({ zoom: 0.9 })}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-r-[7px] text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-r-[7px] text-slate-500 dark:text-gray-400 transition-colors hover:bg-slate-50 dark:hover:bg-gray-700 hover:text-slate-900 dark:hover:text-gray-100"
                 >
                   <Maximize2 className="h-3 w-3" />
                 </button>
@@ -540,19 +540,18 @@ export default function BuilderPage() {
 
         {/* ── Left: Editor panel ──────────────────────────────────────────────── */}
         <section
-          className="builder-editor hover-scrollbar flex-none overflow-y-auto"
-          style={{ width: leftWidth ?? '50%', backgroundColor: '#F7F8FA', minWidth: 0 }}
+          className="builder-editor hover-scrollbar flex-none overflow-y-auto bg-[#F7F8FA] dark:bg-[#0f172a]"
+          style={{ width: leftWidth ?? '50%', minWidth: 0 }}
         >
           <div
-            className="sticky top-0 z-10 border-b border-slate-200/60 px-5 py-4 backdrop-blur-xl"
-            style={{ backgroundColor: 'rgba(247,248,250,0.95)' }}
+            className="sticky top-0 z-10 border-b border-slate-200/60 dark:border-gray-800/60 bg-[rgba(247,248,250,0.95)] dark:bg-[rgba(15,23,42,0.95)] px-5 py-4 backdrop-blur-xl"
           >
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[13px] text-slate-500">
-                  <Link href="/dashboard" className="hover:text-slate-900 transition-colors">← Resume Builder</Link>
-                  <span className="mx-2 text-slate-300">&gt;</span>
-                  <span className="font-medium text-slate-900">{fullName}</span>
+                <p className="text-[13px] text-slate-500 dark:text-gray-400">
+                  <Link href="/dashboard" className="hover:text-slate-900 dark:hover:text-gray-100 transition-colors">← Resume Builder</Link>
+                  <span className="mx-2 text-slate-300 dark:text-gray-600">&gt;</span>
+                  <span className="font-medium text-slate-900 dark:text-gray-100">{fullName}</span>
                 </p>
               </div>
             </div>
@@ -577,10 +576,10 @@ export default function BuilderPage() {
           />
           {/* Gripper chip — fades in on hover, stays visible while dragging */}
           <div
-            className={`absolute left-[1px] top-1/2 z-10 -translate-y-1/2 flex flex-col items-center justify-center gap-[4px] rounded-full border bg-white px-[3px] py-[7px] shadow-md transition-all duration-200 ${
+            className={`absolute left-[1px] top-1/2 z-10 -translate-y-1/2 flex flex-col items-center justify-center gap-[4px] rounded-full border bg-white dark:bg-gray-800 px-[3px] py-[7px] shadow-md transition-all duration-200 ${
               isDragging
-                ? 'opacity-100 border-indigo-300 bg-indigo-50'
-                : 'opacity-0 group-hover:opacity-100 border-slate-200 group-hover:border-indigo-200 group-hover:bg-indigo-50'
+                ? 'opacity-100 border-indigo-300 bg-indigo-50 dark:bg-indigo-900/30'
+                : 'opacity-0 group-hover:opacity-100 border-slate-200 dark:border-gray-700 group-hover:border-indigo-200 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30'
             }`}
           >
             {[0, 1, 2].map((i) => (
@@ -595,7 +594,7 @@ export default function BuilderPage() {
         </div>
 
         {/* ── Right: Preview panel ────────────────────────────────────────────── */}
-        <section className="flex min-h-0 flex-1 flex-col" style={{ backgroundColor: '#E8E8E8' }}>
+        <section className="flex min-h-0 flex-1 flex-col bg-[#E8E8E8] dark:bg-[#0a0a0f]">
           <div className="hover-scrollbar min-h-0 flex-1 overflow-y-auto py-12 pl-8 pr-8">
             <motion.div
               initial={{ opacity: 0, y: 12 }}

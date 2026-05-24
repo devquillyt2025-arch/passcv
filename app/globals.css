@@ -1,6 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+h1, h2, h3 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+}
 
 @layer base {
   :root {
@@ -13,13 +20,113 @@
   }
 }
 
+/* ── Landing page theme tokens ─────────────────────────────────────────────── */
+:root {
+  --lp-bg:               #f8f9fc;
+  --lp-card-bg:          #ffffff;
+  --lp-free-card-bg:     #f9fafb;
+  --lp-pill-bg:          #f3f0ff;
+  --lp-nav-bg:           rgba(255,255,255,0.92);
+  --lp-nav-border:       #e5e7eb;
+  --lp-nav-sep:          rgba(0,0,0,0.12);
+  --lp-heading:          #0a0f1e;
+  --lp-body:             #4b5563;
+  --lp-muted:            rgba(10,15,30,0.40);
+  --lp-valueprop:        rgba(10,15,30,0.45);
+  --lp-accent-text:      #6C63FF;
+  --lp-glow:             rgba(108,99,255,0.06);
+  --lp-section-border:   #e5e7eb;
+  --lp-section-label:    #6C63FF;
+  --lp-footer-border:    #e5e7eb;
+  --lp-footer-text:      rgba(10,15,30,0.40);
+  --lp-card-border:      #e5e7eb;
+  --lp-card-border-h:    rgba(108,99,255,0.40);
+  --lp-free-border:      #e5e7eb;
+  --lp-free-border-h:    rgba(108,99,255,0.25);
+  --lp-card-title:       #0a0f1e;
+  --lp-free-title:       rgba(10,15,30,0.65);
+  --lp-card-body:        #4b5563;
+  --lp-icon-bg:          rgba(108,99,255,0.07);
+  --lp-icon-border:      rgba(108,99,255,0.18);
+  --lp-free-icon-bg:     rgba(10,15,30,0.05);
+  --lp-free-icon-border: rgba(10,15,30,0.10);
+}
+
+.dark {
+  --lp-bg:               #080d1a;
+  --lp-card-bg:          #111827;
+  --lp-free-card-bg:     rgba(17,24,39,0.6);
+  --lp-pill-bg:          #0d1829;
+  --lp-nav-bg:           rgba(8,13,26,0.65);
+  --lp-nav-border:       transparent;
+  --lp-nav-sep:          rgba(255,255,255,0.18);
+  --lp-heading:          #ffffff;
+  --lp-body:             #94a3b8;
+  --lp-muted:            rgba(255,255,255,0.28);
+  --lp-valueprop:        rgba(255,255,255,0.38);
+  --lp-accent-text:      #8B5CF6;
+  --lp-glow:             rgba(108,99,255,0.12);
+  --lp-section-border:   rgba(108,99,255,0.10);
+  --lp-section-label:    #8B5CF6;
+  --lp-footer-border:    rgba(108,99,255,0.07);
+  --lp-footer-text:      rgba(255,255,255,0.25);
+  --lp-card-border:      rgba(108,99,255,0.28);
+  --lp-card-border-h:    rgba(108,99,255,0.60);
+  --lp-free-border:      rgba(255,255,255,0.07);
+  --lp-free-border-h:    rgba(255,255,255,0.15);
+  --lp-card-title:       #ffffff;
+  --lp-free-title:       rgba(255,255,255,0.70);
+  --lp-card-body:        rgba(255,255,255,0.38);
+  --lp-icon-bg:          rgba(108,99,255,0.10);
+  --lp-icon-border:      rgba(108,99,255,0.22);
+  --lp-free-icon-bg:     rgba(255,255,255,0.04);
+  --lp-free-icon-border: rgba(255,255,255,0.08);
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
 }
 
+/* ── Global dark mode — makes all pages respond to .dark on <html> ────────── */
+.dark body {
+  background-color: #080d1a;
+  color: #e2e8f0;
+}
+
+/* Page / layout backgrounds */
+.dark .bg-gray-50  { background-color: #0f172a; }
+.dark .bg-white    { background-color: #111827; }
+.dark .bg-gray-100 { background-color: rgba(255,255,255,0.05); }
+
+/* Text */
+.dark .text-gray-900 { color: #f1f5f9; }
+.dark .text-gray-800 { color: #e2e8f0; }
+.dark .text-gray-700 { color: #cbd5e1; }
+.dark .text-gray-600 { color: #94a3b8; }
+.dark .text-gray-500 { color: rgba(255,255,255,0.45); }
+.dark .text-gray-400 { color: rgba(255,255,255,0.38); }
+
+/* Borders */
+.dark .border-gray-200  { border-color: rgba(255,255,255,0.08); }
+.dark .border-gray-100  { border-color: rgba(255,255,255,0.05); }
+.dark .border-slate-200 { border-color: rgba(255,255,255,0.08); }
+.dark .border-slate-100 { border-color: rgba(255,255,255,0.05); }
+.dark .border-b         { border-color: rgba(255,255,255,0.07); }
+
+/* Inputs & textareas */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,0.12);
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: rgba(255,255,255,0.3); }
+
 ::selection {
-  background-color: rgba(99, 102, 241, 0.3);
+  background-color: rgba(108, 99, 255, 0.3);
   color: inherit;
 }
 

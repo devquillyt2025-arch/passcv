@@ -47,7 +47,10 @@ export default function TailorPage() {
   const canAnalyze = resume && (jdText || '').trim().length > 100;
 
   return (
-    <div className="dark min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div
+      className="min-h-screen flex flex-col bg-white dark:bg-[#080d1a]"
+      style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+    >
 
       {/* Radial glow background */}
       <div
@@ -69,40 +72,28 @@ export default function TailorPage() {
 
       {/* Nav */}
       <nav
-        className="sticky top-0 z-30 flex items-center justify-between px-6 h-16 border-b border-white/[0.06]"
+        className="sticky top-0 z-30 flex items-center justify-between px-6 h-16 border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-[#0a0f1e]/80"
         style={{
-          background:   'rgba(10,10,15,0.7)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
         }}
       >
         <Link href="/dashboard" className="flex items-center gap-2 group">
-          <div className="h-6 w-6 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform">
+          <div className="h-6 w-6 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-xs text-white group-hover:scale-105 transition-transform">
             ←
           </div>
-          <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
             Back to Dashboard
           </span>
         </Link>
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', transition: 'color 0.2s ease' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+            className="text-[13px] text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             Home
           </Link>
-          <span
-            style={{
-              fontSize:   13,
-              color:      'rgba(255,255,255,0.45)',
-              background: 'rgba(255,255,255,0.05)',
-              border:     '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '999px',
-              padding:    '4px 14px',
-            }}
-          >
+          <span className="text-[13px] text-gray-500 dark:text-[rgba(255,255,255,0.45)] bg-gray-100 dark:bg-[rgba(255,255,255,0.05)] border border-gray-200 dark:border-[rgba(255,255,255,0.1)] rounded-full px-[14px] py-[4px]">
             Free ATS check · ₹49 rewrite
           </span>
         </div>
@@ -112,12 +103,12 @@ export default function TailorPage() {
       <header className="relative z-10 pt-12 pb-0 px-4 text-center">
         <div className="mx-auto max-w-3xl">
           <h1
+            className="text-gray-900 dark:text-white"
             style={{
               fontSize:   'clamp(32px, 5vw, 48px)',
               fontWeight: 800,
               lineHeight: 1.1,
               letterSpacing: '-0.02em',
-              color: '#fff',
               margin: 0,
             }}
           >
@@ -134,10 +125,10 @@ export default function TailorPage() {
             </span>
           </h1>
           <p
+            className="text-gray-600 dark:text-gray-400"
             style={{
               marginTop: 16,
               fontSize:  16,
-              color:     'rgba(255,255,255,0.45)',
               maxWidth:  520,
               margin:    '16px auto 0',
               lineHeight: 1.5,
@@ -165,17 +156,7 @@ export default function TailorPage() {
 
           {/* Step 1 — Upload */}
           <div className="flex flex-col">
-            <label
-              style={{
-                display:       'block',
-                marginBottom:  12,
-                fontSize:      11,
-                fontWeight:    600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color:         'rgba(255,255,255,0.4)',
-              }}
-            >
+            <label className="block mb-3 text-[11px] font-semibold tracking-[0.08em] uppercase text-gray-400 dark:text-gray-500">
               Step 1 — Your resume
             </label>
             <div className="flex-1">
@@ -193,64 +174,39 @@ export default function TailorPage() {
 
           {/* Step 2 — JD */}
           <div className="flex flex-col">
-            <label
-              style={{
-                display:       'block',
-                marginBottom:  12,
-                fontSize:      11,
-                fontWeight:    600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color:         'rgba(255,255,255,0.4)',
-              }}
-            >
+            <label className="block mb-3 text-[11px] font-semibold tracking-[0.08em] uppercase text-gray-400 dark:text-gray-500">
               Step 2 — Job description
             </label>
             <div
-              className="flex-1 flex overflow-hidden"
+              className="flex-1 flex overflow-hidden rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#111827]"
               style={{
-                background:   '#13131A',
-                border:       '2px dashed rgba(99,102,241,0.35)',
-                borderRadius: 16,
-                minHeight:    320,
-                maxHeight:    320,
-                transition:   'border-color 0.2s ease, box-shadow 0.2s ease',
+                minHeight:  320,
+                maxHeight:  320,
+                transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
               }}
               onFocusCapture={e => {
                 const el = e.currentTarget as HTMLDivElement;
-                el.style.borderColor  = '#6366f1';
-                el.style.borderStyle  = 'solid';
-                el.style.boxShadow    = '0 0 0 3px rgba(99,102,241,0.15), inset 0 0 20px rgba(99,102,241,0.04)';
+                el.style.borderColor = '#8b5cf6';
+                el.style.boxShadow   = '0 0 0 3px rgba(139,92,246,0.15)';
               }}
               onBlurCapture={e => {
                 const el = e.currentTarget as HTMLDivElement;
-                el.style.borderColor  = 'rgba(99,102,241,0.35)';
-                el.style.borderStyle  = 'dashed';
-                el.style.boxShadow    = 'none';
+                el.style.borderColor = '';
+                el.style.boxShadow   = 'none';
               }}
             >
               <textarea
                 value={jdText || ''}
                 onChange={e => setJdText(e.target.value)}
                 placeholder="Paste the full job description from Naukri, LinkedIn or any portal…"
+                className="flex-1 w-full h-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 text-[14px] leading-relaxed resize-none [&::-webkit-scrollbar]:hidden placeholder:text-gray-400 dark:placeholder:text-gray-600"
                 style={{
-                  flex:        1,
-                  width:       '100%',
-                  height:      '100%',
-                  background:  'transparent',
-                  border:      'none',
-                  outline:     'none',
-                  padding:     16,
-                  fontSize:    14,
-                  lineHeight:  1.6,
-                  color:       '#fff',
-                  resize:      'none',
+                  padding:        16,
                   scrollbarWidth: 'none',
                 }}
-                className="[&::-webkit-scrollbar]:hidden placeholder:text-[rgba(255,255,255,0.28)]"
               />
             </div>
-            <p style={{ marginTop: 8, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
+            <p className="mt-2 text-xs text-gray-400 dark:text-gray-600">
               {(jdText || '').length} characters
             </p>
           </div>
@@ -325,29 +281,20 @@ export default function TailorPage() {
           </button>
 
           {!resume && (
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
+            <p className="text-[13px] text-gray-400 dark:text-gray-500">
               Upload a resume to get started
             </p>
           )}
           {resume && !(jdText || '').trim() && (
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
+            <p className="text-[13px] text-gray-400 dark:text-gray-500">
               Paste a job description to continue
             </p>
           )}
         </div>
 
         {/* Feature Highlights Grid */}
-        <section style={{ paddingTop: 64, borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 64 }}>
-          <p
-            style={{
-              fontSize:      13,
-              fontWeight:    600,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color:         'rgba(255,255,255,0.35)',
-              marginBottom:  32,
-            }}
-          >
+        <section className="pt-16 mt-16 border-t border-gray-200 dark:border-white/[0.06]">
+          <p className="text-[13px] font-semibold tracking-[0.08em] uppercase text-gray-400 dark:text-[rgba(255,255,255,0.35)] mb-8">
             How FolioX works
           </p>
           <div className="grid gap-6 sm:grid-cols-3 text-left">
@@ -375,17 +322,7 @@ export default function TailorPage() {
       </main>
 
       {/* Footer */}
-      <footer
-        className="relative z-10"
-        style={{
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          marginTop: 48,
-          padding:   '24px 24px',
-          textAlign: 'center',
-          fontSize:  13,
-          color:     'rgba(255,255,255,0.3)',
-        }}
-      >
+      <footer className="relative z-10 border-t border-gray-200 dark:border-white/[0.06] mt-12 py-6 px-6 text-center text-[13px] text-gray-400 dark:text-[rgba(255,255,255,0.3)]">
         FolioX · Resumes uploaded are auto-deleted after 24h · No human review
       </footer>
 
@@ -401,38 +338,22 @@ function FeatureCard({ icon, title, body }: { icon: string; title: string; body:
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        display:      'flex',
-        gap:          24,
-        background:   '#13131A',
-        border:       `1px solid ${hovered ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.07)'}`,
-        borderRadius: 16,
-        padding:      24,
-        transform:    hovered ? 'translateY(-2px)' : 'translateY(0)',
-        transition:   'all 0.2s ease',
-        cursor:       'default',
-      }}
+      className={`flex gap-6 rounded-2xl p-6 transition-all duration-200 cursor-default border bg-gray-50 dark:bg-[#13131A] ${
+        hovered
+          ? 'border-indigo-300 dark:border-[rgba(99,102,241,0.3)] -translate-y-0.5'
+          : 'border-gray-200 dark:border-[rgba(255,255,255,0.07)]'
+      }`}
     >
       <div
-        style={{
-          flexShrink:   0,
-          width:        40,
-          height:       40,
-          borderRadius: 10,
-          background:   'rgba(99,102,241,0.12)',
-          display:      'flex',
-          alignItems:   'center',
-          justifyContent: 'center',
-          fontSize:     20,
-        }}
+        className="shrink-0 w-10 h-10 rounded-[10px] bg-indigo-50 dark:bg-[rgba(99,102,241,0.12)] flex items-center justify-center text-xl"
       >
         {icon}
       </div>
       <div>
-        <p style={{ fontWeight: 600, fontSize: 15, color: 'rgba(255,255,255,0.9)', margin: 0 }}>
+        <p className="font-semibold text-[15px] text-gray-800 dark:text-[rgba(255,255,255,0.9)] m-0">
           {title}
         </p>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 6, lineHeight: 1.6 }}>
+        <p className="text-[13px] text-gray-500 dark:text-[rgba(255,255,255,0.45)] mt-1.5 leading-relaxed">
           {body}
         </p>
       </div>
