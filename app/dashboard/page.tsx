@@ -24,7 +24,7 @@ export default function DashboardPage() {
       {/* Nav */}
       <nav className="bg-white border-b border-gray-200 px-6 h-16 flex items-center justify-between sticky top-0 z-30">
         <Link href="/" className="text-xl font-bold text-indigo-700 tracking-tight">
-          TailorCV
+          FolioX
         </Link>
         <Link
           href="/"
@@ -40,7 +40,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           
           {/* Card 1: Tailor My Resume */}
-          <div className="bg-gradient-to-tr from-indigo-900 to-indigo-950 text-white rounded-2xl border border-indigo-500/20 p-5 flex flex-col justify-between hover:shadow-xl transition-all shadow-md h-[180px]">
+          <div className="bg-gradient-to-tr from-indigo-900 to-indigo-950 text-white rounded-2xl border border-indigo-500/20 px-5 pt-5 pb-8 flex flex-col justify-between hover:shadow-xl transition-all shadow-md h-[205px]">
             <div>
               <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center mb-3 border border-indigo-500/30">
                 <Sparkles className="w-5 h-5 text-indigo-400" />
@@ -59,7 +59,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Card 2: Build New Resume */}
-          <div className="bg-gradient-to-tr from-teal-900 to-slate-900 text-white rounded-2xl border border-teal-500/20 p-5 flex flex-col justify-between hover:shadow-xl transition-all shadow-md h-[180px]">
+          <div className="bg-gradient-to-tr from-teal-900 to-slate-900 text-white rounded-2xl border border-teal-500/20 px-5 pt-5 pb-8 flex flex-col justify-between hover:shadow-xl transition-all shadow-md h-[205px]">
             <div>
               <div className="w-10 h-10 bg-teal-500/20 rounded-xl flex items-center justify-center mb-3 border border-teal-500/30">
                 <Plus className="w-5 h-5 text-teal-400" />
@@ -130,7 +130,7 @@ export default function DashboardPage() {
       </main>
 
       <footer className="border-t border-gray-200 py-5 px-6 text-center text-xs text-gray-400 bg-white">
-        TailorCV · Resumes are processed securely and never shared
+        FolioX · Resumes are processed securely and never shared
       </footer>
     </div>
   );

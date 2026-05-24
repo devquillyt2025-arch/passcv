@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { RewrittenResume } from '@/lib/types';
 
-const STORAGE_KEY = 'tailorcv:editedResume';
+const STORAGE_KEY = 'foliox:editedResume';
 
 type ContextValue = {
   edited: RewrittenResume | null;

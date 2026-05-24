@@ -28,7 +28,7 @@ export default function RewritePage() {
   const getDownloadFilename = (resume: RewrittenResume, jobTitle: string, ext: string) => {
     const name = resume.contact?.name?.replace(/\s+/g, '_') || 'Resume';
     const title = jobTitle?.replace(/\s+/g, '_').slice(0, 30) || 'Role';
-    return `${name}_${title}_TailorCV.${ext}`;
+    return `${name}_${title}_FolioX.${ext}`;
   };
 
   const handleDownloadDocx = async () => {

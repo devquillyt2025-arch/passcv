@@ -66,7 +66,7 @@ export default function PaymentModal({ plan, open, onSuccess, onClose }: Props) 
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
-        name: 'TailorCV',
+        name: 'FolioX',
         description: plan === 'single' ? '1 Resume Rewrite' : 'Pro Monthly Subscription',
         order_id: order.orderId,
         handler: async (response: RazorpayResponse) => {

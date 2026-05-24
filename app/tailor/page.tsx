@@ -348,7 +348,7 @@ export default function TailorPage() {
               marginBottom:  32,
             }}
           >
-            How TailorCV works
+            How FolioX works
           </p>
           <div className="grid gap-6 sm:grid-cols-3 text-left">
             {[
@@ -386,7 +386,7 @@ export default function TailorPage() {
           color:     'rgba(255,255,255,0.3)',
         }}
       >
-        TailorCV · Resumes uploaded are auto-deleted after 24h · No human review
+        FolioX · Resumes uploaded are auto-deleted after 24h · No human review
       </footer>
 
       {/* Spinner keyframe */}

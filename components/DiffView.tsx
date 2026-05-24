@@ -179,7 +179,7 @@ export default function DiffView({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${(original.contact.name || 'Candidate').replace(/\s+/g, '_')}_CoverLetter_TailorCV.docx`;
+      a.download = `${(original.contact.name || 'Candidate').replace(/\s+/g, '_')}_CoverLetter_FolioX.docx`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {

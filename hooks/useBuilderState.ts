@@ -18,7 +18,7 @@ export function useBuilderState(data: ResumeData, templateId: 'classic' | 'moder
       const a = document.createElement('a');
       a.href = url;
       const fullName = [data.contact.firstName, data.contact.lastName].filter(Boolean).join('_') || 'Resume';
-      a.download = `${fullName}_TailorCV.pdf`;
+      a.download = `${fullName}_FolioX.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {

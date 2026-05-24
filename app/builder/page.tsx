@@ -370,7 +370,7 @@ export default function BuilderPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${fullName.replace(/\s+/g, '_')}_TailorCV.pdf`;
+      a.download = `${fullName.replace(/\s+/g, '_')}_FolioX.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {

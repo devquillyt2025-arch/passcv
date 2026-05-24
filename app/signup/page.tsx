@@ -19,7 +19,7 @@ export default function SignupPage() {
       {/* Nav */}
       <nav className="bg-white border-b border-gray-200 px-6 h-16 flex items-center justify-between sticky top-0 z-30">
         <Link href="/" className="text-xl font-bold text-indigo-700 tracking-tight">
-          TailorCV
+          FolioX
         </Link>
         <span className="text-sm text-gray-500">
           Already have an account?{' '}
@@ -82,7 +82,7 @@ export default function SignupPage() {
       </div>
 
       <footer className="border-t border-gray-200 py-5 px-6 text-center text-xs text-gray-400">
-        TailorCV · Resumes are processed securely and never shared
+        FolioX · Resumes are processed securely and never shared
       </footer>
     </div>
   );

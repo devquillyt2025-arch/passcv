@@ -195,7 +195,7 @@ export async function POST(req: NextRequest) {
     if (data.type === 'cover_letter') {
       const doc = buildCoverLetterDocx(data.coverLetter || '', data.name || 'Candidate', data.jobTitle || 'Role');
       const buffer = await Packer.toBuffer(doc);
-      const filename = `${safeFilename(data.name || 'Candidate')}_CoverLetter_TailorCV.docx`;
+      const filename = `${safeFilename(data.name || 'Candidate')}_CoverLetter_FolioX.docx`;
       return new Response(new Uint8Array(buffer), {
         status: 200,
         headers: {
@@ -211,7 +211,7 @@ export async function POST(req: NextRequest) {
 
     const doc = buildDocx(resume as ResumeInput);
     const buffer = await Packer.toBuffer(doc);
-    const filename = `${safeFilename((resume as ResumeInput)?.contact?.name || 'Resume')}_${safeFilename(jobTitle)}_TailorCV.docx`;
+    const filename = `${safeFilename((resume as ResumeInput)?.contact?.name || 'Resume')}_${safeFilename(jobTitle)}_FolioX.docx`;
 
     return new Response(new Uint8Array(buffer), {
       status: 200,
