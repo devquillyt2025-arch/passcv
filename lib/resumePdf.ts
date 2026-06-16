@@ -1,11 +1,16 @@
 import React from 'react';
 import { pdf } from '@react-pdf/renderer';
-import { ResumeData, ParsedResume, RewrittenResume } from './types';
+import { ResumeData, ParsedResume, RewrittenResume, TemplateId } from './types';
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
 import ModernTemplate from '@/components/templates/ModernTemplate';
 import MinimalTemplate from '@/components/templates/MinimalTemplate';
 import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
 import SidebarTemplate from '@/components/templates/SidebarTemplate';
+import ElegantTemplate from '@/components/templates/ElegantTemplate';
+import CreativeTemplate from '@/components/templates/CreativeTemplate';
+import AcademicTemplate from '@/components/templates/AcademicTemplate';
+import BoldTemplate from '@/components/templates/BoldTemplate';
+import ContemporaryTemplate from '@/components/templates/ContemporaryTemplate';
 
 export type ResumeInput = ParsedResume | RewrittenResume;
 
@@ -62,17 +67,31 @@ export async function generateResumePdfBlob(resume: ResumeInput): Promise<Blob> 
   return generateBuilderPdfBlob(data, 'classic');
 }
 
-const TEMPLATE_MAP = {
-  classic:   ClassicTemplate,
-  modern:    ModernTemplate,
-  minimal:   MinimalTemplate,
-  executive: ExecutiveTemplate,
-  sidebar:   SidebarTemplate,
-} as const;
+// The on-screen / gallery templates are HTML (see components/resume-templates).
+// PDF export still uses these react-pdf components; each HTML template id maps to
+// its closest react-pdf design so downloads keep working. (Exact PDF parity for
+// the new designs is a planned follow-up.)
+const TEMPLATE_MAP: Record<TemplateId, typeof ClassicTemplate> = {
+  'classic':         ClassicTemplate,
+  'sidebar-dark':    SidebarTemplate,
+  'executive-bold':  ExecutiveTemplate,
+  'creative-purple': CreativeTemplate,
+  'swiss-grid':      ModernTemplate,
+  'infographic':     SidebarTemplate,
+  'minimalist-mono': MinimalTemplate,
+  'magazine-spread': ExecutiveTemplate,
+  'card-stack':      ModernTemplate,
+  'timeline-left':   ContemporaryTemplate,
+  'government':      ClassicTemplate,
+  'dark-mode':       ExecutiveTemplate,
+  'elegant-serif':   ElegantTemplate,
+  'startup-bold':    BoldTemplate,
+  'academic-cv':     AcademicTemplate,
+};
 
 export async function generateBuilderPdfBlob(
   data: ResumeData,
-  templateId: keyof typeof TEMPLATE_MAP = 'classic',
+  templateId: TemplateId = 'classic',
   sectionOrder?: string[],
   accentColor?: string
 ): Promise<Blob> {

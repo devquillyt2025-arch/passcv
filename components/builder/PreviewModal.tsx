@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ResumeData } from '@/lib/types';
+import { ResumeData, TemplateId } from '@/lib/types';
 
 interface Props {
   data: ResumeData;
-  templateId: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar';
+  templateId: TemplateId;
   accentColor?: string;
   onClose: () => void;
   onDownload: () => void;

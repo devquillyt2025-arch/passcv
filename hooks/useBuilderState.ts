@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ResumeData } from '@/lib/types';
+import { ResumeData, TemplateId } from '@/lib/types';
 
-export function useBuilderState(data: ResumeData, templateId: 'classic' | 'modern') {
+export function useBuilderState(data: ResumeData, templateId: TemplateId) {
   const [step, setStep] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [showImport, setShowImport] = useState(false);

@@ -63,7 +63,7 @@ export default function Home() {
         style={{
           position: 'fixed', top: '-10%', left: '50%', transform: 'translateX(-50%)',
           width: '1400px', height: '800px',
-          background: 'radial-gradient(ellipse at center, var(--lp-glow) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse at 50% 40%, var(--lp-glow) 0%, transparent 65%)',
           pointerEvents: 'none', zIndex: 0,
         }}
       />
@@ -90,13 +90,13 @@ export default function Home() {
           <Link
             href="/login"
             style={{
-              fontSize: 14, fontWeight: 500, color: 'var(--lp-heading)',
+              fontSize: 14, fontWeight: 500, color: 'var(--lp-login-color)',
               background: 'transparent', border: '1px solid transparent',
               borderRadius: '999px', padding: '6px 18px',
-              transition: 'border-color 0.2s ease', textDecoration: 'none',
+              transition: 'border-color 0.2s ease, color 0.2s ease', textDecoration: 'none',
             }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = BORDER)}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--lp-pill-border)'; e.currentTarget.style.color = 'var(--lp-login-hover)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'var(--lp-login-color)'; }}
           >
             Log in
           </Link>
@@ -133,9 +133,9 @@ export default function Home() {
               display: 'inline-flex', alignItems: 'center', gap: 8,
               fontSize: 11, fontWeight: 700,
               letterSpacing: '0.15em', textTransform: 'uppercase',
-              color: 'var(--lp-accent-text)',
+              color: 'var(--lp-badge-text)',
               background: 'var(--lp-pill-bg)',
-              border: `1px solid ${BORDER}`,
+              border: '1px solid var(--lp-pill-border)',
               borderRadius: '999px', padding: '6px 18px', marginBottom: 44,
             }}
           >
@@ -174,10 +174,10 @@ export default function Home() {
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '16px 40px', borderRadius: '999px',
               background: GRAD, color: '#fff', fontWeight: 700, fontSize: 16,
-              boxShadow: `0 0 30px ${GLOW}`, transition: 'all 0.22s ease', textDecoration: 'none',
+              boxShadow: 'var(--lp-cta-shadow)', transition: 'all 0.22s ease', textDecoration: 'none',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = `0 0 44px ${GLOW_H}`; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)';    e.currentTarget.style.boxShadow = `0 0 30px ${GLOW}`; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = 'var(--lp-cta-shadow-hover)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)';    e.currentTarget.style.boxShadow = 'var(--lp-cta-shadow)'; }}
           >
             Build Your Resume →
           </Link>
@@ -189,27 +189,12 @@ export default function Home() {
 
           {/* Platform pills */}
           <div style={{ marginTop: 32 }}>
-            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--lp-muted)', marginBottom: 12 }}>
+            <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--lp-muted)', marginBottom: 12 }}>
               Works with every major ATS
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               {['Naukri', 'LinkedIn', 'Taleo', 'Darwinbox', 'Keka', 'Workday'].map(name => (
-                <span
-                  key={name}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    fontSize: 12, fontWeight: 500,
-                    color: 'var(--lp-accent-text)',
-                    background: 'var(--lp-pill-bg)',
-                    border: `1px solid ${BORDER}`,
-                    borderRadius: '999px', padding: '5px 13px',
-                  }}
-                >
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                    <path d="M2 5.5L4 7.5L8 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {name}
-                </span>
+                <AtsChip key={name} name={name} />
               ))}
             </div>
           </div>
@@ -245,6 +230,32 @@ export default function Home() {
       </footer>
 
     </div>
+  );
+}
+
+function AtsChip({ name }: { name: string }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <span
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        fontSize: 12, fontWeight: 500,
+        color: 'var(--lp-accent-text)',
+        background: hovered ? 'var(--lp-chip-bg-hover)' : 'var(--lp-chip-bg)',
+        border: '1px solid var(--lp-pill-border)',
+        borderRadius: '999px', padding: '5px 13px',
+        boxShadow: 'var(--lp-chip-shadow)',
+        transition: 'background 0.15s ease',
+        cursor: 'default',
+      }}
+    >
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+        <path d="M2 5.5L4 7.5L8 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      {name}
+    </span>
   );
 }
 

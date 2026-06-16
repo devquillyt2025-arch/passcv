@@ -22,19 +22,19 @@ h1, h2, h3 {
 
 /* ── Landing page theme tokens ─────────────────────────────────────────────── */
 :root {
-  --lp-bg:               #f8f9fc;
+  --lp-bg:               linear-gradient(135deg, #f0f0ff 0%, #fafafa 50%, #f0f7ff 100%);
   --lp-card-bg:          #ffffff;
   --lp-free-card-bg:     #f9fafb;
-  --lp-pill-bg:          #f3f0ff;
-  --lp-nav-bg:           rgba(255,255,255,0.92);
-  --lp-nav-border:       #e5e7eb;
+  --lp-pill-bg:          #faf5ff;
+  --lp-nav-bg:           rgba(255,255,255,0.80);
+  --lp-nav-border:       rgba(167,139,250,0.18);
   --lp-nav-sep:          rgba(0,0,0,0.12);
-  --lp-heading:          #0a0f1e;
-  --lp-body:             #4b5563;
-  --lp-muted:            rgba(10,15,30,0.40);
-  --lp-valueprop:        rgba(10,15,30,0.45);
-  --lp-accent-text:      #6C63FF;
-  --lp-glow:             rgba(108,99,255,0.06);
+  --lp-heading:          #111827;
+  --lp-body:             #6b7280;
+  --lp-muted:            #a855f7;
+  --lp-valueprop:        #6b7280;
+  --lp-accent-text:      #9333ea;
+  --lp-glow:             rgba(108,99,255,0.08);
   --lp-section-border:   #e5e7eb;
   --lp-section-label:    #6C63FF;
   --lp-footer-border:    #e5e7eb;
@@ -43,13 +43,23 @@ h1, h2, h3 {
   --lp-card-border-h:    rgba(108,99,255,0.40);
   --lp-free-border:      #e5e7eb;
   --lp-free-border-h:    rgba(108,99,255,0.25);
-  --lp-card-title:       #0a0f1e;
+  --lp-card-title:       #111827;
   --lp-free-title:       rgba(10,15,30,0.65);
-  --lp-card-body:        #4b5563;
+  --lp-card-body:        #6b7280;
   --lp-icon-bg:          rgba(108,99,255,0.07);
   --lp-icon-border:      rgba(108,99,255,0.18);
   --lp-free-icon-bg:     rgba(10,15,30,0.05);
   --lp-free-icon-border: rgba(10,15,30,0.10);
+  /* light-mode extras */
+  --lp-badge-text:       #7c3aed;
+  --lp-pill-border:      #e9d5ff;
+  --lp-chip-bg:          #ffffff;
+  --lp-chip-bg-hover:    #faf5ff;
+  --lp-chip-shadow:      0 1px 3px rgba(0,0,0,0.08);
+  --lp-login-color:      #374151;
+  --lp-login-hover:      #9333ea;
+  --lp-cta-shadow:       0 8px 30px rgba(108,99,255,0.35);
+  --lp-cta-shadow-hover: 0 12px 40px rgba(108,99,255,0.55);
 }
 
 .dark {
@@ -81,6 +91,16 @@ h1, h2, h3 {
   --lp-icon-border:      rgba(108,99,255,0.22);
   --lp-free-icon-bg:     rgba(255,255,255,0.04);
   --lp-free-icon-border: rgba(255,255,255,0.08);
+  /* dark-mode counterparts for new tokens */
+  --lp-badge-text:       #8B5CF6;
+  --lp-pill-border:      rgba(108,99,255,0.30);
+  --lp-chip-bg:          #0d1829;
+  --lp-chip-bg-hover:    rgba(108,99,255,0.12);
+  --lp-chip-shadow:      none;
+  --lp-login-color:      #ffffff;
+  --lp-login-hover:      #c4b5fd;
+  --lp-cta-shadow:       0 0 30px rgba(108,99,255,0.40);
+  --lp-cta-shadow-hover: 0 0 44px rgba(108,99,255,0.65);
 }
 
 body {

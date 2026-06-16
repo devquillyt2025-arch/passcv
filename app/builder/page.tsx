@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Download,
   Eye,
+  LayoutGrid,
   Loader2,
   Maximize2,
   Minus,
@@ -28,6 +29,8 @@ import ImportResumeModal from '@/components/builder/ImportResumeModal';
 import ScoreFooterBar from '@/components/builder/ScoreFooterBar';
 import PortalPopover from '@/components/ui/PortalPopover';
 import { calculateScore, mapResumeDataToParsedResume, parseJD } from '@/lib/scoring';
+import type { TemplateId } from '@/lib/types';
+import { TEMPLATE_META } from '@/lib/templates';
 
 const ACCENTS = [
   { color: '#4F46E5', name: 'Indigo' },
@@ -117,38 +120,64 @@ function Segmented<T extends string>({
   );
 }
 
-const TEMPLATE_OPTIONS = [
-  { id: 'classic'   as const, label: 'Classic'   },
-  { id: 'modern'    as const, label: 'Modern'    },
-  { id: 'minimal'   as const, label: 'Minimal'   },
-  { id: 'executive' as const, label: 'Executive' },
-  { id: 'sidebar'   as const, label: 'Sidebar'   },
-];
-
-function TemplateSwitch({
+function TemplateSelect({
   value,
   onChange,
 }: {
   value: string;
-  onChange: (v: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar') => void;
+  onChange: (v: TemplateId) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  const current = TEMPLATE_META.find((t) => t.id === value) ?? TEMPLATE_META[0];
+
   return (
-    <div className="inline-flex rounded-[8px] bg-slate-100 dark:bg-gray-800 p-[3px]">
-      {TEMPLATE_OPTIONS.map(({ id, label }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => onChange(id)}
-          className={`rounded-[5px] px-3 py-[3px] text-[11px] font-semibold transition-all ${
-            value === id
-              ? 'bg-[#1E293B] dark:bg-gray-700 text-white shadow-sm'
-              : 'text-slate-400 dark:text-gray-500 hover:text-slate-700 dark:hover:text-gray-300'
-          }`}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
+    <>
+      <button
+        ref={ref}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex h-8 min-w-[160px] items-center justify-between gap-2 rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-[#1e293b] px-3 text-xs font-medium text-slate-900 dark:text-gray-100 shadow-sm transition hover:border-slate-300 dark:hover:border-gray-600 hover:shadow focus:outline-none"
+      >
+        <span className="truncate">{current.label}</span>
+        <ChevronDown
+          className={`h-3.5 w-3.5 flex-shrink-0 text-slate-400 dark:text-gray-500 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      <PortalPopover isOpen={open} onClose={() => setOpen(false)} anchorRef={ref}>
+        <div className="max-h-[360px] min-w-[240px] overflow-y-auto rounded-xl border border-slate-100 dark:border-gray-700 bg-white dark:bg-[#1e293b] py-1 shadow-2xl shadow-slate-300/40 dark:shadow-black/40 ring-1 ring-slate-900/[0.06] dark:ring-white/[0.06]">
+          {TEMPLATE_META.map((option) => {
+            const isSelected = option.id === value;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => { onChange(option.id); setOpen(false); }}
+                className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
+                  isSelected
+                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                    : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50/80 dark:hover:bg-gray-700'
+                }`}
+              >
+                <span className="flex-1 text-xs font-medium leading-none">{option.label}</span>
+                <span
+                  className={`flex-shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
+                    option.ats
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                      : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+                  }`}
+                >
+                  {option.ats ? 'ATS' : 'Stylized'}
+                </span>
+                {isSelected && <Check className="h-3.5 w-3.5 flex-shrink-0 text-indigo-500" />}
+              </button>
+            );
+          })}
+        </div>
+      </PortalPopover>
+    </>
   );
 }
 
@@ -462,7 +491,15 @@ export default function BuilderPage() {
 
           {/* ─ Template ─────────────────────────────── */}
           <ToolbarGroup label="Template">
-            <TemplateSwitch value={templateId} onChange={setTemplateId} />
+            <div className="flex items-center gap-2">
+              <TemplateSelect value={templateId} onChange={setTemplateId} />
+              <Link
+                href="/templates"
+                className="flex items-center gap-1 rounded-[6px] border border-slate-200 dark:border-gray-700 px-2.5 py-[5px] text-[11px] font-semibold text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" /> Browse all
+              </Link>
+            </div>
           </ToolbarGroup>
 
           <ToolbarDivider />

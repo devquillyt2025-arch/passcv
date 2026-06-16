@@ -1,7 +1,7 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { ResumeData, ResumeLanguage } from '@/lib/types';
 
-const SECTION_KEYS = [
+const ALL_SECTION_KEYS = [
   'summary', 'skills', 'experience', 'education', 'certifications',
   'languages', 'projects', 'awards', 'volunteer', 'courses', 'publications',
 ];
@@ -28,137 +28,166 @@ function sanitize(text: string): string {
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 36,
-    paddingBottom: 48,
-    paddingHorizontal: 44,
+    paddingTop: 28,
+    paddingBottom: 40,
+    paddingHorizontal: 36,
     fontFamily: 'Helvetica',
-    fontSize: 10,
-    color: '#1f2937',
-    lineHeight: 1.55,
+    fontSize: 9.5,
+    color: '#111827',
+    lineHeight: 1.4,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingBottom: 10,
+    marginBottom: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: '#111827',
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  headerRight: {
+    flexShrink: 0,
+    alignItems: 'flex-end',
+    maxWidth: 210,
   },
   name: {
     fontSize: 20,
     fontWeight: 700,
     color: '#111827',
-    marginBottom: 3,
-    lineHeight: 1.2,
+    lineHeight: 1.15,
+    marginBottom: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   jobTitle: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 400,
+    color: '#374151',
+  },
+  contactLine: {
+    fontSize: 8.5,
     color: '#4b5563',
-    marginBottom: 3,
+    lineHeight: 1.5,
+    textAlign: 'right',
   },
-  contact: {
-    fontSize: 9,
-    color: '#9ca3af',
-    marginBottom: 2,
-  },
-  dividerThin: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#e5e7eb',
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 10,
-    marginBottom: 14,
+    marginBottom: 5,
   },
   sectionTitle: {
-    fontSize: 8.5,
-    fontWeight: 500,
-    color: '#6b7280',
+    fontSize: 9,
+    fontWeight: 700,
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#e5e7eb',
-    paddingBottom: 3,
-    marginBottom: 7,
-    marginTop: 14,
+    letterSpacing: 0.8,
+    flexShrink: 0,
+    marginRight: 6,
+  },
+  sectionLine: {
+    flex: 1,
+    borderBottomWidth: 0.75,
   },
   summary: {
-    fontSize: 10,
+    fontSize: 9.5,
     color: '#374151',
-    lineHeight: 1.6,
+    lineHeight: 1.55,
     textAlign: 'justify',
+    marginBottom: 2,
   },
   entry: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   itemHeader: {
-    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   titleWrapper: {
     flex: 1,
     flexShrink: 1,
-    display: 'flex',
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 5,
+    gap: 4,
     flexWrap: 'wrap',
-    marginRight: 8,
+    marginRight: 6,
   },
   title: {
     fontWeight: 700,
-    fontSize: 10,
+    fontSize: 9.5,
     color: '#111827',
   },
   company: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontStyle: 'italic',
     color: '#6b7280',
   },
   dateLocation: {
-    fontSize: 9,
-    color: '#9ca3af',
+    fontSize: 8.5,
+    color: '#6b7280',
     textAlign: 'right',
     flexShrink: 0,
   },
   bulletList: {
-    marginLeft: 10,
-    marginTop: 2,
+    marginLeft: 8,
+    marginTop: 1,
   },
   bulletPoint: {
-    display: 'flex',
     flexDirection: 'row',
-    marginBottom: 2,
+    marginBottom: 1.5,
   },
   bullet: {
-    width: 10,
+    width: 9,
     fontSize: 9,
-    color: '#9ca3af',
     flexShrink: 0,
   },
   bulletText: {
     flex: 1,
-    fontSize: 10,
+    fontSize: 9.5,
     color: '#374151',
-    lineHeight: 1.5,
+    lineHeight: 1.4,
   },
   metaText: {
-    fontSize: 9,
-    color: '#9ca3af',
+    fontSize: 8.5,
+    color: '#6b7280',
     marginTop: 1,
   },
 });
 
-interface MinimalTemplateProps {
+interface CompactTemplateProps {
   data: ResumeData;
   sectionOrder?: string[];
   accentColor?: string;
 }
 
-export default function MinimalTemplate({ data, sectionOrder, accentColor }: MinimalTemplateProps) {
-  const accent = accentColor || '#6b7280';
+function SectionHeader({ label, accent }: { label: string; accent: string }) {
+  return (
+    <View style={styles.sectionRow}>
+      <Text style={[styles.sectionTitle, { color: accent }]}>{label}</Text>
+      <View style={[styles.sectionLine, { borderBottomColor: accent + '55' }]} />
+    </View>
+  );
+}
+
+export default function CompactTemplate({ data, sectionOrder, accentColor }: CompactTemplateProps) {
+  const accent = accentColor || '#111827';
   const { contact, summary, experience, education, skills, projects, certifications, languages } = data;
   const awards = data.awards || [];
   const volunteer = data.volunteer || [];
   const courses = data.courses || [];
   const publications = data.publications || [];
-  const order = (sectionOrder || SECTION_KEYS).filter(id => SECTION_KEYS.includes(id) || id.startsWith('custom-'));
+
+  const order = (sectionOrder || ALL_SECTION_KEYS).filter(
+    id => ALL_SECTION_KEYS.includes(id) || id.startsWith('custom-')
+  );
 
   const fullName = [contact.firstName, contact.lastName].filter(Boolean).join(' ');
-  const contactParts = [
+
+  const contactLines = [
     contact.email,
     contact.phone,
     [contact.city, contact.country].filter(Boolean).join(', '),
@@ -170,39 +199,47 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
     <Document>
       <Page size="A4" style={styles.page}>
 
-        {/* ── Header ─────────────────────────────────────────────────────── */}
-        <View wrap={false}>
-          {fullName && <Text style={styles.name}>{fullName}</Text>}
-          {contact.jobTitle && <Text style={styles.jobTitle}>{sanitize(contact.jobTitle)}</Text>}
-          {contactParts.length > 0 && <Text style={styles.contact}>{contactParts.join('  ·  ')}</Text>}
-          <View style={styles.dividerThin} />
+        {/* ── Two-column header ─────────────────────────────────────── */}
+        <View style={styles.header} wrap={false}>
+          <View style={styles.headerLeft}>
+            {fullName ? <Text style={styles.name}>{fullName}</Text> : null}
+            {contact.jobTitle ? <Text style={styles.jobTitle}>{sanitize(contact.jobTitle)}</Text> : null}
+          </View>
+          <View style={styles.headerRight}>
+            {contactLines.map((line, i) => (
+              <Text key={i} style={styles.contactLine}>{line}</Text>
+            ))}
+          </View>
         </View>
 
-        {/* ── Sections ────────────────────────────────────────────────────── */}
+        {/* ── Sections ──────────────────────────────────────────────── */}
         {order.map((sectionId) => {
 
+          // ── Summary ────────────────────────────────────────────────
           if (sectionId === 'summary') {
             if (!summary) return null;
             return (
               <View key="summary" wrap={false}>
-                <Text style={[styles.sectionTitle, { color: accent }]}>Summary</Text>
+                <SectionHeader label="Summary" accent={accent} />
                 <Text style={styles.summary}>{sanitize(summary)}</Text>
               </View>
             );
           }
 
+          // ── Skills ─────────────────────────────────────────────────
           if (sectionId === 'skills') {
             if (!skills || skills.length === 0) return null;
             return (
               <View key="skills" wrap={false}>
-                <Text style={[styles.sectionTitle, { color: accent }]}>Skills</Text>
-                <Text style={{ fontSize: 10, color: '#374151', lineHeight: 1.5 }}>
+                <SectionHeader label="Skills" accent={accent} />
+                <Text style={{ fontSize: 9.5, color: '#374151', lineHeight: 1.4 }}>
                   {skills.map(s => sanitize(s.name)).join('  ·  ')}
                 </Text>
               </View>
             );
           }
 
+          // ── Experience ─────────────────────────────────────────────
           if (sectionId === 'experience') {
             if (!experience || experience.length === 0) return null;
             return (
@@ -215,12 +252,12 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
                   const dateStr = [
                     fmtDate(exp.startDate),
                     exp.currentlyWorking ? 'Present' : fmtDate(exp.endDate),
-                  ].filter(Boolean).join(' – ');
-                  const rightStr = [dateStr, exp.location].filter(Boolean).join('  ·  ');
+                  ].filter(Boolean).join(' - ');
+                  const rightStr = [dateStr, exp.location].filter(Boolean).join('  |  ');
 
                   return (
                     <View key={`exp-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Experience</Text>}
+                      {idx === 0 && <SectionHeader label="Experience" accent={accent} />}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -233,7 +270,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
                           <View style={styles.bulletList}>
                             {bullets.map((bullet, bIdx) => (
                               <View key={bIdx} style={styles.bulletPoint}>
-                                <Text style={styles.bullet}>–</Text>
+                                <Text style={[styles.bullet, { color: accent }]}>-</Text>
                                 <Text style={styles.bulletText}>{bullet}</Text>
                               </View>
                             ))}
@@ -247,6 +284,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
+          // ── Education ──────────────────────────────────────────────
           if (sectionId === 'education') {
             if (!education || education.length === 0) return null;
             return (
@@ -257,12 +295,12 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
                   const dateStr = [
                     fmtDate(edu.startDate),
                     edu.currentlyStudying ? 'Present' : fmtDate(edu.endDate),
-                  ].filter(Boolean).join(' – ');
-                  const rightStr = [dateStr, edu.location].filter(Boolean).join('  ·  ');
+                  ].filter(Boolean).join(' - ');
+                  const rightStr = [dateStr, edu.location].filter(Boolean).join('  |  ');
 
                   return (
                     <View key={`edu-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Education</Text>}
+                      {idx === 0 && <SectionHeader label="Education" accent={accent} />}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -280,6 +318,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
+          // ── Certifications ─────────────────────────────────────────
           if (sectionId === 'certifications') {
             if (!certifications || certifications.length === 0) return null;
             return (
@@ -289,11 +328,11 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
                   const dateStr = [
                     fmtDate(cert.issueDate),
                     cert.doesNotExpire ? 'No Expiry' : fmtDate(cert.expiryDate),
-                  ].filter(Boolean).join(' – ');
+                  ].filter(Boolean).join(' - ');
 
                   return (
                     <View key={`cert-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Certifications</Text>}
+                      {idx === 0 && <SectionHeader label="Certifications" accent={accent} />}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -311,6 +350,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
+          // ── Languages ──────────────────────────────────────────────
           if (sectionId === 'languages') {
             if (!languages || languages.length === 0) return null;
             return (
@@ -318,8 +358,8 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
               <>
                 {languages.map((lang: ResumeLanguage, idx: number) => (
                   <View key={`lang-${idx}`} wrap={false}>
-                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Languages</Text>}
-                    <View style={[styles.entry, { marginBottom: 4 }]}>
+                    {idx === 0 && <SectionHeader label="Languages" accent={accent} />}
+                    <View style={[styles.entry, { marginBottom: 3 }]}>
                       <View style={styles.itemHeader}>
                         <Text style={styles.title}>{sanitize(lang.name)}</Text>
                         <Text style={styles.dateLocation}>{lang.proficiency}</Text>
@@ -331,6 +371,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
+          // ── Projects ───────────────────────────────────────────────
           if (sectionId === 'projects') {
             if (!projects || projects.length === 0) return null;
             return (
@@ -340,11 +381,11 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
                   const bullets = proj.description
                     .split('\n').map(b => b.trim()).filter(Boolean)
                     .map(b => sanitize(b.replace(/^[-•]\s*/, '')));
-                  const dateStr = [fmtDate(proj.startDate), fmtDate(proj.endDate)].filter(Boolean).join(' – ');
+                  const dateStr = [fmtDate(proj.startDate), fmtDate(proj.endDate)].filter(Boolean).join(' - ');
 
                   return (
                     <View key={`proj-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Projects</Text>}
+                      {idx === 0 && <SectionHeader label="Projects" accent={accent} />}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
@@ -357,7 +398,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
                           <View style={styles.bulletList}>
                             {bullets.map((bullet, bIdx) => (
                               <View key={bIdx} style={styles.bulletPoint}>
-                                <Text style={styles.bullet}>–</Text>
+                                <Text style={[styles.bullet, { color: accent }]}>-</Text>
                                 <Text style={styles.bulletText}>{bullet}</Text>
                               </View>
                             ))}
@@ -373,7 +414,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
-          // ── Awards ─────────────────────────────────────────────────────
+          // ── Awards ─────────────────────────────────────────────────
           if (sectionId === 'awards') {
             if (!awards.length) return null;
             return (
@@ -381,7 +422,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
               <>
                 {awards.map((award, idx) => (
                   <View key={`award-${idx}`} wrap={false}>
-                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Awards</Text>}
+                    {idx === 0 && <SectionHeader label="Awards" accent={accent} />}
                     <View style={styles.entry}>
                       <View style={styles.itemHeader}>
                         <View style={styles.titleWrapper}>
@@ -398,7 +439,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
-          // ── Volunteer ──────────────────────────────────────────────────
+          // ── Volunteer ──────────────────────────────────────────────
           if (sectionId === 'volunteer') {
             if (!volunteer.length) return null;
             return (
@@ -411,25 +452,24 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
                   const dateStr = [
                     fmtDate(vol.startDate),
                     vol.currentlyVolunteering ? 'Present' : fmtDate(vol.endDate),
-                  ].filter(Boolean).join(' – ');
-                  const rightStr = [dateStr, vol.location].filter(Boolean).join('  ·  ');
+                  ].filter(Boolean).join(' - ');
 
                   return (
                     <View key={`vol-${idx}`} wrap={false}>
-                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Volunteer</Text>}
+                      {idx === 0 && <SectionHeader label="Volunteer" accent={accent} />}
                       <View style={styles.entry}>
                         <View style={styles.itemHeader}>
                           <View style={styles.titleWrapper}>
                             <Text style={styles.title}>{sanitize(vol.role)}</Text>
                             {vol.organization ? <Text style={styles.company}>{sanitize(vol.organization)}</Text> : null}
                           </View>
-                          {rightStr ? <Text style={styles.dateLocation}>{rightStr}</Text> : null}
+                          {dateStr ? <Text style={styles.dateLocation}>{dateStr}</Text> : null}
                         </View>
                         {bullets.length > 0 && (
                           <View style={styles.bulletList}>
                             {bullets.map((bullet, bIdx) => (
                               <View key={bIdx} style={styles.bulletPoint}>
-                                <Text style={styles.bullet}>–</Text>
+                                <Text style={[styles.bullet, { color: accent }]}>-</Text>
                                 <Text style={styles.bulletText}>{bullet}</Text>
                               </View>
                             ))}
@@ -443,7 +483,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
-          // ── Courses ────────────────────────────────────────────────────
+          // ── Courses ────────────────────────────────────────────────
           if (sectionId === 'courses') {
             if (!courses.length) return null;
             return (
@@ -451,7 +491,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
               <>
                 {courses.map((course, idx) => (
                   <View key={`course-${idx}`} wrap={false}>
-                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Courses</Text>}
+                    {idx === 0 && <SectionHeader label="Courses" accent={accent} />}
                     <View style={styles.entry}>
                       <View style={styles.itemHeader}>
                         <View style={styles.titleWrapper}>
@@ -467,7 +507,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
-          // ── Publications ───────────────────────────────────────────────
+          // ── Publications ───────────────────────────────────────────
           if (sectionId === 'publications') {
             if (!publications.length) return null;
             return (
@@ -475,7 +515,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
               <>
                 {publications.map((pub, idx) => (
                   <View key={`pub-${idx}`} wrap={false}>
-                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Publications</Text>}
+                    {idx === 0 && <SectionHeader label="Publications" accent={accent} />}
                     <View style={styles.entry}>
                       <View style={styles.itemHeader}>
                         <View style={styles.titleWrapper}>
@@ -492,7 +532,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
             );
           }
 
-          // ── Custom Sections ────────────────────────────────────────────
+          // ── Custom Sections ────────────────────────────────────────
           if (sectionId.startsWith('custom-')) {
             const customSection = data.customSections?.find((s) => s.id === sectionId);
             if (!customSection || !customSection.items || customSection.items.length === 0) return null;
@@ -501,7 +541,7 @@ export default function MinimalTemplate({ data, sectionOrder, accentColor }: Min
               <>
                 {customSection.items.map((item, idx) => (
                   <View key={`${sectionId}-${idx}`} wrap={false}>
-                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>{sanitize(customSection.title || 'Other')}</Text>}
+                    {idx === 0 && <SectionHeader label={sanitize(customSection.title || 'Other')} accent={accent} />}
                     <View style={styles.entry}>
                       <Text style={styles.title}>{sanitize(item.name)}</Text>
                       {item.description ? <Text style={styles.summary}>{sanitize(item.description)}</Text> : null}

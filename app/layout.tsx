@@ -14,6 +14,7 @@ export const metadata: Metadata = {
     icon: '/foliox-logo.png',
     apple: '/foliox-logo.png',
   },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

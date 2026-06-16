@@ -2,7 +2,10 @@ import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { ResumeData, ResumeLanguage } from '@/lib/types';
 
 // Sections shown in the right main column; sidebar always gets contact/skills/languages.
-const MAIN_KEYS = ['summary', 'experience', 'education', 'certifications', 'projects'];
+const MAIN_KEYS = [
+  'summary', 'experience', 'education', 'certifications', 'projects',
+  'awards', 'volunteer', 'courses', 'publications',
+];
 
 const SIDEBAR_W = 175; // pts — ~30% of A4 595pt width
 const ACCENT = '#4f46e5';
@@ -198,7 +201,11 @@ interface SidebarTemplateProps {
 export default function SidebarTemplate({ data, sectionOrder, accentColor }: SidebarTemplateProps) {
   const accent = accentColor || ACCENT;
   const { contact, summary, experience, education, skills, projects, certifications, languages } = data;
-  const mainOrder = (sectionOrder || MAIN_KEYS).filter(id => MAIN_KEYS.includes(id));
+  const awards = data.awards || [];
+  const volunteer = data.volunteer || [];
+  const courses = data.courses || [];
+  const publications = data.publications || [];
+  const mainOrder = (sectionOrder || MAIN_KEYS).filter(id => MAIN_KEYS.includes(id) || id.startsWith('custom-'));
 
   const fullName = [contact.firstName, contact.lastName].filter(Boolean).join(' ');
   const contactLines = [
@@ -410,6 +417,144 @@ export default function SidebarTemplate({ data, sectionOrder, accentColor }: Sid
                       </View>
                     );
                   })}
+                </>
+              );
+            }
+
+            // ── Awards ───────────────────────────────────────────────────
+            if (sectionId === 'awards') {
+              if (!awards.length) return null;
+              return (
+                // eslint-disable-next-line react/jsx-no-useless-fragment
+                <>
+                  {awards.map((award, idx) => (
+                    <View key={`award-${idx}`} wrap={false}>
+                      {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>Awards</Text>}
+                      <View style={styles.mEntry}>
+                        <View style={styles.mItemHeader}>
+                          <View style={styles.mTitleWrapper}>
+                            <Text style={styles.mTitle}>{sanitize(award.name)}</Text>
+                            {award.issuer ? <Text style={styles.mCompany}>— {sanitize(award.issuer)}</Text> : null}
+                          </View>
+                          {award.date ? <Text style={styles.mDateLocation}>{fmtDate(award.date)}</Text> : null}
+                        </View>
+                        {award.description ? <Text style={styles.mSummary}>{sanitize(award.description)}</Text> : null}
+                      </View>
+                    </View>
+                  ))}
+                </>
+              );
+            }
+
+            // ── Volunteer ─────────────────────────────────────────────────
+            if (sectionId === 'volunteer') {
+              if (!volunteer.length) return null;
+              return (
+                // eslint-disable-next-line react/jsx-no-useless-fragment
+                <>
+                  {volunteer.map((vol, idx) => {
+                    const bullets = vol.description
+                      .split('\n').map(b => b.trim()).filter(Boolean)
+                      .map(b => sanitize(b.replace(/^[-•]\s*/, '')));
+                    const dateStr = [
+                      fmtDate(vol.startDate),
+                      vol.currentlyVolunteering ? 'Present' : fmtDate(vol.endDate),
+                    ].filter(Boolean).join(' – ');
+
+                    return (
+                      <View key={`vol-${idx}`} wrap={false}>
+                        {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>Volunteer</Text>}
+                        <View style={styles.mEntry}>
+                          <View style={styles.mItemHeader}>
+                            <View style={styles.mTitleWrapper}>
+                              <Text style={styles.mTitle}>{sanitize(vol.role)}</Text>
+                              {vol.organization ? <Text style={styles.mCompany}>— {sanitize(vol.organization)}</Text> : null}
+                            </View>
+                            {dateStr ? <Text style={styles.mDateLocation}>{dateStr}</Text> : null}
+                          </View>
+                          {bullets.length > 0 && (
+                            <View style={styles.mBulletList}>
+                              {bullets.map((bullet, bIdx) => (
+                                <View key={bIdx} style={styles.mBulletPoint}>
+                                  <Text style={[styles.mBullet, { color: accent }]}>▸</Text>
+                                  <Text style={styles.mBulletText}>{bullet}</Text>
+                                </View>
+                              ))}
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </>
+              );
+            }
+
+            // ── Courses ───────────────────────────────────────────────────
+            if (sectionId === 'courses') {
+              if (!courses.length) return null;
+              return (
+                // eslint-disable-next-line react/jsx-no-useless-fragment
+                <>
+                  {courses.map((course, idx) => (
+                    <View key={`course-${idx}`} wrap={false}>
+                      {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>Courses</Text>}
+                      <View style={styles.mEntry}>
+                        <View style={styles.mItemHeader}>
+                          <View style={styles.mTitleWrapper}>
+                            <Text style={styles.mTitle}>{sanitize(course.name)}</Text>
+                            {course.platform ? <Text style={styles.mCompany}>— {sanitize(course.platform)}</Text> : null}
+                          </View>
+                          {course.completionDate ? <Text style={styles.mDateLocation}>{fmtDate(course.completionDate)}</Text> : null}
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </>
+              );
+            }
+
+            // ── Publications ──────────────────────────────────────────────
+            if (sectionId === 'publications') {
+              if (!publications.length) return null;
+              return (
+                // eslint-disable-next-line react/jsx-no-useless-fragment
+                <>
+                  {publications.map((pub, idx) => (
+                    <View key={`pub-${idx}`} wrap={false}>
+                      {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>Publications</Text>}
+                      <View style={styles.mEntry}>
+                        <View style={styles.mItemHeader}>
+                          <View style={styles.mTitleWrapper}>
+                            <Text style={styles.mTitle}>{sanitize(pub.title)}</Text>
+                            {pub.publisher ? <Text style={styles.mCompany}>— {sanitize(pub.publisher)}</Text> : null}
+                          </View>
+                          {pub.date ? <Text style={styles.mDateLocation}>{fmtDate(pub.date)}</Text> : null}
+                        </View>
+                        {pub.coAuthors ? <Text style={styles.mMetaText}>Co-authors: {sanitize(pub.coAuthors)}</Text> : null}
+                      </View>
+                    </View>
+                  ))}
+                </>
+              );
+            }
+
+            // ── Custom Sections ───────────────────────────────────────────
+            if (sectionId.startsWith('custom-')) {
+              const customSection = data.customSections?.find((s) => s.id === sectionId);
+              if (!customSection || !customSection.items || customSection.items.length === 0) return null;
+              return (
+                // eslint-disable-next-line react/jsx-no-useless-fragment
+                <>
+                  {customSection.items.map((item, idx) => (
+                    <View key={`${sectionId}-${idx}`} wrap={false}>
+                      {idx === 0 && <Text style={[styles.mSectionTitle, { color: accent }]}>{sanitize(customSection.title || 'Other')}</Text>}
+                      <View style={styles.mEntry}>
+                        <Text style={styles.mTitle}>{sanitize(item.name)}</Text>
+                        {item.description ? <Text style={styles.mSummary}>{sanitize(item.description)}</Text> : null}
+                      </View>
+                    </View>
+                  ))}
                 </>
               );
             }

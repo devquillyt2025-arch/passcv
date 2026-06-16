@@ -1,9 +1,9 @@
 import { StateCreator } from 'zustand';
-import { ResumeData, ResumeExperience, ResumeEducation, ResumeSkill, ResumeProject, ResumeCertification, ResumeLanguage, ResumePublication, ResumeCourse, ResumeAward, ResumeVolunteer, ResumeCustomItem } from '../../types';
+import { ResumeData, ResumeExperience, ResumeEducation, ResumeSkill, ResumeProject, ResumeCertification, ResumeLanguage, ResumePublication, ResumeCourse, ResumeAward, ResumeVolunteer, ResumeCustomItem, TemplateId } from '../../types';
 
 export interface GlobalSlice {
   resumeId: string | null;
-  templateId: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar';
+  templateId: TemplateId;
   builderDesign: {
     accentColor: string;
     fontPair: 'modern' | 'arial' | 'helvetica' | 'verdana' | 'times' | 'calibri' | 'courier' | 'editorial' | 'classic';
@@ -16,7 +16,7 @@ export interface GlobalSlice {
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setResumeId: (id: string | null) => void;
-  setTemplateId: (templateId: 'classic' | 'modern' | 'minimal' | 'executive' | 'sidebar') => void;
+  setTemplateId: (templateId: TemplateId) => void;
   setBuilderDesign: (design: Partial<GlobalSlice['builderDesign']>) => void;
   setSectionOrder: (order: string[]) => void;
   toggleSectionVisibility: (id: string) => void;

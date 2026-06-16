@@ -1,0 +1,16 @@
+{
+  "name": "FolioX",
+  "short_name": "FolioX",
+  "description": "AI-powered resume builder. ATS score, rewrite, and DOCX — in seconds.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080d1a",
+  "theme_color": "#6C63FF",
+  "icons": [
+    {
+      "src": "/foliox-logo.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}

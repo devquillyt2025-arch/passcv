@@ -1,3 +1,8 @@
+export type TemplateId =
+  | 'classic' | 'sidebar-dark' | 'executive-bold' | 'creative-purple' | 'swiss-grid'
+  | 'infographic' | 'minimalist-mono' | 'magazine-spread' | 'card-stack' | 'timeline-left'
+  | 'government' | 'dark-mode' | 'elegant-serif' | 'startup-bold' | 'academic-cv';
+
 export interface Contact {
   name: string;
   email: string;

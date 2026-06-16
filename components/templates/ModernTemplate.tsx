@@ -1,7 +1,10 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { ResumeData, ResumeLanguage } from '@/lib/types';
 
-const SECTION_KEYS = ['summary', 'skills', 'experience', 'education', 'certifications', 'languages', 'projects'];
+const SECTION_KEYS = [
+  'summary', 'skills', 'experience', 'education', 'certifications',
+  'languages', 'projects', 'awards', 'volunteer', 'courses', 'publications',
+];
 
 function fmtDate(d: string): string {
   if (!d) return '';
@@ -156,6 +159,10 @@ interface ModernTemplateProps {
 export default function ModernTemplate({ data, sectionOrder, accentColor }: ModernTemplateProps) {
   const accent = accentColor || '#2563eb';
   const { contact, summary, experience, education, skills, projects, certifications, languages } = data;
+  const awards = data.awards || [];
+  const volunteer = data.volunteer || [];
+  const courses = data.courses || [];
+  const publications = data.publications || [];
   const order = (sectionOrder || SECTION_KEYS).filter(id => SECTION_KEYS.includes(id) || id.startsWith('custom-'));
 
   const fullName = [contact.firstName, contact.lastName].filter(Boolean).join(' ');
@@ -378,6 +385,125 @@ export default function ModernTemplate({ data, sectionOrder, accentColor }: Mode
                     </View>
                   );
                 })}
+              </>
+            );
+          }
+
+          // ── Awards ─────────────────────────────────────────────────────
+          if (sectionId === 'awards') {
+            if (!awards.length) return null;
+            return (
+              // eslint-disable-next-line react/jsx-no-useless-fragment
+              <>
+                {awards.map((award, idx) => (
+                  <View key={`award-${idx}`} wrap={false}>
+                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Awards</Text>}
+                    <View style={styles.entry}>
+                      <View style={styles.itemHeader}>
+                        <View style={styles.titleWrapper}>
+                          <Text style={styles.title}>{sanitize(award.name)}</Text>
+                          {award.issuer ? <Text style={styles.company}>- {sanitize(award.issuer)}</Text> : null}
+                        </View>
+                        {award.date ? <Text style={styles.dateLocation}>{fmtDate(award.date)}</Text> : null}
+                      </View>
+                      {award.description ? <Text style={styles.summary}>{sanitize(award.description)}</Text> : null}
+                    </View>
+                  </View>
+                ))}
+              </>
+            );
+          }
+
+          // ── Volunteer ──────────────────────────────────────────────────
+          if (sectionId === 'volunteer') {
+            if (!volunteer.length) return null;
+            return (
+              // eslint-disable-next-line react/jsx-no-useless-fragment
+              <>
+                {volunteer.map((vol, idx) => {
+                  const bullets = vol.description
+                    .split('\n').map(b => b.trim()).filter(Boolean)
+                    .map(b => sanitize(b.replace(/^[-•]\s*/, '')));
+                  const dateStr = [
+                    fmtDate(vol.startDate),
+                    vol.currentlyVolunteering ? 'Present' : fmtDate(vol.endDate),
+                  ].filter(Boolean).join(' - ');
+                  const rightStr = [dateStr, vol.location].filter(Boolean).join('  |  ');
+
+                  return (
+                    <View key={`vol-${idx}`} wrap={false}>
+                      {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Volunteer</Text>}
+                      <View style={styles.entry}>
+                        <View style={styles.itemHeader}>
+                          <View style={styles.titleWrapper}>
+                            <Text style={styles.title}>{sanitize(vol.role)}</Text>
+                            {vol.organization ? <Text style={styles.company}>- {sanitize(vol.organization)}</Text> : null}
+                          </View>
+                          {rightStr ? <Text style={styles.dateLocation}>{rightStr}</Text> : null}
+                        </View>
+                        {bullets.length > 0 && (
+                          <View style={styles.bulletList}>
+                            {bullets.map((bullet, bIdx) => (
+                              <View key={bIdx} style={styles.bulletPoint}>
+                                <Text style={styles.bullet}>-</Text>
+                                <Text style={styles.bulletText}>{bullet}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+              </>
+            );
+          }
+
+          // ── Courses ────────────────────────────────────────────────────
+          if (sectionId === 'courses') {
+            if (!courses.length) return null;
+            return (
+              // eslint-disable-next-line react/jsx-no-useless-fragment
+              <>
+                {courses.map((course, idx) => (
+                  <View key={`course-${idx}`} wrap={false}>
+                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Courses</Text>}
+                    <View style={styles.entry}>
+                      <View style={styles.itemHeader}>
+                        <View style={styles.titleWrapper}>
+                          <Text style={styles.title}>{sanitize(course.name)}</Text>
+                          {course.platform ? <Text style={styles.company}>- {sanitize(course.platform)}</Text> : null}
+                        </View>
+                        {course.completionDate ? <Text style={styles.dateLocation}>{fmtDate(course.completionDate)}</Text> : null}
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </>
+            );
+          }
+
+          // ── Publications ───────────────────────────────────────────────
+          if (sectionId === 'publications') {
+            if (!publications.length) return null;
+            return (
+              // eslint-disable-next-line react/jsx-no-useless-fragment
+              <>
+                {publications.map((pub, idx) => (
+                  <View key={`pub-${idx}`} wrap={false}>
+                    {idx === 0 && <Text style={[styles.sectionTitle, { color: accent }]}>Publications</Text>}
+                    <View style={styles.entry}>
+                      <View style={styles.itemHeader}>
+                        <View style={styles.titleWrapper}>
+                          <Text style={styles.title}>{sanitize(pub.title)}</Text>
+                          {pub.publisher ? <Text style={styles.company}>- {sanitize(pub.publisher)}</Text> : null}
+                        </View>
+                        {pub.date ? <Text style={styles.dateLocation}>{fmtDate(pub.date)}</Text> : null}
+                      </View>
+                      {pub.coAuthors ? <Text style={styles.metaText}>Co-authors: {sanitize(pub.coAuthors)}</Text> : null}
+                    </View>
+                  </View>
+                ))}
               </>
             );
           }
