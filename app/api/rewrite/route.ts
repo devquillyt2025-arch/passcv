@@ -1,10 +1,16 @@
+import { checkAndConsumeCredit } from '@/lib/credits';
 import { NextRequest, NextResponse } from 'next/server';
 import { parseJD } from '@/lib/scoring';
 import { rewriteResume } from '@/lib/claude';
 import { ParsedResume } from '@/lib/types';
-import { ParsedResumeSchema } from '@/lib/schemas';
+import { ParsedResumeSchema, RewrittenResumeSchema } from '@/lib/schemas';
 
 export async function POST(req: NextRequest) {
+  const creditCheck = await checkAndConsumeCredit();
+  if (!creditCheck.allowed) {
+    return NextResponse.json({ error: creditCheck.error }, { status: 402 });
+  }
+
   try {
     const body = await req.json();
     const { resume, jdText } = body as {
@@ -27,11 +33,17 @@ export async function POST(req: NextRequest) {
     const jd = parseJD(jdText);
     const rewritten = await rewriteResume(resume, jd, jdText);
 
+    const outParseResult = RewrittenResumeSchema.safeParse(rewritten);
+    if (!outParseResult.success) {
+      console.error('Claude output validation failed:', outParseResult.error.format());
+      return NextResponse.json({ error: 'AI generated invalid data structure' }, { status: 500 });
+    }
+
     return NextResponse.json({ rewritten, jd });
   } catch (err) {
     console.error('rewrite error', err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Rewrite failed' },
+      { error: 'An internal error occurred during rewrite' },
       { status: 500 }
     );
   }

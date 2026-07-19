@@ -11,6 +11,7 @@ import WizardProgress from '@/components/WizardProgress';
 export default function ScorePage() {
   const router = useRouter();
   const { original, jdText, score, jd, setRewriteData, _hasHydrated } = useRewriteStore();
+  const hasRewritten = useRewriteStore(s => !!s.rewritten);
   const [rewriting, setRewriting] = useState(false);
   const [scoreError, setScoreError] = useState('');
 
@@ -74,7 +75,7 @@ export default function ScorePage() {
         <WizardProgress 
           currentStep={2} 
           canProceedToScore={true} 
-          canProceedToRewrite={!!useRewriteStore.getState().rewritten} 
+          canProceedToRewrite={hasRewritten} 
         />
 
         {scoreError && (

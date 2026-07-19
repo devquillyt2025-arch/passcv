@@ -16,6 +16,7 @@ export default function TailorPage() {
 
   const resume   = mounted ? store.original : null;
   const jdText   = mounted ? store.jdText   : null;
+  const hasScore = useRewriteStore(s => !!s.score);
   const setResume   = store.setOriginal;
   const setJdText   = store.setJdText;
   const setScoreData = store.setScoreData;
@@ -35,10 +36,11 @@ export default function TailorPage() {
         body:    JSON.stringify({ resume, jdText }),
       });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to analyze resume');
       setScoreData({ original: resume, jdText: jdText || '', score: data.score, jd: data.jd });
       router.push('/score');
-    } catch (e) {
-      setScoreError(e instanceof Error ? e.message : 'Analysis failed. Please try again.');
+    } catch (e: any) {
+      setScoreError(e.message || 'Analysis failed. Please try again.');
     } finally {
       setScoring(false);
     }
@@ -148,7 +150,7 @@ export default function TailorPage() {
         <WizardProgress
           currentStep={1}
           canProceedToScore={!!resume && (jdText || '').trim().length > 100}
-          canProceedToRewrite={mounted ? !!useRewriteStore.getState().score : false}
+          canProceedToRewrite={mounted ? hasScore : false}
         />
 
         {/* Upload + JD two-column */}

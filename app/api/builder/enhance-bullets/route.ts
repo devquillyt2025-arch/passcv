@@ -1,3 +1,4 @@
+import { checkAndConsumeCredit } from '@/lib/credits';
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { refineBullets, detectRepetition } from '@/lib/bulletRefinement';
@@ -28,6 +29,11 @@ WRITE LIKE A REAL PERSON:
 - Short, punchy sentences beat long corporate speak`;
 
 export async function POST(req: Request) {
+  const creditCheck = await checkAndConsumeCredit();
+  if (!creditCheck.allowed) {
+    return NextResponse.json({ error: creditCheck.error }, { status: 402 });
+  }
+
   try {
     const { text, position, company } = await req.json();
 

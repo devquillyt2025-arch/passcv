@@ -300,12 +300,21 @@ function FontSelect<T extends string>({
 }
 
 export default function BuilderPage() {
-  const { data, resumeId, templateId, sectionOrder, hiddenSections, builderDesign, _hasHydrated, setBuilderDesign, setTemplateId } = useResumeStore();
+  const { data, resumeId, setResumeId, templateId, sectionOrder, hiddenSections, builderDesign, _hasHydrated, setBuilderDesign, setTemplateId } = useResumeStore();
   const debouncedData = useDebounce(data, 300);
   const { jdText } = useUIStore();
   const stats = useResumeStats(debouncedData);
-  const { saveStatus } = useAutosaveSync(resumeId, data);
+  const { saveStatus } = useAutosaveSync(resumeId, data, setResumeId);
 
+  // Initial hydration check for existing users
+  useEffect(() => {
+    if (_hasHydrated && !resumeId && data.contact.firstName) {
+      // Data exists locally but no resumeId (migrating from local-only)
+      // The useAutosaveSync will pick this up automatically if we pass a change, 
+      // but to force it, we can just rely on useAutosaveSync handling the initial INSERT
+      // as long as we trigger a save or useAutosaveSync detects `!resumeId` and inserts.
+    }
+  }, [_hasHydrated, resumeId, data.contact.firstName]);
   const [showModal, setShowModal] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [downloading, setDownloading] = useState(false);

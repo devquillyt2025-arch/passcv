@@ -1,3 +1,4 @@
+import { checkAndConsumeCredit } from '@/lib/credits';
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { ParsedResume } from '@/lib/types';
@@ -63,6 +64,11 @@ CRITICAL RULES:
 }`;
 
 export async function POST(req: NextRequest) {
+  const creditCheck = await checkAndConsumeCredit();
+  if (!creditCheck.allowed) {
+    return NextResponse.json({ error: creditCheck.error }, { status: 402 });
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: 'Server misconfiguration: missing API key' }, { status: 500 });

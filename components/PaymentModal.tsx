@@ -41,11 +41,16 @@ export default function PaymentModal({ plan, open, onSuccess, onClose }: Props) 
 
   useEffect(() => {
     if (!open) return;
+    // Avoid injecting the script more than once (e.g., if modal re-opens quickly)
+    const SCRIPT_ID = 'razorpay-checkout-js';
+    if (document.getElementById(SCRIPT_ID)) return;
     const script = document.createElement('script');
+    script.id = SCRIPT_ID;
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
     document.body.appendChild(script);
-    return () => { document.body.removeChild(script); };
+    // Do NOT remove on cleanup — Razorpay re-init fails if the script is torn down
+    // between payment attempts. It is a small, idempotent CDN script.
   }, [open]);
 
   const handlePay = async () => {
@@ -73,7 +78,7 @@ export default function PaymentModal({ plan, open, onSuccess, onClose }: Props) 
           const verifyRes = await fetch('/api/payment/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(response),
+            body: JSON.stringify({ ...response, plan }),
           });
           const verify = await verifyRes.json();
           if (verify.success) {

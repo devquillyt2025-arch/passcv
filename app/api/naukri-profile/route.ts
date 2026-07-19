@@ -1,3 +1,4 @@
+import { checkAndConsumeCredit } from '@/lib/credits';
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import type { RewrittenResume, NaukriProfile } from '@/lib/types';
@@ -5,6 +6,11 @@ import type { RewrittenResume, NaukriProfile } from '@/lib/types';
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
+  const creditCheck = await checkAndConsumeCredit();
+  if (!creditCheck.allowed) {
+    return NextResponse.json({ error: creditCheck.error }, { status: 402 });
+  }
+
   try {
     const { resume, jobTitle } = await req.json() as {
       resume: RewrittenResume;

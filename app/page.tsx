@@ -12,10 +12,9 @@ const TAGLINES = [
 ];
 
 /* ── Theme-invariant brand tokens ──────────────────────────────────────────── */
-const GRAD      = 'linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)';
-const GLOW      = 'rgba(108,99,255,0.40)';
-const GLOW_H    = 'rgba(108,99,255,0.65)';
-const BORDER    = 'rgba(108,99,255,0.30)';
+const GRAD   = 'linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)';
+const GLOW   = 'rgba(108,99,255,0.40)';
+const GLOW_H = 'rgba(108,99,255,0.65)';
 
 /* ── FX SVG monogram ───────────────────────────────────────────────────────── */
 function FXMark({ size = 32 }: { size?: number }) {

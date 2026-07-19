@@ -437,9 +437,9 @@ export default function DiffView({
                 Copy-paste into your Naukri &ldquo;About Me&rdquo; section — keyword-optimised for this role.
               </p>
               <div className="rounded-xl bg-[rgba(34,197,94,0.05)] border border-[rgba(34,197,94,0.15)] p-5 text-[14px] text-[rgba(255,255,255,0.85)] leading-[1.7] whitespace-pre-wrap">
-                {rewritten.naukriProfileText}
+                {rewritten.naukriProfileText || 'Generating...'}
               </div>
-              <CopyButton text={rewritten.naukriProfileText} label="Copy About Me" />
+              <CopyButton text={rewritten.naukriProfileText || ''} label="Copy About Me" />
             </div>
 
             {/* Structured Naukri profile */}

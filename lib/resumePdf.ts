@@ -55,9 +55,29 @@ function adaptToResumeData(input: ResumeInput): ResumeData {
       name: skill,
       level: ''
     })),
-    projects: [],
-    certifications: [],
-    languages: [],
+    projects: (input.projects || []).map((proj, i) => ({
+      id: `proj-${i}`,
+      name: proj.name || '',
+      description: proj.description || '',
+      url: proj.url || '',
+      startDate: proj.startDate || '',
+      endDate: proj.endDate || ''
+    })),
+    certifications: (input.certifications || []).map((cert, i) => ({
+      id: `cert-${i}`,
+      name: typeof cert === 'string' ? cert : '',
+      issuer: '',
+      issueDate: '',
+      expiryDate: '',
+      doesNotExpire: true,
+      credentialId: '',
+      credentialUrl: ''
+    })),
+    languages: (input.languages || []).map((lang, i) => ({
+      id: `lang-${i}`,
+      name: lang.name || '',
+      proficiency: (lang.proficiency as any) || 'Professional Working Proficiency'
+    })),
     customSections: [],
   };
 }
@@ -68,22 +88,24 @@ export async function generateResumePdfBlob(resume: ResumeInput): Promise<Blob> 
 }
 
 // The on-screen / gallery templates are HTML (see components/resume-templates).
-// PDF export still uses these react-pdf components; each HTML template id maps to
-// its closest react-pdf design so downloads keep working. (Exact PDF parity for
-// the new designs is a planned follow-up.)
+// PDF export uses `@react-pdf/renderer` templates which differ from standard HTML/CSS.
+// Because creating 1:1 react-pdf components for all HTML templates is complex, 
+// each HTML template id maps to its closest structural react-pdf design below.
+// Note: Visual drift (e.g. precise font kerning, background colors, custom SVGs) 
+// is expected. Exact PDF parity is a planned follow-up.
 const TEMPLATE_MAP: Record<TemplateId, typeof ClassicTemplate> = {
   'classic':         ClassicTemplate,
   'sidebar-dark':    SidebarTemplate,
   'executive-bold':  ExecutiveTemplate,
   'creative-purple': CreativeTemplate,
   'swiss-grid':      ModernTemplate,
-  'infographic':     SidebarTemplate,
+  'infographic':     SidebarTemplate, // Closest structure for two-column graphics
   'minimalist-mono': MinimalTemplate,
-  'magazine-spread': ExecutiveTemplate,
-  'card-stack':      ModernTemplate,
+  'magazine-spread': ExecutiveTemplate, // Full width elegant structure
+  'card-stack':      ModernTemplate, // Clean separated sections
   'timeline-left':   ContemporaryTemplate,
-  'government':      ClassicTemplate,
-  'dark-mode':       ExecutiveTemplate,
+  'government':      ClassicTemplate, // Standard formal format
+  'dark-mode':       ExecutiveTemplate, // High contrast fallback
   'elegant-serif':   ElegantTemplate,
   'startup-bold':    BoldTemplate,
   'academic-cv':     AcademicTemplate,

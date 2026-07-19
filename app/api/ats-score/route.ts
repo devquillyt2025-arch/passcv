@@ -9,6 +9,7 @@
  * implementation in lib/scoring.ts, so the frontend still receives a valid
  * ATS score payload without needing the Python service.
  */
+import { checkAndConsumeCredit } from '@/lib/credits';
 import { NextResponse } from 'next/server';
 import { calculateScore, mapResumeDataToParsedResume, parseJD } from '@/lib/scoring';
 import type { ResumeData } from '@/lib/types';
@@ -16,6 +17,11 @@ import type { ResumeData } from '@/lib/types';
 const SCORER_URL = process.env.ATS_SCORER_URL?.replace(/\/$/, '');
 
 export async function POST(req: Request) {
+  const creditCheck = await checkAndConsumeCredit();
+  if (!creditCheck.allowed) {
+    return NextResponse.json({ error: creditCheck.error }, { status: 402 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -23,8 +29,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
+  const payload = body as { resume?: ResumeData; jdText?: string };
+
   if (!SCORER_URL) {
-    const payload = body as { resume?: ResumeData; jdText?: string };
     if (!payload?.resume || typeof payload.jdText !== 'string') {
       return NextResponse.json({ error: 'Missing resume or jdText' }, { status: 400 });
     }
@@ -51,7 +58,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json(data);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Scorer unavailable';
-    return NextResponse.json({ error: message }, { status: 502 });
+    console.warn('ATS Scorer external service failed, falling back to local scoring:', err);
+    if (!payload?.resume || typeof payload.jdText !== 'string') {
+      return NextResponse.json({ error: 'Missing resume or jdText' }, { status: 400 });
+    }
+    const parsedResume = mapResumeDataToParsedResume(payload.resume);
+    const score = calculateScore(parsedResume, parseJD(payload.jdText));
+    return NextResponse.json(score);
   }
 }

@@ -1,3 +1,4 @@
+import { checkAndConsumeCredit } from '@/lib/credits';
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 
@@ -63,6 +64,11 @@ function buildUserMessage(
 
 // ── Route handler ─────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
+  const creditCheck = await checkAndConsumeCredit();
+  if (!creditCheck.allowed) {
+    return NextResponse.json({ error: creditCheck.error }, { status: 402 });
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
   }

@@ -90,7 +90,9 @@ export const RewrittenResumeSchema = z.object({
   education: z.array(EducationSchema).default([]),
   skills: z.array(z.string()).default([]),
   certifications: z.array(z.string()).default([]),
-  naukriProfileText: z.string().default(''),
+  projects: z.array(ParsedProjectSchema).optional(),
+  languages: z.array(ParsedLanguageSchema).optional(),
+  naukriProfileText: z.string().optional(),
   noticePeriod: z.string().optional(),
   ctc: z.string().optional(),
 });

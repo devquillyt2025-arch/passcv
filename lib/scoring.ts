@@ -1,4 +1,4 @@
-import { ParsedResume, ParsedJD, ATSScore } from './types';
+import { ParsedResume, ParsedJD, ATSScore, ResumeData } from './types';
 
 const TECH_KEYWORDS = [
   'python', 'java', 'javascript', 'typescript', 'react', 'node', 'nodejs', 'angular', 'vue',
@@ -298,8 +298,6 @@ function buildResumeText(resume: ParsedResume): string {
     resume.rawText || '',
   ].join(' ').toLowerCase();
 }
-
-import { ResumeData } from './types';
 
 export function mapResumeDataToParsedResume(data: ResumeData): ParsedResume {
   return {

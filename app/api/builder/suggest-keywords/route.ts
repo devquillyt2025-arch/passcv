@@ -1,9 +1,15 @@
+import { checkAndConsumeCredit } from '@/lib/credits';
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || '' });
 
 export async function POST(req: Request) {
+  const creditCheck = await checkAndConsumeCredit();
+  if (!creditCheck.allowed) {
+    return NextResponse.json({ error: creditCheck.error }, { status: 402 });
+  }
+
   try {
     const { summary, jobTitle, skills, experience } = await req.json();
 

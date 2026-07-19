@@ -89,7 +89,18 @@ export interface RewrittenResume {
   education: Education[];
   skills: string[];
   certifications: string[];
-  naukriProfileText: string;
+  projects?: {
+    name: string;
+    description: string;
+    url?: string;
+    startDate?: string;
+    endDate?: string;
+  }[];
+  languages?: {
+    name: string;
+    proficiency?: string;
+  }[];
+  naukriProfileText?: string;
   noticePeriod?: string;
   ctc?: string;
 }
