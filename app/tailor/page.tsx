@@ -39,8 +39,8 @@ export default function TailorPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to analyze resume');
       setScoreData({ original: resume, jdText: jdText || '', score: data.score, jd: data.jd });
       router.push('/score');
-    } catch (e: any) {
-      setScoreError(e.message || 'Analysis failed. Please try again.');
+    } catch (e: unknown) {
+      setScoreError(e instanceof Error ? e.message : 'Analysis failed. Please try again.');
     } finally {
       setScoring(false);
     }

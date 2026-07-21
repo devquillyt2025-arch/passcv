@@ -76,7 +76,7 @@ function adaptToResumeData(input: ResumeInput): ResumeData {
     languages: (input.languages || []).map((lang, i) => ({
       id: `lang-${i}`,
       name: lang.name || '',
-      proficiency: (lang.proficiency as any) || 'Professional Working Proficiency'
+      proficiency: (lang.proficiency as ResumeData['languages'][0]['proficiency']) || 'Professional Working Proficiency'
     })),
     customSections: [],
   };
