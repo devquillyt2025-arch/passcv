@@ -4,6 +4,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useUIStore } from '@/lib/store/useUIStore';
 
 const PersonalInfo = lazy(() => import('./steps/PersonalInfo'));
@@ -198,7 +199,15 @@ function SectionCard({
 const ALL_SECTIONS = new Set(['personal', 'summary', 'skills', 'experience', 'education', 'certifications', 'languages', 'projects']);
 
 export default function EditorPanel() {
-  const { data, sectionOrder, setSectionOrder, hiddenSections, toggleSectionVisibility, addCustomSection, removeCustomSection } = useResumeStore();
+  const { data, sectionOrder, setSectionOrder, hiddenSections, toggleSectionVisibility, addCustomSection, removeCustomSection } = useResumeStore(useShallow(state => ({
+    data: state.data,
+    sectionOrder: state.sectionOrder,
+    setSectionOrder: state.setSectionOrder,
+    hiddenSections: state.hiddenSections,
+    toggleSectionVisibility: state.toggleSectionVisibility,
+    addCustomSection: state.addCustomSection,
+    removeCustomSection: state.removeCustomSection
+  })));
   const { pendingSectionFocus, clearSectionFocus } = useUIStore();
   // Open sections can include custom ones too, start by grabbing all current custom sections.
   const [openSections, setOpenSections] = useState<Set<string>>(

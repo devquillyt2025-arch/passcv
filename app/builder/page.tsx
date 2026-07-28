@@ -670,6 +670,7 @@ export default function BuilderPage() {
         <PreviewModal
           data={data}
           templateId={templateId}
+          sectionOrder={sectionOrder}
           accentColor={accentColor}
           onClose={() => setShowModal(false)}
           onDownload={() => {

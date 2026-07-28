@@ -14,71 +14,73 @@ import ContemporaryTemplate from '@/components/templates/ContemporaryTemplate';
 
 export type ResumeInput = ParsedResume | RewrittenResume;
 
-function adaptToResumeData(input: ResumeInput): ResumeData {
+function adaptToResumeData(input: any): ResumeData {
   return {
+    ...input,
     contact: {
-      firstName: input.contact?.name?.split(' ')[0] || '',
-      lastName: input.contact?.name?.split(' ').slice(1).join(' ') || '',
-      jobTitle: '',
+      firstName: input.contact?.firstName || input.contact?.name?.split(' ')[0] || '',
+      lastName: input.contact?.lastName || input.contact?.name?.split(' ').slice(1).join(' ') || '',
+      jobTitle: input.contact?.jobTitle || '',
       email: input.contact?.email || '',
       phone: input.contact?.phone || '',
-      city: input.contact?.location || '',
-      country: '',
+      city: input.contact?.city || input.contact?.location || '',
+      country: input.contact?.country || '',
       linkedin: input.contact?.linkedin || '',
-      github: '',
-      website: ''
+      github: input.contact?.github || '',
+      website: input.contact?.website || ''
     },
     summary: input.summary || '',
-    experience: (input.experience || []).map((exp, i) => ({
-      id: `exp-${i}`,
+    experience: (input.experience || []).map((exp: any, i: number) => ({
+      ...exp,
+      id: exp.id || `exp-${i}`,
       company: exp.company || '',
-      position: exp.title || '',
-      location: '',
+      position: exp.position || exp.title || '',
+      location: exp.location || '',
       startDate: exp.startDate || '',
       endDate: exp.endDate || '',
-      currentlyWorking: exp.endDate?.toLowerCase().includes('present') || false,
-      description: exp.bullets?.join('\n') || ''
+      currentlyWorking: exp.currentlyWorking ?? (exp.endDate?.toLowerCase().includes('present') || false),
+      description: exp.description || (exp.bullets ? exp.bullets.join('\n') : '')
     })),
-    education: (input.education || []).map((edu, i) => ({
-      id: `edu-${i}`,
+    education: (input.education || []).map((edu: any, i: number) => ({
+      ...edu,
+      id: edu.id || `edu-${i}`,
       institution: edu.institution || '',
       degree: edu.degree || '',
       field: edu.field || '',
-      location: '',
-      startDate: '',
-      endDate: edu.year || '',
-      currentlyStudying: false,
-      score: edu.cgpa || ''
+      location: edu.location || '',
+      startDate: edu.startDate || '',
+      endDate: edu.endDate || edu.year || '',
+      currentlyStudying: edu.currentlyStudying || false,
+      score: edu.score || edu.cgpa || ''
     })),
-    skills: (input.skills || []).map((skill, i) => ({
-      id: `skill-${i}`,
-      name: skill,
-      level: ''
-    })),
-    projects: (input.projects || []).map((proj, i) => ({
-      id: `proj-${i}`,
+    skills: (input.skills || []).map((skill: any, i: number) => {
+      if (typeof skill === 'string') return { id: `skill-${i}`, name: skill, level: '' };
+      return { ...skill, id: skill.id || `skill-${i}`, name: skill.name || '', level: skill.level || '' };
+    }),
+    projects: (input.projects || []).map((proj: any, i: number) => ({
+      ...proj,
+      id: proj.id || `proj-${i}`,
       name: proj.name || '',
       description: proj.description || '',
       url: proj.url || '',
       startDate: proj.startDate || '',
       endDate: proj.endDate || ''
     })),
-    certifications: (input.certifications || []).map((cert, i) => ({
-      id: `cert-${i}`,
-      name: typeof cert === 'string' ? cert : '',
-      issuer: '',
-      issueDate: '',
-      expiryDate: '',
-      doesNotExpire: true,
-      credentialId: '',
-      credentialUrl: ''
-    })),
-    languages: (input.languages || []).map((lang, i) => ({
-      id: `lang-${i}`,
+    certifications: (input.certifications || []).map((cert: any, i: number) => {
+      if (typeof cert === 'string') return { id: `cert-${i}`, name: cert, issuer: '', issueDate: '', expiryDate: '', doesNotExpire: true, credentialId: '', credentialUrl: '' };
+      return { ...cert, id: cert.id || `cert-${i}`, name: cert.name || '' };
+    }),
+    languages: (input.languages || []).map((lang: any, i: number) => ({
+      ...lang,
+      id: lang.id || `lang-${i}`,
       name: lang.name || '',
-      proficiency: (lang.proficiency as ResumeData['languages'][0]['proficiency']) || 'Professional Working Proficiency'
+      proficiency: lang.proficiency || 'Professional Working Proficiency'
     })),
-    customSections: [],
+    awards: (input.awards || []).map((aw: any, i: number) => ({ ...aw, id: aw.id || `aw-${i}` })),
+    volunteer: (input.volunteer || []).map((vol: any, i: number) => ({ ...vol, id: vol.id || `vol-${i}` })),
+    publications: (input.publications || []).map((pub: any, i: number) => ({ ...pub, id: pub.id || `pub-${i}` })),
+    courses: (input.courses || []).map((course: any, i: number) => ({ ...course, id: course.id || `course-${i}` })),
+    customSections: input.customSections || [],
   };
 }
 

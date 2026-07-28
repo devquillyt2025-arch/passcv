@@ -60,27 +60,34 @@ interface ResumeDocProps {
   data: ResumeData;
   templateId: TemplateId;
   hiddenSections?: string[];
+  sectionOrder?: string[];
+  atsFriendly?: boolean;
+  builderDesign?: any;
 }
 
 /**
  * Renders the selected HTML template inside a fixed A4 sheet. The sheet is the
  * single unit that callers scale (gallery thumbnails) or zoom (builder preview).
  */
-export default function ResumeDoc({ data, templateId, hiddenSections = [] }: ResumeDocProps) {
+export default function ResumeDoc({ data, templateId, hiddenSections = [], atsFriendly = false, sectionOrder, builderDesign }: ResumeDocProps) {
   const Template = HTML_TEMPLATES[templateId] ?? ClassicTemplate;
   const filtered = applyHidden(data, hiddenSections);
+  
+  if (data.customSections) {
+      filtered.customSections = data.customSections.filter(c => !hiddenSections.includes(c.id));
+  }
 
   return (
-    <div
-      style={{
-        width: SHEET_W,
-        minHeight: SHEET_H,
-        background: '#ffffff',
-        overflow: 'hidden',
-        position: 'relative',
-      }}
-    >
-      <Template data={filtered} />
+    <div className={`relative transition-all duration-300 w-full ${!atsFriendly ? 'shadow-2xl' : ''}`} style={{ textAlign: 'left' }}>
+      <div
+        className="relative w-full overflow-hidden bg-white"
+        style={{
+          width: SHEET_W,
+          minHeight: SHEET_H,
+        }}
+      >
+        <Template data={filtered} sectionOrder={sectionOrder} builderDesign={builderDesign} />
+      </div>
     </div>
   );
 }

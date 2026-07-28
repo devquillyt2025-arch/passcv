@@ -221,7 +221,8 @@ export default function makeTemplate(spec: TemplateSpec) {
     const courses = data.courses || [];
     const publications = data.publications || [];
 
-    const order = (sectionOrder || ALL_SECTION_KEYS).filter(
+    const defaultKeys = [...ALL_SECTION_KEYS, ...(data.customSections?.map(c => c.id) || [])];
+    const order = (sectionOrder || defaultKeys).filter(
       id => ALL_SECTION_KEYS.includes(id) || id.startsWith('custom-')
     );
 

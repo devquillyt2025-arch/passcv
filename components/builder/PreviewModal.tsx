@@ -6,12 +6,13 @@ import { ResumeData, TemplateId } from '@/lib/types';
 interface Props {
   data: ResumeData;
   templateId: TemplateId;
+  sectionOrder?: string[];
   accentColor?: string;
   onClose: () => void;
   onDownload: () => void;
 }
 
-export default function PreviewModal({ data, templateId, accentColor, onClose, onDownload }: Props) {
+export default function PreviewModal({ data, templateId, sectionOrder, accentColor, onClose, onDownload }: Props) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const urlRef = useRef<string | null>(null);
@@ -19,7 +20,7 @@ export default function PreviewModal({ data, templateId, accentColor, onClose, o
   useEffect(() => {
     setLoading(true);
     import('@/lib/resumePdf')
-      .then(({ generateBuilderPdfBlob }) => generateBuilderPdfBlob(data, templateId, undefined, accentColor))
+      .then(({ generateBuilderPdfBlob }) => generateBuilderPdfBlob(data, templateId, sectionOrder, accentColor))
       .then(blob => {
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         const url = URL.createObjectURL(blob);
@@ -44,6 +45,19 @@ export default function PreviewModal({ data, templateId, accentColor, onClose, o
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  const handleDownloadATS = async () => {
+    const { generateResumeTxtBlob } = await import('@/lib/resumeTxt');
+    const blob = generateResumeTxtBlob(data, sectionOrder);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const name = [data.contact.firstName, data.contact.lastName].filter(Boolean).join('_') || 'Untitled';
+    a.download = `${name}_FolioX.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    onClose();
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
@@ -59,6 +73,15 @@ export default function PreviewModal({ data, templateId, accentColor, onClose, o
             <p className="text-xs text-gray-500">Exactly how your resume will look when downloaded</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadATS}
+              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              ATS Text
+            </button>
             <button
               onClick={onDownload}
               className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
