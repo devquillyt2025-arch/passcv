@@ -1,17 +1,32 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { login } from '@/app/auth/actions';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /**
+   * Calls the `login` server action. This used to be `router.push('/dashboard')`
+   * with no authentication at all — the form was decorative, no session was ever
+   * created, and the middleware bounced the user straight back to /login.
+   *
+   * Deliberately not wrapped in try/catch: on success the action calls
+   * `redirect()`, which throws NEXT_REDIRECT for Next to handle. Catching here
+   * would swallow the navigation and look like a failed sign-in.
+   */
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-    router.push('/dashboard');
+
+    const result = await login(new FormData(e.currentTarget));
+
+    // Only reached when the action returned instead of redirecting, i.e. on failure.
+    if (result && 'error' in result) setError(result.error);
+    setLoading(false);
   };
 
   return (
@@ -36,6 +51,15 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
             <p className="text-gray-500 text-sm mt-2">Sign in to your account to continue</p>
           </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
+            >
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>

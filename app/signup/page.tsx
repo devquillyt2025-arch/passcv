@@ -1,17 +1,35 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { signup } from '@/app/auth/actions';
 
 export default function SignupPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /**
+   * Calls the `signup` server action. This used to be
+   * `router.push('/dashboard')` with no account creation at all.
+   *
+   * `notice` is the email-confirmation case: Supabase accepted the signup but
+   * issued no session, so there is nothing to redirect into yet.
+   *
+   * Deliberately not wrapped in try/catch — see the note in app/auth/actions.ts.
+   */
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+    setNotice(null);
     setLoading(true);
-    router.push('/dashboard');
+
+    const result = await signup(new FormData(e.currentTarget));
+
+    // Only reached when the action returned instead of redirecting.
+    if (result && 'error' in result) setError(result.error);
+    else if (result && 'notice' in result) setNotice(result.notice);
+    setLoading(false);
   };
 
   return (
@@ -36,6 +54,24 @@ export default function SignupPage() {
             <h1 className="text-2xl font-bold text-gray-900">Create an account</h1>
             <p className="text-gray-500 text-sm mt-2">Start building your resume for free</p>
           </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
+            >
+              {error}
+            </div>
+          )}
+
+          {notice && (
+            <div
+              role="status"
+              className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800"
+            >
+              {notice}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
