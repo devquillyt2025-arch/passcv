@@ -52,11 +52,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    (request.nextUrl.pathname.startsWith('/builder') ||
-      request.nextUrl.pathname.startsWith('/dashboard'))
-  ) {
+  // Every route that renders or acts on a user's own resume data. The list had
+  // drifted to just /builder and /dashboard while /tailor, /score and /rewrite
+  // were added to the app, leaving three authenticated surfaces reachable
+  // without a session.
+  const PROTECTED = ['/builder', '/dashboard', '/tailor', '/score', '/rewrite']
+
+  if (!user && PROTECTED.some((p) => request.nextUrl.pathname.startsWith(p))) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
