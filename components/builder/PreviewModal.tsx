@@ -1,26 +1,27 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ResumeData, TemplateId } from '@/lib/types';
+import type { ResumeRenderInput } from '@/lib/resume-render/types';
 
 interface Props {
-  data: ResumeData;
-  templateId: TemplateId;
-  sectionOrder?: string[];
-  accentColor?: string;
+  input: ResumeRenderInput;
   onClose: () => void;
   onDownload: () => void;
 }
 
-export default function PreviewModal({ data, templateId, sectionOrder, accentColor, onClose, onDownload }: Props) {
+export default function PreviewModal({ input, onClose, onDownload }: Props) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const urlRef = useRef<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
-    import('@/lib/resumePdf')
-      .then(({ generateBuilderPdfBlob }) => generateBuilderPdfBlob(data, templateId, sectionOrder, accentColor))
+    // Same generator the download button uses, on the same tuple — that is what
+    // makes the header's "exactly how your resume will look" claim true. It
+    // previously called generateBuilderPdfBlob directly with its own argument
+    // list, so the two could drift.
+    import('@/lib/resume-render/client')
+      .then(({ generateResumePdf }) => generateResumePdf(input))
       .then(blob => {
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         const url = URL.createObjectURL(blob);
@@ -36,7 +37,7 @@ export default function PreviewModal({ data, templateId, sectionOrder, accentCol
     return () => {
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     };
-  }, [data, templateId, accentColor]);
+  }, [input]);
 
   // Close on Escape key
   useEffect(() => {
@@ -47,11 +48,11 @@ export default function PreviewModal({ data, templateId, sectionOrder, accentCol
 
   const handleDownloadATS = async () => {
     const { generateResumeTxtBlob } = await import('@/lib/resumeTxt');
-    const blob = generateResumeTxtBlob(data, sectionOrder);
+    const blob = generateResumeTxtBlob(input.data, input.sectionOrder);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const name = [data.contact.firstName, data.contact.lastName].filter(Boolean).join('_') || 'Untitled';
+    const name = [input.data.contact.firstName, input.data.contact.lastName].filter(Boolean).join('_') || 'Untitled';
     a.download = `${name}_FolioX.txt`;
     a.click();
     URL.revokeObjectURL(url);

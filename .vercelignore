@@ -1,0 +1,6 @@
+# Local-only harness output and scratch scripts.
+# NOTE: do not add `.next` here — Vercel's builder writes and then reads its own
+# build output, and excluding it makes the build fail with
+# `ENOENT .next/export-detail.json` / `.next/export/404.html`.
+scratch
+scratch-dev.log

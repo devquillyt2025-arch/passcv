@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, contactItems, range, bullets, degreeLine, has, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 7 — MINIMALIST MONO: monospace, ultra-narrow, `// SECTION` titles, terminal feel.
-const mono = '"Courier New", "SF Mono", Menlo, Consolas, monospace';
+const mono = FONTS.mono.stack;
 
 export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const pal = palette(builderDesign, '#1f2937');
@@ -11,18 +12,16 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
   const rowBetween: CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 };
   const muted: CSSProperties = { color: pal.inkFaint };
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <>
-                <div style={title}>{'// projects'}</div>
+                <div style={title}>{`// ${(customSection.title || 'section').toLowerCase()}`}</div>
                 {customSection.items.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
                     <div style={rowBetween}>
@@ -41,15 +40,15 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><>
                 <div style={title}>{'// summary'}</div>
                 <p style={{ margin: 0 }}>{data.summary}</p>
               </></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><>
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><>
                 <div style={title}>{'// skills'}</div>
                 <div>{data.skills.map((s) => s.name).join(', ')}</div>
               </></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
                 <div style={title}>{'// experience'}</div>
                 {data.experience.map((e) => (
                   <div key={e.id} style={{ marginBottom: 12 }}>
@@ -64,7 +63,7 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
                   </div>
                 ))}
               </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><>
                 <div style={title}>{'// education'}</div>
                 {data.education.map((e) => (
                   <div key={e.id} style={{ marginBottom: 6 }}>
@@ -76,7 +75,7 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
                   </div>
                 ))}
               </></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><>
                 <div style={title}>{'// projects'}</div>
                 {data.projects.map((p) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -91,8 +90,8 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
                   </div>
                 ))}
               </></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><>
-                <div style={title}>{'// projects'}</div>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><>
+                <div style={title}>{'// certifications'}</div>
                 {data.certifications.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
                     <div style={rowBetween}>
@@ -106,12 +105,12 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
                   </div>
                 ))}
               </></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><>
-                <div style={title}>{'// skills'}</div>
-                <div>{data.languages.map((s: any) => `${s.name} - ${s.proficiency}`).join(', ')}</div>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><>
+                <div style={title}>{'// languages'}</div>
+                <div>{data.languages.map((s) => `${s.name} - ${s.proficiency}`).join(', ')}</div>
               </></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><>
-                <div style={title}>{'// projects'}</div>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><>
+                <div style={title}>{'// awards'}</div>
                 {data.awards.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
                     <div style={rowBetween}>
@@ -125,9 +124,9 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
                   </div>
                 ))}
               </></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
-                <div style={title}>{'// experience'}</div>
-                {data.volunteer.map((e: any) => (
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
+                <div style={title}>{'// volunteer'}</div>
+                {data.volunteer.map((e) => (
                   <div key={e.id} style={{ marginBottom: 12 }}>
                     <div style={rowBetween}>
                       <span style={{ fontWeight: 700 }}>{e.role} @ {e.organization}</span>
@@ -140,8 +139,8 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
                   </div>
                 ))}
               </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><>
-                <div style={title}>{'// projects'}</div>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><>
+                <div style={title}>{'// courses'}</div>
                 {data.courses.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
                     <div style={rowBetween}>
@@ -155,8 +154,8 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
                   </div>
                 ))}
               </></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><>
-                <div style={title}>{'// projects'}</div>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><>
+                <div style={title}>{'// publications'}</div>
                 {data.publications.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
                     <div style={rowBetween}>
@@ -182,18 +181,8 @@ export default function MinimalistMonoTemplate({ data, sectionOrder, builderDesi
               {contact.jobTitle && <div style={{ ...muted, marginTop: 2 }}>{contact.jobTitle}</div>}
               <div style={{ ...muted, fontSize: 11, marginTop: 6 }}>{contactItems(contact).join('  ·  ')}</div>
 
-              
-
-              
-
-              
-
-              
-
-              
+              {order.map(renderSection)}
             </div>
-          
-      {order.map(renderSection)}
       </div>
   );
 }

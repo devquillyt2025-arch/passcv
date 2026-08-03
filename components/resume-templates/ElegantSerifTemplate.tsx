@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, contactItems, range, bullets, degreeLine, has, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 13 — ELEGANT SERIF: italic name, small-caps sections on a hairline underline.
-const serif = '"Georgia", "Times New Roman", serif';
+const serif = FONTS.serif.stack;
 
 export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   // Burgundy is only this template's *default*; the builder accent overrides it.
@@ -28,16 +29,14 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
     </div>
   );
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <>
               <Ornament title={customSection.title} />
               {customSection.items.map((p: any) => (
@@ -54,15 +53,15 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><>
               <Ornament title="Profile" />
               <p style={{ margin: 0, textAlign: 'left', fontStyle: 'italic', color: pal.inkMuted }}>{data.summary}</p>
             </></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><>
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><>
               <Ornament title="Skills" />
               <p style={{ margin: 0, textAlign: 'left', fontStyle: 'italic' }}>{data.skills.map((s) => s.name).join(',  ')}</p>
             </></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
               <Ornament title="Experience" />
               {data.experience.map((e) => (
                 <div key={e.id} style={{ marginBottom: 12 }}>
@@ -77,7 +76,7 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><>
               <Ornament title="Education" />
               {data.education.map((e) => (
                 <div key={e.id} style={{ marginBottom: 7, textAlign: 'left' }}>
@@ -86,7 +85,7 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><>
               <Ornament title="Projects" />
               {data.projects.map((p) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -97,7 +96,7 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><>
               <Ornament title="Certifications" />
               {data.certifications.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -108,11 +107,11 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><>
               <Ornament title="Languages" />
-              <p style={{ margin: 0, textAlign: 'left', fontStyle: 'italic' }}>{data.languages.map((s: any) => `${s.name} - ${s.proficiency}`).join(',  ')}</p>
+              <p style={{ margin: 0, textAlign: 'left', fontStyle: 'italic' }}>{data.languages.map((s) => `${s.name} - ${s.proficiency}`).join(',  ')}</p>
             </></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><>
               <Ornament title="Awards" />
               {data.awards.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -123,9 +122,9 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
               <Ornament title="Volunteer" />
-              {data.volunteer.map((e: any) => (
+              {data.volunteer.map((e) => (
                 <div key={e.id} style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <span style={{ fontWeight: 700 }}>{e.organization}</span>
@@ -138,7 +137,7 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><>
               <Ornament title="Courses" />
               {data.courses.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -149,7 +148,7 @@ export default function ElegantSerifTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><>
               <Ornament title="Publications" />
               {data.publications.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>

@@ -8,6 +8,7 @@
     "app/api/builder/suggest-keywords/route.ts": { "maxDuration": 60 },
     "app/api/builder/suggest-skills/route.ts": { "maxDuration": 60 },
     "app/api/cover-letter/route.ts": { "maxDuration": 60 },
-    "app/api/score/route.ts": { "maxDuration": 60 }
+    "app/api/score/route.ts": { "maxDuration": 60 },
+    "pages/api/export/pdf.ts": { "maxDuration": 60, "memory": 1536 }
   }
 }

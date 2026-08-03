@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { ResumeData } from '@/lib/types';
 
 /** The subset of the builder's design state that templates actually read. */
@@ -10,13 +11,53 @@ export interface BuilderDesign {
 
 export interface TemplateProps {
   data: ResumeData;
-  sectionOrder?: string[];
+  /**
+   * Required and guaranteed non-empty — ResumeDoc always supplies a resolved
+   * order from selectRenderInput(). Templates must not carry their own default
+   * list; those copies disagreed with each other and with the store.
+   */
+  sectionOrder: string[];
   builderDesign?: BuilderDesign | null;
 }
 
 /** A4 sheet geometry shared by every HTML template (96dpi). */
 export const SHEET_W = 794;
 export const SHEET_H = 1123;
+
+/* ── Fragmentation-safe columns ───────────────────────────────────────────
+ * Chromium cannot fragment a flex or grid container across printed pages: a
+ * container that does not fit in the remaining space is pushed to the next
+ * page whole. On the magazine-spread fixture that produced a PDF whose first
+ * page held only the header (184 characters) and whose second held the entire
+ * body (2260) — while the preview showed one continuous page.
+ *
+ * Measured alternatives, same fixture:
+ *   grid / flex    2 pages, 184 + 2260   container pushed whole
+ *   inline-block   2 pages, 184 + 2261   also monolithic
+ *   column-count   1 page,  2444         fragments, but reflows content
+ *                                        between columns, so a template can no
+ *                                        longer choose what goes where
+ *   float          1 page,  2446         fragments AND keeps each child in the
+ *                                        column the template assigned it
+ *
+ * Floats win. `colRow`/`colCell`/`colClear` express a row of columns that
+ * paginates. Every child needs an explicit width — all templates already
+ * declared percentage widths, so this is a like-for-like swap.
+ * ---------------------------------------------------------------------- */
+
+/** Container for a row of columns. Must be followed by <div style={colClear} />. */
+export const colRow: CSSProperties = { display: 'block' };
+
+/** One column. `gap` becomes right padding, so it does not add to the width. */
+export function colCell(width: string, gap = 0): CSSProperties {
+  return { float: 'left', width, paddingRight: gap, boxSizing: 'border-box' };
+}
+
+/**
+ * Closes a colRow. A float container cannot use overflow:hidden to self-clear
+ * here — that clips content at the page break instead of letting it flow.
+ */
+export const colClear: CSSProperties = { clear: 'both' };
 
 /* ── Colour plumbing ──────────────────────────────────────────────────────
  * Templates used to hardcode their accent (#7f1d1d, #e11d48, #0ea5e9 …) and

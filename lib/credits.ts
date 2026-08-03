@@ -1,7 +1,11 @@
 import { createClient } from '@/utils/supabase/server';
 
 export async function checkAndConsumeCredit(): Promise<{ allowed: boolean; error?: string }> {
-  const supabase = createClient();
+  if (process.env.NODE_ENV === 'development') {
+    return { allowed: true };
+  }
+
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

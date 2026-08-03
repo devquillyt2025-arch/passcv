@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react';
-import { TemplateProps, contactItems, range, bullets, degreeLine, has, palette } from './shared';
+import { TemplateProps, contactItems, range, bullets, degreeLine, has, palette, colClear } from './shared';
+import { FONTS } from './fonts';
 
 // Template 5 — SWISS GRID: stacked giant name, 3-col grid, date-column experience.
-const sans = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+const sans = FONTS.sans.stack;
 
 export default function SwissGridTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const { contact } = data;
@@ -25,16 +26,14 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
     lineHeight: 1.35,
   };
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <div>
                 <div style={head}>{customSection.title}</div>
                 {customSection.items.map((p: any) => (
@@ -49,12 +48,12 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><p style={{ margin: '14px 0 18px', maxWidth: '78%' }}>{data.summary}</p></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><div>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><p style={{ margin: '14px 0 18px', maxWidth: '78%' }}>{data.summary}</p></div>) : null;
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><div>
                 <div style={head}>Skills</div>
                 <div>{data.skills.map((s) => <span key={s.id} style={pill}>{s.name}</span>)}</div>
               </div></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
               <div style={head}>Experience</div>
               {data.experience.map((e) => (
                 <div key={e.id} style={{ display: 'flex', gap: 18, marginBottom: 13 }}>
@@ -71,7 +70,7 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
                 </div>
               ))}
             </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><div>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><div>
                 <div style={head}>Education</div>
                 {data.education.map((e) => (
                   <div key={e.id} style={{ marginBottom: 8 }}>
@@ -81,7 +80,7 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
                   </div>
                 ))}
               </div></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><div>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><div>
                 <div style={head}>Projects</div>
                 {data.projects.map((p) => (
                   <div key={p.id} style={{ marginBottom: 8 }}>
@@ -90,7 +89,7 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
                   </div>
                 ))}
               </div></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><div>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><div>
                 <div style={head}>Certifications</div>
                 {data.certifications.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 8 }}>
@@ -99,11 +98,11 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
                   </div>
                 ))}
               </div></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><div>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><div>
                 <div style={head}>Languages</div>
-                <div>{data.languages.map((s: any) => <span key={s.id} style={pill}>{`${s.name} — ${s.proficiency}`}</span>)}</div>
+                <div>{data.languages.map((s) => <span key={s.id} style={pill}>{`${s.name} — ${s.proficiency}`}</span>)}</div>
               </div></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><div>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><div>
                 <div style={head}>Awards</div>
                 {data.awards.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 8 }}>
@@ -112,9 +111,9 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
                   </div>
                 ))}
               </div></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
               <div style={head}>Volunteer</div>
-              {data.volunteer.map((e: any) => (
+              {data.volunteer.map((e) => (
                 <div key={e.id} style={{ display: 'flex', gap: 18, marginBottom: 13 }}>
                   <div style={{ width: 120, flexShrink: 0, textAlign: 'right', fontSize: 11, color: pal.inkFaint, paddingTop: 1 }}>
                     {range(e.startDate, e.endDate, e.currentlyVolunteering)}
@@ -129,7 +128,7 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
                 </div>
               ))}
             </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><div>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><div>
                 <div style={head}>Courses</div>
                 {data.courses.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 8 }}>
@@ -138,7 +137,7 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
                   </div>
                 ))}
               </div></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><div>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><div>
                 <div style={head}>Publications</div>
                 {data.publications.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 8 }}>
@@ -169,10 +168,13 @@ export default function SwissGridTemplate({ data, sectionOrder, builderDesign }:
 
             {order.filter((id) => id === 'summary').map(renderSection)}
 
-            {/* 3-column grid — the short, list-shaped sections */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 22, marginBottom: 20, alignItems: 'start' }}>
+            {/* 3 columns of short, list-shaped sections. Floated via
+                data-colrow, not grid: a grid container cannot be split across
+                printed pages. See sheetStyles.ts. */}
+            <div data-colrow="3" style={{ marginBottom: 20, ['--colrow-gap' as string]: '22px' }}>
               {order.filter((id) => gridKeys.includes(id)).map(renderSection)}
             </div>
+            <div style={colClear} />
 
             {/* Date-aligned experience and the rest, full measure */}
             {order.filter((id) => id !== 'summary' && !gridKeys.includes(id)).map(renderSection)}

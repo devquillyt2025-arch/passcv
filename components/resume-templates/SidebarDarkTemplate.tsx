@@ -1,12 +1,13 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, initials, range, bullets, degreeLine, has, SHEET_H, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 2 — SIDEBAR DARK: 32% slate rail + 68% white content.
 // Identity vs INFOGRAPHIC: this one puts only the *credential* sections
 // (contact, skills, education, languages) in a solid dark rail and gives the
 // whole narrative — summary included — to the white column. Infographic keeps a
 // light rail and pushes summary/certs/awards into it as well.
-const sans = '"Segoe UI", system-ui, -apple-system, Roboto, sans-serif';
+const sans = FONTS.sans.stack;
 
 export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const { contact } = data;
@@ -25,16 +26,14 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
     borderBottom: `2px solid ${pal.accentLine}`, paddingBottom: 3, margin: '18px 0 9px',
   };
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <>
                 <div style={mainLabel}>{customSection.title}</div>
                 {customSection.items.map((p: any) => (
@@ -55,15 +54,15 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><>
                 <div style={mainLabel}>Profile</div>
                 <p style={{ margin: 0, color: pal.inkMuted }}>{data.summary}</p>
               </></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><>
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><>
                 <div style={sideLabel}>Skills</div>
                 {data.skills.map((s) => <div key={s.id} style={{ fontSize: 11.5, marginBottom: 5 }}>{s.name}</div>)}
               </></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
                 <div style={mainLabel}>Experience</div>
                 {data.experience.map((e) => (
                   <div key={e.id} style={{ marginBottom: 12 }}>
@@ -78,7 +77,7 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
                   </div>
                 ))}
               </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><>
                 <div style={sideLabel}>Education</div>
                 {data.education.map((e) => (
                   <div key={e.id} style={{ marginBottom: 9 }}>
@@ -88,7 +87,7 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
                   </div>
                 ))}
               </></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><>
                 <div style={mainLabel}>Projects</div>
                 {data.projects.map((p) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -103,7 +102,7 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
                   </div>
                 ))}
               </></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><>
                 <div style={mainLabel}>Certifications</div>
                 {data.certifications.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -118,11 +117,11 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
                   </div>
                 ))}
               </></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><>
                 <div style={sideLabel}>Languages</div>
-                {data.languages.map((s: any) => <div key={s.id} style={{ fontSize: 11.5, marginBottom: 5 }}>{`${s.name} - ${s.proficiency}`}</div>)}
+                {data.languages.map((s) => <div key={s.id} style={{ fontSize: 11.5, marginBottom: 5 }}>{`${s.name} - ${s.proficiency}`}</div>)}
               </></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><>
                 <div style={mainLabel}>Awards</div>
                 {data.awards.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -137,9 +136,9 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
                   </div>
                 ))}
               </></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
                 <div style={mainLabel}>Volunteer</div>
-                {data.volunteer.map((e: any) => (
+                {data.volunteer.map((e) => (
                   <div key={e.id} style={{ marginBottom: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <span style={{ fontSize: 13, fontWeight: 700 }}>{e.role}</span>
@@ -152,7 +151,7 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
                   </div>
                 ))}
               </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><>
                 <div style={mainLabel}>Courses</div>
                 {data.courses.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -167,7 +166,7 @@ export default function SidebarDarkTemplate({ data, sectionOrder, builderDesign 
                   </div>
                 ))}
               </></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><>
                 <div style={mainLabel}>Publications</div>
                 {data.publications.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>

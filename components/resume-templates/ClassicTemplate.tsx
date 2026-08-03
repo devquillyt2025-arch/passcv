@@ -1,11 +1,12 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, contactItems, range, bullets, degreeLine, has, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 1 — CLASSIC: single column, centered serif, refined book typography.
 // Identity vs GOVERNMENT: Classic is the *typographic* one — generous leading,
 // small-caps section marks on a single hairline, italic metadata. Government is
 // the condensed, strictly-ruled form.
-const serif = 'Georgia, "Times New Roman", Times, serif';
+const serif = FONTS.serif.stack;
 
 export default function ClassicTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const { contact } = data;
@@ -26,16 +27,14 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
   const role: CSSProperties = { fontSize: 13, fontWeight: 600, color: pal.ink };
   const meta: CSSProperties = { fontSize: 11.5, color: pal.inkMuted, fontStyle: 'italic' };
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <>
               <div style={sectionTitle}>{customSection.title}</div>
               {customSection.items.map((p: any) => (
@@ -56,15 +55,15 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Summary</div>
               <p style={{ margin: 0, textAlign: 'justify' }}>{data.summary}</p>
             </></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><>
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Skills</div>
               <p style={{ margin: 0, textAlign: 'center' }}>{data.skills.map((s) => s.name).join(', ')}</p>
             </></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Experience</div>
               {data.experience.map((e) => (
                 <div key={e.id} style={{ marginBottom: 11 }}>
@@ -79,7 +78,7 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
                 </div>
               ))}
             </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Education</div>
               {data.education.map((e) => (
                 <div key={e.id} style={{ marginBottom: 6 }}>
@@ -91,7 +90,7 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
                 </div>
               ))}
             </></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Projects</div>
               {data.projects.map((p) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -106,7 +105,7 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
                 </div>
               ))}
             </></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Certifications</div>
               {data.certifications.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -121,11 +120,11 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
                 </div>
               ))}
             </></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Languages</div>
-              <p style={{ margin: 0, textAlign: 'center' }}>{data.languages.map((s: any) => `${s.name} - ${s.proficiency}`).join(', ')}</p>
+              <p style={{ margin: 0, textAlign: 'center' }}>{data.languages.map((s) => `${s.name} - ${s.proficiency}`).join(', ')}</p>
             </></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Awards</div>
               {data.awards.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -140,9 +139,9 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
                 </div>
               ))}
             </></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Volunteer</div>
-              {data.volunteer.map((e: any) => (
+              {data.volunteer.map((e) => (
                 <div key={e.id} style={{ marginBottom: 11 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <span style={role}>{e.role}</span>
@@ -155,7 +154,7 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
                 </div>
               ))}
             </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Courses</div>
               {data.courses.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -170,7 +169,7 @@ export default function ClassicTemplate({ data, sectionOrder, builderDesign }: T
                 </div>
               ))}
             </></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Publications</div>
               {data.publications.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>

@@ -22,6 +22,7 @@ import { useUIStore } from '@/lib/store/useUIStore';
 import { useAutosaveSync } from '@/hooks/useAutosaveSync';
 import { useResumeStats } from '@/hooks/useResumeStats';
 import { useDebounce } from '@/hooks/useDebounce';
+import { selectRenderInput } from '@/lib/resume-render/selectRenderInput';
 import EditorPanel from '@/components/builder/EditorPanel';
 import ResumePreview from '@/components/builder/ResumePreview';
 import PreviewModal from '@/components/builder/PreviewModal';
@@ -303,6 +304,34 @@ export default function BuilderPage() {
   const { data, resumeId, setResumeId, templateId, sectionOrder, hiddenSections, builderDesign, _hasHydrated, setBuilderDesign, setTemplateId } = useResumeStore();
   const debouncedData = useDebounce(data, 300);
   const { jdText } = useUIStore();
+
+  const accentColor = builderDesign?.accentColor || '#4F46E5';
+  // Memoised so the two useMemos below actually hold; a fresh object literal
+  // here would invalidate them on every render and repaint the sheet on every
+  // keystroke, which is the cost the debounce exists to avoid.
+  const design = useMemo(
+    () => ({ accentColor, fontPair: builderDesign.fontPair, spacing: builderDesign.spacing }),
+    [accentColor, builderDesign.fontPair, builderDesign.spacing],
+  );
+
+  /**
+   * Two views of one tuple, differing only in how fresh `data` is.
+   *
+   * previewInput is debounced purely as a render optimisation for the pane that
+   * repaints on every keystroke. exportInput is live, because the download and
+   * the PDF preview modal are one-shot actions that must reflect exactly what
+   * the user has typed — the modal previously read live `data` while the
+   * download read `debouncedData`, so the modal could show something the
+   * downloaded file did not contain.
+   */
+  const previewInput = useMemo(
+    () => selectRenderInput({ data: debouncedData, templateId, sectionOrder, hiddenSections, builderDesign: design }),
+    [debouncedData, templateId, sectionOrder, hiddenSections, design],
+  );
+  const exportInput = useMemo(
+    () => selectRenderInput({ data, templateId, sectionOrder, hiddenSections, builderDesign: design }),
+    [data, templateId, sectionOrder, hiddenSections, design],
+  );
   const stats = useResumeStats(debouncedData);
   const { saveStatus } = useAutosaveSync(resumeId, data, setResumeId);
 
@@ -399,18 +428,21 @@ export default function BuilderPage() {
     }
   }, [debouncedData, jdText]);
 
+  const saveBlob = (blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fullName.replace(/\s+/g, '_')}_FolioX.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleDownload = async () => {
     setDownloading(true);
     setDlError('');
     try {
-      const { generateBuilderPdfBlob } = await import('@/lib/resumePdf');
-      const blob = await generateBuilderPdfBlob(debouncedData, templateId, sectionOrder, accentColor);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${fullName.replace(/\s+/g, '_')}_FolioX.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const { generateResumePdf } = await import('@/lib/resume-render/client');
+      saveBlob(await generateResumePdf(exportInput));
     } catch (e) {
       setDlError(e instanceof Error ? e.message : 'Download failed');
     } finally {
@@ -425,8 +457,6 @@ export default function BuilderPage() {
       </div>
     );
   }
-
-  const accentColor = builderDesign?.accentColor || '#4F46E5';
 
   return (
     <div
@@ -649,13 +679,7 @@ export default function BuilderPage() {
               className="mx-auto flex min-h-full max-w-[794px] justify-center"
             >
               <div className="mx-auto origin-top" style={{ transform: `scale(${builderDesign.zoom})` }}>
-                <ResumePreview
-                  data={debouncedData}
-                  templateId={templateId}
-                  sectionOrder={sectionOrder}
-                  hiddenSections={hiddenSections}
-                  builderDesign={builderDesign}
-                />
+                <ResumePreview input={previewInput} pageGuides paginate />
               </div>
             </motion.div>
           </div>
@@ -668,10 +692,7 @@ export default function BuilderPage() {
 
       {showModal && (
         <PreviewModal
-          data={data}
-          templateId={templateId}
-          sectionOrder={sectionOrder}
-          accentColor={accentColor}
+          input={exportInput}
           onClose={() => setShowModal(false)}
           onDownload={() => {
             setShowModal(false);

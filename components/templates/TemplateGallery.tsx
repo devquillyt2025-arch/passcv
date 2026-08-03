@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Eye, X } from 'lucide-react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { DEMO_RESUME_DATA } from '@/lib/store/slices/defaultData';
-import { DEFAULT_SECTION_ORDER } from '@/lib/store/slices/globalSlice';
 import ResumePreview from '@/components/builder/ResumePreview';
+import { selectRenderInput } from '@/lib/resume-render/selectRenderInput';
+import type { ResumeRenderInput } from '@/lib/resume-render/types';
 import { TEMPLATE_META } from '@/lib/templates';
 import type { TemplateId, ResumeData } from '@/lib/types';
-import type { StoreState } from '@/lib/store/slices/types';
 
 // The live preview renders an A4 sheet at 794px wide. We scale it to fit cards.
 const PAGE_W = 794;
@@ -28,28 +28,18 @@ function hasRealContent(data: ResumeData): boolean {
 }
 
 interface PreviewProps {
-  templateId: TemplateId;
-  data: ResumeData;
-  sectionOrder: string[];
-  hiddenSections: string[];
-  builderDesign: StoreState['builderDesign'];
+  input: ResumeRenderInput;
 }
 
 /** A non-interactive, scaled-down live preview used as a gallery thumbnail. */
-function Thumbnail({ templateId, data, sectionOrder, hiddenSections, builderDesign }: PreviewProps) {
+function Thumbnail({ input }: PreviewProps) {
   return (
     <div
       style={{ width: THUMB_W, height: THUMB_H, overflow: 'hidden', position: 'relative' }}
       className="pointer-events-none bg-white"
     >
       <div style={{ transform: `scale(${THUMB_SCALE})`, transformOrigin: 'top left', width: PAGE_W }}>
-        <ResumePreview
-          data={data}
-          templateId={templateId}
-          sectionOrder={sectionOrder}
-          hiddenSections={hiddenSections}
-          builderDesign={builderDesign}
-        />
+        <ResumePreview input={input} />
       </div>
       {/* Soft fade at the bottom so the clipped page edge looks intentional */}
       <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white to-transparent" />
@@ -75,8 +65,18 @@ export default function TemplateGallery() {
 
   // Use the user's own resume so they see how their content looks; fall back to demo data.
   const previewData = hasRealContent(data) ? data : DEMO_RESUME_DATA;
-  const order = sectionOrder?.length ? sectionOrder : DEFAULT_SECTION_ORDER;
   const usingDemo = previewData === DEMO_RESUME_DATA;
+
+  // Every sheet on this page — thumbnails and the full preview — goes through
+  // the same assembler as the builder and the PDF export.
+  const makeInput = (templateId: TemplateId): ResumeRenderInput =>
+    selectRenderInput({
+      data: previewData,
+      templateId,
+      sectionOrder,
+      hiddenSections,
+      builderDesign,
+    });
 
   const choose = (id: TemplateId) => {
     setTemplateId(id);
@@ -127,13 +127,7 @@ export default function TemplateGallery() {
                   aria-label={`Preview ${tpl.label} template`}
                 >
                   <div className="rounded-md shadow-md ring-1 ring-black/5">
-                    <Thumbnail
-                      templateId={tpl.id}
-                      data={previewData}
-                      sectionOrder={order}
-                      hiddenSections={hiddenSections}
-                      builderDesign={builderDesign}
-                    />
+                    <Thumbnail input={makeInput(tpl.id)} />
                   </div>
                   <span className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/30 group-hover:opacity-100">
                     <span className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 shadow">
@@ -221,13 +215,7 @@ export default function TemplateGallery() {
             </div>
             <div className="flex-1 overflow-auto bg-slate-200 dark:bg-gray-950 p-6">
               <div className="mx-auto w-fit">
-                <ResumePreview
-                  data={previewData}
-                  templateId={previewId}
-                  sectionOrder={order}
-                  hiddenSections={hiddenSections}
-                  builderDesign={builderDesign}
-                />
+                <ResumePreview input={makeInput(previewId)} />
               </div>
             </div>
           </div>

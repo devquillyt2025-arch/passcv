@@ -1,9 +1,10 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, contactItems, range, bullets, degreeLine, has, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 3 — EXECUTIVE BOLD: heavy all-caps name, 28/72 two-column, timeline dots.
-const sans = '"Arial Black", "Helvetica Neue", Arial, sans-serif';
-const body = '"Helvetica Neue", Arial, sans-serif';
+const sans = FONTS.sans.stack;
+const body = FONTS.sans.stack;
 
 export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const { contact } = data;
@@ -13,16 +14,14 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
   };
   const rightLabel: CSSProperties = { ...leftLabel, margin: '0 0 12px' };
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <div>
                   <div style={leftLabel}>{customSection.title}</div>
                   {customSection.items.map((p: any) => (
@@ -40,8 +39,8 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><p style={{ margin: '0 0 16px', color: pal.ink }}>{data.summary}</p></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><div style={{ marginBottom: 20 }}>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><p style={{ margin: '0 0 16px', color: pal.ink }}>{data.summary}</p></div>) : null;
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><div style={{ marginBottom: 20 }}>
                   <div style={leftLabel}>Expertise</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                     {data.skills.map((s) => (
@@ -49,7 +48,7 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
                     ))}
                   </div>
                 </div></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
                   <div style={rightLabel}>Experience</div>
                   <div style={{ position: 'relative', paddingLeft: 18, borderLeft: `2px solid ${pal.rule}` }}>
                     {data.experience.map((e) => (
@@ -67,7 +66,7 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
                     ))}
                   </div>
                 </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><div style={{ marginBottom: 20 }}>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><div style={{ marginBottom: 20 }}>
                   <div style={leftLabel}>Education</div>
                   {data.education.map((e) => (
                     <div key={e.id} style={{ marginBottom: 9 }}>
@@ -77,7 +76,7 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><div>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><div>
                   <div style={leftLabel}>Projects</div>
                   {data.projects.map((p) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -89,7 +88,7 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><div>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><div>
                   <div style={leftLabel}>Certifications</div>
                   {data.certifications.map((p: any) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -101,15 +100,15 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><div style={{ marginBottom: 20 }}>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><div style={{ marginBottom: 20 }}>
                   <div style={leftLabel}>Languages</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                    {data.languages.map((s: any) => (
+                    {data.languages.map((s) => (
                       <span key={s.id} style={{ fontSize: 11, border: `1px solid ${pal.accentLine}`, background: pal.accentTint, borderRadius: 3, padding: '2px 7px' }}>{`${s.name} - ${s.proficiency}`}</span>
                     ))}
                   </div>
                 </div></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><div>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><div>
                   <div style={leftLabel}>Awards</div>
                   {data.awards.map((p: any) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -121,10 +120,10 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
                   <div style={rightLabel}>Volunteer</div>
                   <div style={{ position: 'relative', paddingLeft: 18, borderLeft: `2px solid ${pal.rule}` }}>
-                    {data.volunteer.map((e: any) => (
+                    {data.volunteer.map((e) => (
                       <div key={e.id} style={{ position: 'relative', marginBottom: 16 }}>
                         <span style={{ position: 'absolute', left: -25, top: 4, width: 10, height: 10, borderRadius: '50%', background: pal.accent }} />
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -139,7 +138,7 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
                     ))}
                   </div>
                 </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><div>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><div>
                   <div style={leftLabel}>Courses</div>
                   {data.courses.map((p: any) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -151,7 +150,7 @@ export default function ExecutiveBoldTemplate({ data, sectionOrder, builderDesig
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><div>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><div>
                   <div style={leftLabel}>Publications</div>
                   {data.publications.map((p: any) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>

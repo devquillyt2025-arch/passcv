@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, contactItems, range, bullets, degreeLine, has, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 10 — TIMELINE LEFT: vertical timeline with dots for experience, indigo accents.
-const sans = '"Segoe UI", system-ui, -apple-system, sans-serif';
+const sans = FONTS.sans.stack;
 
 export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const pal = palette(builderDesign, '#6366f1');
@@ -10,16 +11,14 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
   const { contact } = data;
   const label: CSSProperties = { fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: INDIGO, margin: '0 0 9px' };
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <>
               <div style={{ ...label, marginTop: 18 }}>{customSection.title}</div>
               {customSection.items.map((p: any) => (
@@ -36,8 +35,8 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><p style={{ margin: '10px 0 18px', color: pal.inkMuted }}>{data.summary}</p></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><div>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><p style={{ margin: '10px 0 18px', color: pal.inkMuted }}>{data.summary}</p></div>) : null;
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><div>
                 <div style={label}>Skills</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                   {data.skills.map((s) => (
@@ -45,7 +44,7 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
                   ))}
                 </div>
               </div></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
               <div style={label}>Career Timeline</div>
               <div style={{ position: 'relative', borderLeft: `2px solid ${INDIGO}`, marginLeft: 5, paddingLeft: 22 }}>
                 {data.experience.map((e) => (
@@ -63,7 +62,7 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
                 ))}
               </div>
             </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><div>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><div>
                 <div style={label}>Education</div>
                 {data.education.map((e) => (
                   <div key={e.id} style={{ marginBottom: 8 }}>
@@ -73,7 +72,7 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
                   </div>
                 ))}
               </div></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><>
               <div style={{ ...label, marginTop: 18 }}>Projects</div>
               {data.projects.map((p) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -84,7 +83,7 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><>
               <div style={{ ...label, marginTop: 18 }}>Certifications</div>
               {data.certifications.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -95,15 +94,15 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><div>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><div>
                 <div style={label}>Languages</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                  {data.languages.map((s: any) => (
+                  {data.languages.map((s) => (
                     <span key={s.id} style={{ fontSize: 11, background: pal.accentTint, color: pal.accentInk, borderRadius: 4, padding: '2px 8px' }}>{`${s.name} - ${s.proficiency}`}</span>
                   ))}
                 </div>
               </div></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><>
               <div style={{ ...label, marginTop: 18 }}>Awards</div>
               {data.awards.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -114,10 +113,10 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
-              <div style={label}>Career Timeline</div>
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
+              <div style={label}>Volunteering</div>
               <div style={{ position: 'relative', borderLeft: `2px solid ${INDIGO}`, marginLeft: 5, paddingLeft: 22 }}>
-                {data.volunteer.map((e: any) => (
+                {data.volunteer.map((e) => (
                   <div key={e.id} style={{ position: 'relative', marginBottom: 16 }}>
                     <span style={{ position: 'absolute', left: -29, top: 3, width: 12, height: 12, borderRadius: '50%', background: '#fff', border: `3px solid ${INDIGO}` }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -132,7 +131,7 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
                 ))}
               </div>
             </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><>
               <div style={{ ...label, marginTop: 18 }}>Courses</div>
               {data.courses.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>
@@ -143,7 +142,7 @@ export default function TimelineLeftTemplate({ data, sectionOrder, builderDesign
                 </div>
               ))}
             </></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><>
               <div style={{ ...label, marginTop: 18 }}>Publications</div>
               {data.publications.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 9 }}>

@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, initials, range, bullets, degreeLine, has, SHEET_H, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 12 — DARK MODE: full dark background, 35/65 two-column, teal accents.
-const sans = '"Segoe UI", system-ui, -apple-system, sans-serif';
+const sans = FONTS.sans.stack;
 
 export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const pal = palette(builderDesign, '#14b8a6');
@@ -12,16 +13,14 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
   const { contact } = data;
   const label: CSSProperties = { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: TEAL, margin: '18px 0 8px' };
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <>
                 <div style={label}>{customSection.title}</div>
                 {customSection.items.map((p: any) => (
@@ -39,8 +38,8 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><p style={{ margin: '12px 0 0', color: pal.onDark }}>{data.summary}</p></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><p style={{ margin: '12px 0 0', color: pal.onDark }}>{data.summary}</p></div>) : null;
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><>
                 <div style={label}>Skills</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                   {data.skills.map((s) => (
@@ -48,7 +47,7 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
                   ))}
                 </div>
               </></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
                 <div style={label}>Experience</div>
                 {data.experience.map((e) => (
                   <div key={e.id} style={{ marginBottom: 13 }}>
@@ -63,7 +62,7 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
                   </div>
                 ))}
               </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><>
                 <div style={label}>Education</div>
                 {data.education.map((e) => (
                   <div key={e.id} style={{ marginBottom: 9 }}>
@@ -73,7 +72,7 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
                   </div>
                 ))}
               </></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><>
                 <div style={label}>Projects</div>
                 {data.projects.map((p) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -85,7 +84,7 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
                   </div>
                 ))}
               </></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><>
                 <div style={label}>Certifications</div>
                 {data.certifications.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -97,15 +96,15 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
                   </div>
                 ))}
               </></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><>
                 <div style={label}>Languages</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                  {data.languages.map((s: any) => (
+                  {data.languages.map((s) => (
                     <span key={s.id} style={{ fontSize: 10.5, border: `1px solid ${TEAL}`, color: TEAL, borderRadius: 4, padding: '2px 7px' }}>{`${s.name} - ${s.proficiency}`}</span>
                   ))}
                 </div>
               </></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><>
                 <div style={label}>Awards</div>
                 {data.awards.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -117,9 +116,9 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
                   </div>
                 ))}
               </></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
                 <div style={label}>Volunteer</div>
-                {data.volunteer.map((e: any) => (
+                {data.volunteer.map((e) => (
                   <div key={e.id} style={{ marginBottom: 13 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: pal.onDark }}>{e.role}</span>
@@ -132,7 +131,7 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
                   </div>
                 ))}
               </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><>
                 <div style={label}>Courses</div>
                 {data.courses.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>
@@ -144,7 +143,7 @@ export default function DarkModeTemplate({ data, sectionOrder, builderDesign }: 
                   </div>
                 ))}
               </></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><>
                 <div style={label}>Publications</div>
                 {data.publications.map((p: any) => (
                   <div key={p.id} style={{ marginBottom: 10 }}>

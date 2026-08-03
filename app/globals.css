@@ -1,4 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500&display=swap');
+/* Self-hosted. This used to be an @import from fonts.googleapis.com — a
+   render-time CDN dependency of exactly the kind commit 0efda50 removed when
+   CDN fonts broke PDF generation. The files come from scripts/fetch-fonts.mjs
+   and are the same ones the resume sheet and the PDF embedder use, so the app
+   chrome, the preview and the exported PDF all resolve Outfit to one file.
+   Weights 300 and 600 are not carried; CSS falls to the nearest available. */
+@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/Outfit-400.woff2') format('woff2'); }
+@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/Outfit-700.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/Inter-400.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/Inter-700.woff2') format('woff2'); }
 
 @tailwind base;
 @tailwind components;

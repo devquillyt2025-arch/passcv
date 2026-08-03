@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, contactItems, range, bullets, degreeLine, has, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 14 — STARTUP BOLD: huge orange name, thick orange rule, 40/60 two-column.
-const sans = '"Helvetica Neue", Arial, sans-serif';
+const sans = FONTS.sans.stack;
 
 export default function StartupBoldTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const pal = palette(builderDesign, '#f97316');
@@ -10,16 +11,14 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
   const { contact } = data;
   const label: CSSProperties = { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 3, color: ORANGE, margin: '0 0 9px' };
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <div>
                   <div style={label}>{customSection.title}</div>
                   {customSection.items.map((p: any) => (
@@ -37,8 +36,8 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><p style={{ margin: '0 0 18px', color: pal.inkMuted }}>{data.summary}</p></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><div style={{ marginBottom: 20 }}>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><p style={{ margin: '0 0 18px', color: pal.inkMuted }}>{data.summary}</p></div>) : null;
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><div style={{ marginBottom: 20 }}>
                   <div style={label}>Skills</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {data.skills.map((s) => (
@@ -46,7 +45,7 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
                     ))}
                   </div>
                 </div></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
                   <div style={label}>Experience</div>
                   {data.experience.map((e) => (
                     <div key={e.id} style={{ marginBottom: 14 }}>
@@ -61,7 +60,7 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
                     </div>
                   ))}
                 </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><div style={{ marginBottom: 20 }}>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><div style={{ marginBottom: 20 }}>
                   <div style={label}>Education</div>
                   {data.education.map((e) => (
                     <div key={e.id} style={{ marginBottom: 9 }}>
@@ -71,7 +70,7 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><div>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><div>
                   <div style={label}>Projects</div>
                   {data.projects.map((p) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -83,7 +82,7 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><div>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><div>
                   <div style={label}>Certifications</div>
                   {data.certifications.map((p: any) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -95,15 +94,15 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><div style={{ marginBottom: 20 }}>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><div style={{ marginBottom: 20 }}>
                   <div style={label}>Languages</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {data.languages.map((s: any) => (
+                    {data.languages.map((s) => (
                       <span key={s.id} style={{ fontSize: 11, background: pal.accentTint, color: pal.accentInk, borderRadius: 4, padding: '3px 9px' }}>{`${s.name} - ${s.proficiency}`}</span>
                     ))}
                   </div>
                 </div></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><div>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><div>
                   <div style={label}>Awards</div>
                   {data.awards.map((p: any) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -115,9 +114,9 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
                   <div style={label}>Volunteer</div>
-                  {data.volunteer.map((e: any) => (
+                  {data.volunteer.map((e) => (
                     <div key={e.id} style={{ marginBottom: 14 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                         <span style={{ fontSize: 13.5, fontWeight: 800 }}>{e.role}</span>
@@ -130,7 +129,7 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
                     </div>
                   ))}
                 </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><div>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><div>
                   <div style={label}>Courses</div>
                   {data.courses.map((p: any) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -142,7 +141,7 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
                     </div>
                   ))}
                 </div></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><div>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><div>
                   <div style={label}>Publications</div>
                   {data.publications.map((p: any) => (
                     <div key={p.id} style={{ marginBottom: 9 }}>
@@ -172,20 +171,10 @@ export default function StartupBoldTemplate({ data, sectionOrder, builderDesign 
 
             
 
-            <div style={{ display: 'flex', gap: 30 }}>
-              {/* Left 40% */}
-              <div style={{ width: '40%' }}>
-                
-                
-                
-              </div>
-
-              {/* Right 60% */}
-              <div style={{ width: '60%' }}>
-                
-              </div>
-            </div>
-          
+      {/* The 40/60 flex row that used to sit here held no content — the AST
+          refactor left the column divs empty and moved every section into the
+          single-column list below. Removed; it was an unfragmentable flex
+          container contributing nothing but a pagination hazard. */}
       {order.map(renderSection)}
       </div>
   );

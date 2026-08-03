@@ -1,16 +1,10 @@
 import React from 'react';
 import { pdf } from '@react-pdf/renderer';
-import { ResumeData, ParsedResume, RewrittenResume, TemplateId } from './types';
+import { ResumeData, ParsedResume, RewrittenResume } from './types';
+// Only Classic is imported now. The other nine react-pdf templates were
+// referenced solely by the deleted TEMPLATE_MAP, which aliased 15 HTML template
+// ids onto 10 react-pdf designs; they are unreachable and go with the tree.
 import ClassicTemplate from '@/components/templates/ClassicTemplate';
-import ModernTemplate from '@/components/templates/ModernTemplate';
-import MinimalTemplate from '@/components/templates/MinimalTemplate';
-import ExecutiveTemplate from '@/components/templates/ExecutiveTemplate';
-import SidebarTemplate from '@/components/templates/SidebarTemplate';
-import ElegantTemplate from '@/components/templates/ElegantTemplate';
-import CreativeTemplate from '@/components/templates/CreativeTemplate';
-import AcademicTemplate from '@/components/templates/AcademicTemplate';
-import BoldTemplate from '@/components/templates/BoldTemplate';
-import ContemporaryTemplate from '@/components/templates/ContemporaryTemplate';
 
 export type ResumeInput = ParsedResume | RewrittenResume;
 
@@ -84,45 +78,22 @@ function adaptToResumeData(input: any): ResumeData {
   };
 }
 
+/**
+ * PDF for the tailor/rewrite flow, which produces a ParsedResume rather than
+ * builder state and has no template picker — it is always Classic.
+ *
+ * This is the last remaining @react-pdf/renderer caller. The builder's export
+ * moved to headless-Chromium print (lib/resume-render), and with it went the
+ * TEMPLATE_MAP that used to approximate 15 HTML templates with 10 react-pdf
+ * ones — five ids were aliases, so choosing Dark Mode produced a white
+ * Executive PDF. Nothing maps or approximates any more: the builder renders the
+ * template the user picked, and this function renders exactly Classic.
+ *
+ * Retire alongside components/templates once the tailor flow moves over too.
+ */
 export async function generateResumePdfBlob(resume: ResumeInput): Promise<Blob> {
   const data = adaptToResumeData(resume);
-  return generateBuilderPdfBlob(data, 'classic');
-}
-
-// The on-screen / gallery templates are HTML (see components/resume-templates).
-// PDF export uses `@react-pdf/renderer` templates which differ from standard HTML/CSS.
-// Because creating 1:1 react-pdf components for all HTML templates is complex, 
-// each HTML template id maps to its closest structural react-pdf design below.
-// Note: Visual drift (e.g. precise font kerning, background colors, custom SVGs) 
-// is expected. Exact PDF parity is a planned follow-up.
-const TEMPLATE_MAP: Record<TemplateId, typeof ClassicTemplate> = {
-  'classic':         ClassicTemplate,
-  'sidebar-dark':    SidebarTemplate,
-  'executive-bold':  ExecutiveTemplate,
-  'creative-purple': CreativeTemplate,
-  'swiss-grid':      ModernTemplate,
-  'infographic':     SidebarTemplate, // Closest structure for two-column graphics
-  'minimalist-mono': MinimalTemplate,
-  'magazine-spread': ExecutiveTemplate, // Full width elegant structure
-  'card-stack':      ModernTemplate, // Clean separated sections
-  'timeline-left':   ContemporaryTemplate,
-  'government':      ClassicTemplate, // Standard formal format
-  'dark-mode':       ExecutiveTemplate, // High contrast fallback
-  'elegant-serif':   ElegantTemplate,
-  'startup-bold':    BoldTemplate,
-  'academic-cv':     AcademicTemplate,
-};
-
-export async function generateBuilderPdfBlob(
-  data: ResumeData,
-  templateId: TemplateId = 'classic',
-  sectionOrder?: string[],
-  accentColor?: string
-): Promise<Blob> {
-  const TemplateComponent = TEMPLATE_MAP[templateId] ?? ClassicTemplate;
-  const doc = React.createElement(TemplateComponent, { data, sectionOrder, accentColor });
+  const doc = React.createElement(ClassicTemplate, { data });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const asPdf = pdf(doc as any);
-  const blob = await asPdf.toBlob();
-  return blob;
+  return pdf(doc as any).toBlob();
 }

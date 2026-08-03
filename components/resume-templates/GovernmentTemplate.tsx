@@ -1,10 +1,11 @@
 import type { CSSProperties } from 'react';
 import { TemplateProps, fullName, range, bullets, degreeLine, has, palette } from './shared';
+import { FONTS } from './fonts';
 
 // Template 11 — GOVERNMENT / FEDERAL: USAJobs-style form document.
 // Identity vs CLASSIC: Government is the *condensed* one — tight 1.3 leading,
 // small type, rules that read as form fields. Classic keeps the airy book feel.
-const serif = '"Times New Roman", Times, serif';
+const serif = FONTS.times.stack;
 
 export default function GovernmentTemplate({ data, sectionOrder, builderDesign }: TemplateProps) {
   const { contact } = data;
@@ -31,16 +32,14 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
     ['LinkedIn', contact.linkedin || ''],
   ].filter(([, v]) => v) as [string, string][];
 
-      const defaultOrder = ["summary","skills","experience","education","projects","certifications","languages","awards","volunteer","courses","publications"];
-      const customIds = (data.customSections || []).map(c => c.id);
-      const order = sectionOrder || [...defaultOrder, ...customIds];
+      const order = sectionOrder;
       
       const renderSection = (id: string) => {
         if (id.startsWith('custom-')) {
           const customSection = data.customSections?.find((c: any) => c.id === id);
           if (!customSection || !has(customSection.items)) return null;
           return (
-            <div key={id}>
+            <div key={id} data-section={id}>
               <>
               <div style={sectionTitle}>Relevant Projects</div>
               {customSection.items.map((p: any) => (
@@ -57,15 +56,15 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
         }
         
         switch(id) {
-          case 'summary': return data.summary ? (<div key={id}><>
+          case 'summary': return data.summary ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Professional Summary</div>
               <p style={{ margin: 0, textAlign: 'justify' }}>{data.summary}</p>
             </></div>) : null;
-          case 'skills': return has(data.skills) ? (<div key={id}><>
+          case 'skills': return has(data.skills) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Skills</div>
               <p style={{ margin: 0 }}>{data.skills.map((s) => s.name).join('; ')}</p>
             </></div>) : null;
-          case 'experience': return has(data.experience) ? (<div key={id}><>
+          case 'experience': return has(data.experience) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Work Experience</div>
               {data.experience.map((e) => (
                 <div key={e.id} style={{ marginBottom: 8 }}>
@@ -79,7 +78,7 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
                 </div>
               ))}
             </></div>) : null;
-          case 'education': return has(data.education) ? (<div key={id}><>
+          case 'education': return has(data.education) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Education</div>
               {data.education.map((e) => (
                 <div key={e.id} style={{ marginBottom: 5 }}>
@@ -89,7 +88,7 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
                 </div>
               ))}
             </></div>) : null;
-          case 'projects': return has(data.projects) ? (<div key={id}><>
+          case 'projects': return has(data.projects) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Relevant Projects</div>
               {data.projects.map((p) => (
                 <div key={p.id} style={{ marginBottom: 6 }}>
@@ -100,8 +99,8 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
                 </div>
               ))}
             </></div>) : null;
-          case 'certifications': return has(data.certifications) ? (<div key={id}><>
-              <div style={sectionTitle}>Relevant Projects</div>
+          case 'certifications': return has(data.certifications) ? (<div key={id} data-section={id}><>
+              <div style={sectionTitle}>Certifications &amp; Licenses</div>
               {data.certifications.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 6 }}>
                   <div style={entryTitle}>{p.name}{p.credentialUrl ? ` (${p.credentialUrl})` : ''}</div>
@@ -111,12 +110,12 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
                 </div>
               ))}
             </></div>) : null;
-          case 'languages': return has(data.languages) ? (<div key={id}><>
+          case 'languages': return has(data.languages) ? (<div key={id} data-section={id}><>
               <div style={sectionTitle}>Languages</div>
-              <p style={{ margin: 0 }}>{data.languages.map((s: any) => `${s.name} - ${s.proficiency}`).join('; ')}</p>
+              <p style={{ margin: 0 }}>{data.languages.map((s) => `${s.name} - ${s.proficiency}`).join('; ')}</p>
             </></div>) : null;
-          case 'awards': return has(data.awards) ? (<div key={id}><>
-              <div style={sectionTitle}>Relevant Projects</div>
+          case 'awards': return has(data.awards) ? (<div key={id} data-section={id}><>
+              <div style={sectionTitle}>Awards &amp; Recognition</div>
               {data.awards.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 6 }}>
                   <div style={entryTitle}>{p.name}{p.url ? ` (${p.url})` : ''}</div>
@@ -126,9 +125,9 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
                 </div>
               ))}
             </></div>) : null;
-          case 'volunteer': return has(data.volunteer) ? (<div key={id}><>
-              <div style={sectionTitle}>Work Experience</div>
-              {data.volunteer.map((e: any) => (
+          case 'volunteer': return has(data.volunteer) ? (<div key={id} data-section={id}><>
+              <div style={sectionTitle}>Volunteer Experience</div>
+              {data.volunteer.map((e) => (
                 <div key={e.id} style={{ marginBottom: 8 }}>
                   <div style={entryTitle}>{e.role}</div>
                   <div style={entryOrg}>{[e.organization, e.location].filter(Boolean).join(', ')}</div>
@@ -140,8 +139,8 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
                 </div>
               ))}
             </></div>) : null;
-          case 'courses': return has(data.courses) ? (<div key={id}><>
-              <div style={sectionTitle}>Relevant Projects</div>
+          case 'courses': return has(data.courses) ? (<div key={id} data-section={id}><>
+              <div style={sectionTitle}>Professional Training</div>
               {data.courses.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 6 }}>
                   <div style={entryTitle}>{p.name}{p.certificateUrl ? ` (${p.certificateUrl})` : ''}</div>
@@ -151,8 +150,8 @@ export default function GovernmentTemplate({ data, sectionOrder, builderDesign }
                 </div>
               ))}
             </></div>) : null;
-          case 'publications': return has(data.publications) ? (<div key={id}><>
-              <div style={sectionTitle}>Relevant Projects</div>
+          case 'publications': return has(data.publications) ? (<div key={id} data-section={id}><>
+              <div style={sectionTitle}>Publications</div>
               {data.publications.map((p: any) => (
                 <div key={p.id} style={{ marginBottom: 6 }}>
                   <div style={entryTitle}>{p.title}{p.url ? ` (${p.url})` : ''}</div>
